@@ -30,5 +30,6 @@ public class StoreController {
     @GetMapping("/all")
     public List<StoreDto> getAllStores() {
         return storeService.findAllStores();
+        //thao
     }
 }
