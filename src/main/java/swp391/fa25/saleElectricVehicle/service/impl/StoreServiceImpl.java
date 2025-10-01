@@ -86,6 +86,7 @@ public class StoreServiceImpl implements StoreService {
             store.setUpdatedAt(LocalDateTime.now());
 
             storeRepository.save(store);
+
         }
         return StoreDto.builder()
                 .storeId(store.getStoreId())
