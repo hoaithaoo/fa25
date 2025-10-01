@@ -7,19 +7,19 @@ import jakarta.persistence.*;
 public class FeedbackDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "feedback_detail_id")
+    @Column
     private int feedbackDetailId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String category;
 
     @Column(nullable = false)
-    private String rating;
+    private int rating;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "feedback_id", nullable = false)
+    @JoinColumn(name = "feedbackId", nullable = false)
     private Feedback feedback;
 }

@@ -32,7 +32,7 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status = PaymentStatus.PENDING;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String paymentMethod;
 
     @Column(columnDefinition = "DECIMAL(12,2)", nullable = false)

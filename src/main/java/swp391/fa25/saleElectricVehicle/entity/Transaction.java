@@ -35,16 +35,16 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status = TransactionStatus.PENDING;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String gateway;
 
-    @Column
+    @Column(unique = true)
     private String transactionRef;
 
     @Column
     private String payerInfor;
 
-    @Column
+    @Column(columnDefinition = "nvarchar(255)")
     private String note;
 
     @ManyToOne

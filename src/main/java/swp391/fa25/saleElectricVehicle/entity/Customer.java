@@ -20,10 +20,10 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int customerId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String fullName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String address;
 
     @Column(unique = true)

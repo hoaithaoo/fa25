@@ -21,10 +21,10 @@ public class Promotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int promotionId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String promotionName;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String description;
 
     @Column

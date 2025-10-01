@@ -18,7 +18,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int roleId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)", unique = true)
     private String roleName;
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

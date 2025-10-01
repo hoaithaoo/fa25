@@ -15,7 +15,7 @@ public class Model {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int modelId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, columnDefinition = "nvarchar(255)")
     private String modelName;
 
     @Column(nullable = false)
@@ -39,13 +39,13 @@ public class Model {
     @Column(nullable = false)
     private int seatingCapacity;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String color;
 
     @Column(columnDefinition = "DECIMAL(10,2)", nullable = false)
     private BigDecimal price;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String bodyType;
 
     @Column(columnDefinition = "NVARCHAR(1000)")

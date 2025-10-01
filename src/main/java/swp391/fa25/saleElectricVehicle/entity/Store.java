@@ -19,20 +19,20 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int storeId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String storeName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String address;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @Pattern(regexp = "^0\\d{9}$", message = "Phone không hợp lệ")
     private String phone;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String provinceName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String ownerName;
 
     @Column(nullable = false)
