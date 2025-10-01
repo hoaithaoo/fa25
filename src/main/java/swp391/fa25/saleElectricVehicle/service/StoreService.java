@@ -8,4 +8,6 @@ public interface StoreService {
     StoreDto createStore(StoreDto storeDto);
     StoreDto findStoreById(int storeId);
     List<StoreDto> findAllStores();
+    StoreDto updateStore(int storeId, StoreDto storeDto);
+    void deleteStore(int storeId);
 }

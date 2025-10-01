@@ -1,10 +1,7 @@
 package swp391.fa25.saleElectricVehicle.payload.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 
 import java.time.LocalDateTime;
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class StoreDto {
     private int storeId;
     private String storeName;

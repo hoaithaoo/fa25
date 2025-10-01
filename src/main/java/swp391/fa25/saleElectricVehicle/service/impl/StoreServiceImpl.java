@@ -1,10 +1,11 @@
-package swp391.fa25.saleElectricVehicle.service;
+package swp391.fa25.saleElectricVehicle.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
 import swp391.fa25.saleElectricVehicle.repository.StoreRepository;
+import swp391.fa25.saleElectricVehicle.service.StoreService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,4 +68,46 @@ public class StoreServiceImpl implements StoreService {
             return storeDto;
         }).toList();
     }
+
+    @Override
+    public StoreDto updateStore(int storeId, StoreDto storeDto) {
+        Store store = storeRepository.findById(storeId).orElse(null);
+        if (store == null) {
+            throw new RuntimeException("Store with id: " + storeId + " not found");
+        } else {
+            store.setStoreName(storeDto.getStoreName());
+            store.setAddress(storeDto.getAddress());
+            store.setPhone(storeDto.getPhone());
+            store.setProvinceName(storeDto.getProvinceName());
+            store.setOwnerName(storeDto.getOwnerName());
+            store.setStatus(storeDto.getStatus());
+            store.setContractStartDate(storeDto.getContractStartDate());
+            store.setContractEndDate(storeDto.getContractEndDate());
+            store.setUpdatedAt(LocalDateTime.now());
+
+            storeRepository.save(store);
+        }
+        return StoreDto.builder()
+                .storeId(store.getStoreId())
+                .storeName(storeDto.getStoreName())
+                .address(storeDto.getAddress())
+                .phone(storeDto.getPhone())
+                .provinceName(storeDto.getProvinceName())
+                .ownerName(storeDto.getOwnerName())
+                .status(storeDto.getStatus())
+                .contractStartDate(storeDto.getContractStartDate())
+                .contractEndDate(storeDto.getContractEndDate())
+                .build();
+    }
+
+    @Override
+    public void deleteStore(int storeId) {
+        Store store = storeRepository.findById(storeId).orElse(null);
+        if (store == null) {
+            throw new RuntimeException("Store with id: " + storeId + " not found");
+        }
+        storeRepository.delete(store);
+    }
+
+
 }
