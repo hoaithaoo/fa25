@@ -88,17 +88,7 @@ public class StoreServiceImpl implements StoreService {
             storeRepository.save(store);
 
         }
-        return StoreDto.builder()
-                .storeId(store.getStoreId())
-                .storeName(storeDto.getStoreName())
-                .address(storeDto.getAddress())
-                .phone(storeDto.getPhone())
-                .provinceName(storeDto.getProvinceName())
-                .ownerName(storeDto.getOwnerName())
-                .status(storeDto.getStatus())
-                .contractStartDate(storeDto.getContractStartDate())
-                .contractEndDate(storeDto.getContractEndDate())
-                .build();
+        return storeDto;
     }
 
     @Override

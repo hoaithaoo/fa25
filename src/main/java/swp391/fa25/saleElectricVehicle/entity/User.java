@@ -42,9 +42,6 @@ public class User {
     @Column(nullable = false)
     private Boolean isActive = true;
 
-    @Column(nullable = false)
-    private LocalDateTime lastLogin;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Appointment> appointments = new java.util.ArrayList<>();
 

@@ -1,8 +1,14 @@
 package swp391.fa25.saleElectricVehicle.service;
 
-import org.springframework.stereotype.Service;
 
-@Service
+import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
+
+import java.util.List;
+
 public interface UserService {
-
+    UserDto createUser(UserDto userDto);
+    UserDto findUserById(int userId);
+    List<UserDto> findAllUsers();
+    UserDto updateUser(int userId, UserDto userDto);
+    void deleteUser(int userId);
 }
