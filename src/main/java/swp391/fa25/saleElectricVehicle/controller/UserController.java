@@ -52,7 +52,7 @@ public class UserController {
 
     @PutMapping("/update/{userId}")
     public ResponseEntity<ApiResponse<UserDto>> updateUser(@PathVariable int userId, @RequestBody UserDto userDto) {
-        UserDto updatedUser = userService.updateUser(userId, userDto);
+        UserDto updatedUser = userService.updateOwnProfile(userId, userDto);
 
         ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
                 .code(HttpStatus.OK.value())

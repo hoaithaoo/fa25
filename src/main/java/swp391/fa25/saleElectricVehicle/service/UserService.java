@@ -13,7 +13,8 @@ public interface UserService {
     UserDto createUser(UserDto userDto);
     UserDto findUserById(int userId);
     List<UserDto> findAllUsers();
-    UserDto updateUser(int userId, UserDto userDto);
+    UserDto updateOwnProfile(int userId, UserDto userDto);
+    UserDto updateUserProfile(int userId, UserDto userDto);
     void deleteUser(int userId);
 
     LoginResponse login(LoginRequest loginRequest);

@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElse(null);
 
         if (user == null) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
         UserDto userDto = UserDto.builder()
@@ -106,15 +106,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(int userId, UserDto userDto) {
+    public UserDto updateOwnProfile(int userId, UserDto userDto) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        Store store = storeRepository.findById(userDto.getStoreId()).orElse(null);
-        if (store == null) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        if (userDto.getFullName() != null && !userDto.getFullName().trim().isEmpty()) {
+            user.setFullName(userDto.getFullName());
+        }
+
+        if (userDto.getPhone() != null && !userDto.getPhone().trim().isEmpty()) {
+            user.setPhone(userDto.getPhone());
+        }
+
+        user.setUpdatedAt(LocalDateTime.now());
+
+        userRepository.save(user);
+
+        return userDto;
+    }
+
+    @Override
+    public UserDto updateUserProfile(int userId, UserDto userDto) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
         Role role = roleRepository.findById(userDto.getRoleId()).orElse(null);
@@ -122,17 +139,37 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
 
-        User updatedUser = User.builder()
-                .userId(userId)
-                .fullName(userDto.getFullName())
-                .email(userDto.getEmail())
-                .phone(userDto.getPhone())
-                .isActive(userDto.getIsActive())
-                .store(store)
-                .role(role)
-                .build();
+        Store store = storeRepository.findById(userDto.getStoreId()).orElse(null);
+        if (store == null && (userDto.getRoleId() != 1 || userDto.getRoleId() != 2)) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
 
-        userRepository.save(updatedUser);
+        if (userDto.getFullName() != null && !userDto.getFullName().trim().isEmpty()) {
+            user.setFullName(userDto.getFullName());
+        }
+
+        if (userDto.getEmail() != null && !userDto.getEmail().trim().isEmpty()) {
+            if (!user.getEmail().equals(userDto.getEmail()) && userRepository.existsByEmail(userDto.getEmail())) {
+                throw new AppException(ErrorCode.USER_EXISTED);
+            }
+            user.setEmail(userDto.getEmail());
+        }
+
+        if (userDto.getPhone() != null && !userDto.getPhone().trim().isEmpty()) {
+            user.setPhone(userDto.getPhone());
+        }
+
+        if (userDto.getPassword() != null && !userDto.getPassword().trim().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+
+        if (userDto.getIsActive() != null) {
+            user.setIsActive(userDto.getIsActive());
+        }
+
+        user.setUpdatedAt(LocalDateTime.now());
+
+        userRepository.save(user);
 
         return userDto;
     }
@@ -141,7 +178,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(int userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
         userRepository.delete(user);
     }
