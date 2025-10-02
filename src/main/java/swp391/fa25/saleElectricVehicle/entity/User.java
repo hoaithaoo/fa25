@@ -46,7 +46,7 @@ public class User {
     private List<Appointment> appointments = new java.util.ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "storeId", nullable = false)
+    @JoinColumn(name = "storeId")
     private Store store;
 
     @ManyToOne

@@ -7,4 +7,5 @@ import swp391.fa25.saleElectricVehicle.entity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
     boolean existsByEmail(String email);
+    User findByEmail(String email);
 }

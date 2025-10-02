@@ -8,10 +8,13 @@ import org.springframework.http.HttpStatusCode;
 public enum ErrorCode {
     //define error code
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_KEY(1001, "Invalid key", HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN(1001, "Token không đúng", HttpStatus.BAD_REQUEST),
     USER_EXISTED(1002, "Tài khoản đã tồn tại", HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    NOT_EXIST(1004, "Không tìm thấy", HttpStatus.NOT_FOUND);
+    STORE_NOT_EXIST(1004, "Không tìm thấy store", HttpStatus.NOT_FOUND),
+    ROLE_NOT_EXIST(1004, "Không tìm thấy role", HttpStatus.NOT_FOUND),
+    USER_NOT_EXIST(1006, "Người dùng không tồn tại", HttpStatus.NOT_FOUND),
+    WRONG_PASSWORD(1007, "Sai mật khẩu", HttpStatus.UNAUTHORIZED);
 
     private final int code;
     private final String message;
