@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -65,4 +66,12 @@ public class Model {
 
     @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Appointment> appointments = new java.util.ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "modelColor",
+            joinColumns = @JoinColumn(name = "modleId"),
+            inverseJoinColumns = @JoinColumn(name = "colorId")
+    )
+    private List<Color> colors = new ArrayList<>();
 }
