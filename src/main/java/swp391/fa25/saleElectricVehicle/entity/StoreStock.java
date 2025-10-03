@@ -32,8 +32,8 @@ public class StoreStock {
     private Store store;
 
     @ManyToOne
-    @JoinColumn(name = "modelId")
-    private Model model;
+    @JoinColumn(name = "modelColorId")
+    private ModelColor modelColor;
 
     @OneToMany(mappedBy = "storeStock", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryTransaction> inventoryTransactions = new ArrayList<>();

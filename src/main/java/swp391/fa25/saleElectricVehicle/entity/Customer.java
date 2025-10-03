@@ -3,11 +3,9 @@ package swp391.fa25.saleElectricVehicle.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -15,6 +13,7 @@ import java.util.List;
 @Getter  @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,15 +33,11 @@ public class Customer {
     @Pattern(regexp = "^0\\d{9}$", message = "Phone không hợp lệ")
     private String phone;
 
-    @Column(nullable = false, unique = true)
-    @Pattern(regexp = "^\\d{12}$", message = "ID Number phải đúng 12 chữ số")
-    private String idNumber;
-
     @Column(nullable = false)
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     @Column
-    private String updatedAt;
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new java.util.ArrayList<>();

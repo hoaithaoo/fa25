@@ -1,0 +1,13 @@
+package swp391.fa25.saleElectricVehicle.service;
+
+import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
+
+import java.util.List;
+
+public interface CustomerService {
+    CustomerDto createCustomer(CustomerDto customerDto);
+    CustomerDto getCustomerByPhone(String phone);
+    List<CustomerDto> getAllCustomers();
+    CustomerDto updateCustomer(int customerId, CustomerDto customerDto);
+    void deleteCustomer(int customerId);
+}

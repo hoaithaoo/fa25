@@ -14,7 +14,10 @@ public enum ErrorCode {
     STORE_NOT_EXIST(1004, "Không tìm thấy store", HttpStatus.NOT_FOUND),
     ROLE_NOT_EXIST(1004, "Không tìm thấy role", HttpStatus.NOT_FOUND),
     USER_NOT_EXIST(1006, "Người dùng không tồn tại", HttpStatus.NOT_FOUND),
-    WRONG_PASSWORD(1007, "Sai mật khẩu", HttpStatus.UNAUTHORIZED);
+    WRONG_PASSWORD(1007, "Sai mật khẩu", HttpStatus.UNAUTHORIZED),
+    MODEL_NOT_FOUND(1008, "Model không tồn tại", HttpStatus.NOT_FOUND),
+    MODEL_EXISTED(1009, "Model đã tồn tại", HttpStatus.BAD_REQUEST),
+    EMAIL_EXISTED(1010, "Email đã tồn tại", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

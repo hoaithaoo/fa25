@@ -19,11 +19,6 @@ public class Color {
     @Column(nullable = false, unique = true, columnDefinition = "nvarchar(50)")
     private String colorName;
 
-    @ManyToMany
-    @JoinTable(
-        name = "modelColor",
-        joinColumns = @JoinColumn(name = "modleId"),
-        inverseJoinColumns = @JoinColumn(name = "colorId")
-    )
-    private List<Model> models = new ArrayList<>();
+    @OneToMany(mappedBy = "color", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModelColor> modelColors = new ArrayList<>();
 }

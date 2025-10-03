@@ -1,6 +1,7 @@
 package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 
 import java.math.BigDecimal;
@@ -11,6 +12,11 @@ import java.util.List;
 
 @Entity
 @Table(name= "models")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Model {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,9 +46,6 @@ public class Model {
     @Column(nullable = false)
     private int seatingCapacity;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    private String color;
-
     @Column(columnDefinition = "DECIMAL(10,2)", nullable = false)
     private BigDecimal price;
 
@@ -59,19 +62,11 @@ public class Model {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StoreStock> storeStocks = new java.util.ArrayList<>();
-
-    @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Promotion> promotions = new java.util.ArrayList<>();
 
     @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Appointment> appointments = new java.util.ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "modelColor",
-            joinColumns = @JoinColumn(name = "modleId"),
-            inverseJoinColumns = @JoinColumn(name = "colorId")
-    )
-    private List<Color> colors = new ArrayList<>();
+    @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModelColor> modelColors = new ArrayList<>();
 }
