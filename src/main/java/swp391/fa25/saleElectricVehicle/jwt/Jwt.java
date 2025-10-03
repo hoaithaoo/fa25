@@ -6,11 +6,13 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
+import swp391.fa25.saleElectricVehicle.service.UserService;
 
 
 import java.text.ParseException;
@@ -77,7 +79,11 @@ public class Jwt {
         }
     }
 
-        //verify token
+    public TokenInfor generateAccessTokenInfor(UserDto userDto) {
+        return generateTokenInfor(userDto, accessExpiration, "accessToken");
+    }
+
+    //verify token
         public SignedJWT verifyToken(String token) throws JOSEException, ParseException {
             JWSVerifier verifier = new MACVerifier(secretKey.getBytes());
 

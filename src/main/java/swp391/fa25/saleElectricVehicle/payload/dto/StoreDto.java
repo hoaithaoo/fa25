@@ -18,8 +18,6 @@ public class StoreDto {
     private String provinceName;
     private String ownerName;
     private Store.StoreStatus status;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime contractStartDate;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime contractEndDate;
 }
