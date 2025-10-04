@@ -1,8 +1,7 @@
 package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +10,8 @@ import java.util.List;
 @Table(name = "colors")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter @Setter
+@Builder
 public class Color {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

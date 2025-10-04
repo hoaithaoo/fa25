@@ -17,7 +17,12 @@ public enum ErrorCode {
     WRONG_PASSWORD(1007, "Sai mật khẩu", HttpStatus.UNAUTHORIZED),
     MODEL_NOT_FOUND(1008, "Model không tồn tại", HttpStatus.NOT_FOUND),
     MODEL_EXISTED(1009, "Model đã tồn tại", HttpStatus.BAD_REQUEST),
-    EMAIL_EXISTED(1010, "Email đã tồn tại", HttpStatus.BAD_REQUEST);
+    EMAIL_EXISTED(1010, "Email đã tồn tại", HttpStatus.BAD_REQUEST),
+    PROMOTION_NOT_EXIST(1011, "Khuyến mãi không tồn tại", HttpStatus.NOT_FOUND),
+    PROMOTION_EXISTED(1012, "Khuyến mãi đã tồn tại", HttpStatus.BAD_REQUEST),
+    INVALID_AMOUNT(1013, "Số tiền không hợp lệ", HttpStatus.BAD_REQUEST),
+    INVALID_END_DATE(1014, "Ngày kết thúc không được trước ngày bắt đầu", HttpStatus.BAD_REQUEST),
+    ;
 
     private final int code;
     private final String message;

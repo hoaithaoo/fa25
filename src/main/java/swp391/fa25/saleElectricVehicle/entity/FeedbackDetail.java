@@ -1,9 +1,14 @@
 package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "feedback_details")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class FeedbackDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

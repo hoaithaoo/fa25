@@ -1,10 +1,8 @@
 package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PromotionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,6 +14,7 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Promotion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,22 +26,18 @@ public class Promotion {
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column
     private PromotionType promotionType;
-
-    public enum  PromotionType {
-        PERCENTAGE,
-        FIXED_AMOUNT
-    }
 
     @Column
     private BigDecimal amount;
 
     @Column(nullable = false)
-    private boolean startDate;
+    private LocalDateTime startDate;
 
     @Column(nullable = false)
-    private boolean endDate;
+    private LocalDateTime endDate;
 
     @Column(nullable = false)
     private boolean isActive;
