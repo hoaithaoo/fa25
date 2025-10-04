@@ -14,7 +14,7 @@ public class UserDto {
     private String email;
     private String password;
     private String phone;
-    private Boolean isActive;
+    private String status;
     private int storeId;
     private int roleId;
 }
