@@ -4,12 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swp391.fa25.saleElectricVehicle.payload.request.CreateUserRequest;
-import swp391.fa25.saleElectricVehicle.payload.request.UpdateUserProfileRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.CreateUserResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.GetUserResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.UpdateUserProfileResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.user.UpdateUserProfileResponse;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.util.List;

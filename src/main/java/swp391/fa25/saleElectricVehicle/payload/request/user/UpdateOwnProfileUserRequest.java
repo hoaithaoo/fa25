@@ -1,4 +1,4 @@
-package swp391.fa25.saleElectricVehicle.payload.request;
+package swp391.fa25.saleElectricVehicle.payload.request.user;
 
 import lombok.*;
 

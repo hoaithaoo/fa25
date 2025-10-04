@@ -7,4 +7,5 @@ import swp391.fa25.saleElectricVehicle.entity.Role;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Integer> {
     boolean existsByRoleName(String roleName);
+    Role findByRoleName(String roleName);
 }

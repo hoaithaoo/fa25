@@ -1,4 +1,4 @@
-package swp391.fa25.saleElectricVehicle.payload.response;
+package swp391.fa25.saleElectricVehicle.payload.response.user;
 
 import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
@@ -7,8 +7,7 @@ import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GetUserResponse {
-    private int userId;
+public class UpdateUserProfileResponse {
     private String fullName;
     private String email;
     private String phone;
