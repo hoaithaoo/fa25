@@ -26,6 +26,7 @@ public enum ErrorCode {
     COLOR_EXISTED(1016, "Màu sắc đã tồn tại", HttpStatus.BAD_REQUEST),
     PHONE_EXISTED(1017, "Số điện thoại đã tồn tại", HttpStatus.BAD_REQUEST),
     ROLE_EXISTED(1018, "Role đã tồn tại", HttpStatus.BAD_REQUEST),
+    STORE_EXISTED(1019, "Store đã tồn tại", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

@@ -1,8 +1,7 @@
 package swp391.fa25.saleElectricVehicle.payload.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import swp391.fa25.saleElectricVehicle.entity.Store;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +16,7 @@ public class StoreDto {
     private String phone;
     private String provinceName;
     private String ownerName;
-    private Store.StoreStatus status;
+    private StoreStatus status;
     private LocalDateTime contractStartDate;
     private LocalDateTime contractEndDate;
 }

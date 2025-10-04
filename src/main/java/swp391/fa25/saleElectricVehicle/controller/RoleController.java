@@ -21,7 +21,7 @@ public class RoleController {
     public ResponseEntity<ApiResponse<RoleDto>> createRole(@RequestBody RoleDto roleDto) {
         RoleDto createdRole = roleService.createRole(roleDto);
         ApiResponse<RoleDto> response = ApiResponse.<RoleDto>builder()
-                .code(HttpStatus.OK.value())
+                .code(HttpStatus.CREATED.value())
                 .message("Role created successfully")
                 .data(createdRole)
                 .build();
