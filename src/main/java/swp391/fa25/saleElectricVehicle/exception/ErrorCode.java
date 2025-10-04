@@ -22,6 +22,8 @@ public enum ErrorCode {
     PROMOTION_EXISTED(1012, "Khuyến mãi đã tồn tại", HttpStatus.BAD_REQUEST),
     INVALID_AMOUNT(1013, "Số tiền không hợp lệ", HttpStatus.BAD_REQUEST),
     INVALID_END_DATE(1014, "Ngày kết thúc không được trước ngày bắt đầu", HttpStatus.BAD_REQUEST),
+    COLOR_NOT_EXIST(1015, "Màu sắc không tồn tại", HttpStatus.NOT_FOUND),
+    COLOR_EXISTED(1016, "Màu sắc đã tồn tại", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
