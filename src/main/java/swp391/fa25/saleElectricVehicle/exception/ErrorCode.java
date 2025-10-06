@@ -28,6 +28,7 @@ public enum ErrorCode {
     ROLE_EXISTED(1018, "Role đã tồn tại", HttpStatus.BAD_REQUEST),
     STORE_EXISTED(1019, "Store đã tồn tại", HttpStatus.BAD_REQUEST),
     INVALID_END_DATE_TIME(1020, "Ngày kết thúc không được trước ngày hiện tại", HttpStatus.BAD_REQUEST),
+    MODEL_COLOR_NOT_EXIST(1021, "Model màu không tồn tại", HttpStatus.NOT_FOUND),
     ;
 
     private final int code;
