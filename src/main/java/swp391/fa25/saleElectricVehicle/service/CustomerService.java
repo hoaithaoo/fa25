@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface CustomerService {
     CustomerDto createCustomer(CustomerDto customerDto);
+    CustomerDto getCustomerById(int customerId);        // ← THÊM dòng này
     CustomerDto getCustomerByPhone(String phone);
     List<CustomerDto> getAllCustomers();
     CustomerDto updateCustomer(int customerId, CustomerDto customerDto);

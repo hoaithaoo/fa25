@@ -9,4 +9,5 @@ public interface ModelService {
     ModelDto getModelById(int id);
     List<ModelDto> getAllModels();
     void deleteModelById(int id);
+    ModelDto updateModel(int id, ModelDto modelDto);
 }

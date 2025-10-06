@@ -28,8 +28,19 @@ public class StoreServiceImpl implements StoreService {
         storeNew.setContractStartDate(storeDto.getContractStartDate());
         storeNew.setContractEndDate(storeDto.getContractEndDate());
         storeNew.setCreatedAt(LocalDateTime.now());
-        storeRepository.save(storeNew);
-        return storeDto;
+        Store savedStore = storeRepository.save(storeNew);
+//        return storeDto;
+        return StoreDto.builder()
+                .storeId(savedStore.getStoreId())
+                .storeName(savedStore.getStoreName())
+                .address(savedStore.getAddress())
+                .phone(savedStore.getPhone())
+                .provinceName(savedStore.getProvinceName())
+                .ownerName(savedStore.getOwnerName())
+                .status(savedStore.getStatus())
+                .contractStartDate(savedStore.getContractStartDate())
+                .contractEndDate(savedStore.getContractEndDate())
+                .build();
     }
 
     @Override

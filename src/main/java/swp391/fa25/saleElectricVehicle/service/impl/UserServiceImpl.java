@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
         }
 
         Store store = storeRepository.findById(userDto.getStoreId()).orElse(null);
-        if (store == null && (userDto.getRoleId() != 1 || userDto.getRoleId() != 2)) {
+        if (store == null && (userDto.getRoleId() != 1 && userDto.getRoleId() != 2)) { //Sửa lại || thành &&
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
@@ -122,9 +122,17 @@ public class UserServiceImpl implements UserService {
 
         user.setUpdatedAt(LocalDateTime.now());
 
-        userRepository.save(user);
+        User updatedUser = userRepository.save(user);
 
-        return userDto;
+//        return userDto;
+        return UserDto.builder()
+                .fullName(updatedUser.getFullName())
+                .email(updatedUser.getEmail())
+                .phone(updatedUser.getPhone())
+                .isActive(updatedUser.getIsActive())
+                .storeId(updatedUser.getStore().getStoreId())
+                .roleId(updatedUser.getRole().getRoleId())
+                .build();
     }
 
     @Override

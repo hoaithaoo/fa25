@@ -90,4 +90,52 @@ public class ModelServiceImpl implements ModelService {
         }
         modelRepository.delete(model);
     }
+
+    @Override
+    public ModelDto updateModel(int id, ModelDto modelDto) {
+        // Bước 1: Tìm model cần update
+        Model existingModel = modelRepository.findById(id).orElse(null);
+        if (existingModel == null) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
+
+        // Bước 2: Kiểm tra tên model có bị trùng không (nếu đổi tên)
+        if (!existingModel.getModelName().equals(modelDto.getModelName()) &&
+                modelRepository.existsModelByModelName(modelDto.getModelName())) {
+            throw new AppException(ErrorCode.MODEL_EXISTED);
+        }
+
+        // Bước 3: Update các fields
+        existingModel.setModelName(modelDto.getModelName());
+        existingModel.setModelYear(modelDto.getModelYear());
+        existingModel.setBatteryCapacity(modelDto.getBatteryCapacity());
+        existingModel.setRange(modelDto.getRange());
+        existingModel.setPowerHp(modelDto.getPowerHp());
+        existingModel.setTorqueNm(modelDto.getTorqueNm());
+        existingModel.setAcceleration(modelDto.getAcceleration());
+        existingModel.setSeatingCapacity(modelDto.getSeatingCapacity());
+        existingModel.setPrice(modelDto.getPrice());
+        existingModel.setBodyType(modelDto.getBodyType());
+        existingModel.setDescription(modelDto.getDescription());
+        existingModel.setUpdatedAt(LocalDateTime.now()); // ← Dùng đúng field name
+
+        // Bước 4: Save vào database
+        Model updatedModel = modelRepository.save(existingModel);
+
+        // Bước 5: Convert Entity → DTO và return
+        return ModelDto.builder()
+                .modelId(updatedModel.getModelId()) // ← Thêm modelId
+                .modelName(updatedModel.getModelName())
+                .modelYear(updatedModel.getModelYear())
+                .batteryCapacity(updatedModel.getBatteryCapacity())
+                .range(updatedModel.getRange())
+                .powerHp(updatedModel.getPowerHp())
+                .torqueNm(updatedModel.getTorqueNm())
+                .acceleration(updatedModel.getAcceleration())
+                .seatingCapacity(updatedModel.getSeatingCapacity())
+                .price(updatedModel.getPrice())
+                .bodyType(updatedModel.getBodyType())
+                .description(updatedModel.getDescription())
+                .build();
+    }
 }

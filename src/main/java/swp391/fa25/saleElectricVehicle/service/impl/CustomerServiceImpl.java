@@ -38,7 +38,33 @@ public class CustomerServiceImpl implements CustomerService {
 
         customerRepository.save(newCustomer);
 
-        return customerDto;
+//        return customerDto;
+        return CustomerDto.builder()
+                .customerId(newCustomer.getCustomerId())
+                .fullName(newCustomer.getFullName())
+                .address(newCustomer.getAddress())
+                .email(newCustomer.getEmail())
+                .phone(newCustomer.getPhone())
+                .build();
+    }
+
+    // Thêm vào CustomerServiceImpl class:
+
+    @Override
+    public CustomerDto getCustomerById(int customerId) {
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+
+        if (customer == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+
+        return CustomerDto.builder()
+                .customerId(customer.getCustomerId())
+                .fullName(customer.getFullName())
+                .address(customer.getAddress())
+                .email(customer.getEmail())
+                .phone(customer.getPhone())
+                .build();
     }
 
     @Override
@@ -78,7 +104,9 @@ public class CustomerServiceImpl implements CustomerService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        if (customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
+//        if (customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
+        if (!customer.getPhone().equals(customerDto.getPhone()) &&
+                customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
@@ -105,7 +133,13 @@ public class CustomerServiceImpl implements CustomerService {
 
         customerRepository.save(customer);
 
-        return customerDto;
+//        return customerDto;
+        return CustomerDto.builder()
+                .fullName(customer.getFullName())
+                .address(customer.getAddress())
+                .email(customer.getEmail())
+                .phone(customer.getPhone())
+                .build();
     }
 
     @Override

@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*") // Thêm để Frontend có thể call API
 public class UserController {
 
     @Autowired
@@ -25,7 +26,7 @@ public class UserController {
                 .message("User created successfully")
                 .data(createdUser)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response); //return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{userId}")

@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/models")
+@CrossOrigin(origins = "*") // Allow requests from any origin
 public class ModelController {
 
     @Autowired
@@ -25,7 +26,9 @@ public class ModelController {
                 .message("Create model successfully")
                 .data(createdModel)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response); //Thay thế return ResponseEntity.ok(response);
+        //ResponseEntity.ok(response) mặc định trả về mã trạng thái HTTP 200 (OK)
+        //nhưng .code(HttpStatus.CREATED.value()) trả về 201 (Created) nềuu tạo thành công
     }
 
     @GetMapping("/{id}")
@@ -62,4 +65,16 @@ public class ModelController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ModelDto>> updateModel(@PathVariable int id, @RequestBody ModelDto modelDto) {
+        ModelDto updatedModel = modelService.updateModel(id, modelDto);
+        ApiResponse<ModelDto> response = ApiResponse.<ModelDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Update model successfully")
+                .data(updatedModel)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
 }
