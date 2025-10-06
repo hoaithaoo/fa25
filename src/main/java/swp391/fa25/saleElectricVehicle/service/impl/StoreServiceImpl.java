@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Store;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
@@ -28,13 +29,17 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.INVALID_END_DATE);
         }
 
+        if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
+        }
+
         Store store = Store.builder()
                 .storeName(storeDto.getStoreName())
                 .address(storeDto.getAddress())
                 .phone(storeDto.getPhone())
                 .provinceName(storeDto.getProvinceName())
                 .ownerName(storeDto.getOwnerName())
-                .status(storeDto.getStatus())
+                .status(StoreStatus.ACTIVE)
                 .contractStartDate(storeDto.getContractStartDate())
                 .contractEndDate(storeDto.getContractEndDate())
                 .createdAt(LocalDateTime.now())
@@ -42,7 +47,7 @@ public class StoreServiceImpl implements StoreService {
 
         storeRepository.save(store);
 
-        return storeDto;
+        return mapTodo(store);
     }
 
     @Override
@@ -51,36 +56,12 @@ public class StoreServiceImpl implements StoreService {
         if (store.isEmpty()) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
-        return store.stream().map(s -> {
-            StoreDto storeDto = new StoreDto();
-            storeDto.setStoreId(s.getStoreId());
-            storeDto.setStoreName(s.getStoreName());
-            storeDto.setAddress(s.getAddress());
-            storeDto.setPhone(s.getPhone());
-            storeDto.setProvinceName(s.getProvinceName());
-            storeDto.setOwnerName(s.getOwnerName());
-            storeDto.setStatus(s.getStatus());
-            storeDto.setContractStartDate(s.getContractStartDate());
-            storeDto.setContractEndDate(s.getContractEndDate());
-            return storeDto;
-        }).toList();
+        return store.stream().map(this::mapTodo).toList();
     }
 
     @Override
     public List<StoreDto> findAllStores() {
-        return storeRepository.findAll().stream().map(store -> {
-            StoreDto storeDto = new StoreDto();
-            storeDto.setStoreId(store.getStoreId());
-            storeDto.setStoreName(store.getStoreName());
-            storeDto.setAddress(store.getAddress());
-            storeDto.setPhone(store.getPhone());
-            storeDto.setProvinceName(store.getProvinceName());
-            storeDto.setOwnerName(store.getOwnerName());
-            storeDto.setStatus(store.getStatus());
-            storeDto.setContractStartDate(store.getContractStartDate());
-            storeDto.setContractEndDate(store.getContractEndDate());
-            return storeDto;
-        }).toList();
+        return storeRepository.findAll().stream().map(this::mapTodo).toList();
     }
 
     @Override
@@ -90,8 +71,16 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
+        if (storeRepository.existsByStoreName(store.getStoreName())) {
+            throw new AppException(ErrorCode.STORE_EXISTED);
+        }
+
         if (storeDto.getContractEndDate().isBefore(storeDto.getContractStartDate())) {
             throw new AppException(ErrorCode.INVALID_END_DATE);
+        }
+
+        if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
         }
 
         if (storeDto.getStoreName() != null && !storeDto.getStoreName().trim().isEmpty()) {
@@ -100,13 +89,6 @@ public class StoreServiceImpl implements StoreService {
 
         if (storeDto.getAddress() != null && !storeDto.getAddress().trim().isEmpty()) {
             store.setAddress(storeDto.getAddress());
-        }
-
-        if (storeDto.getPhone() != null && !storeDto.getPhone().trim().isEmpty()) {
-            if (storeRepository.existsByPhone(storeDto.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_EXISTED);
-            }
-            store.setPhone(storeDto.getPhone());
         }
 
         if (storeDto.getProvinceName() != null && !storeDto.getProvinceName().trim().isEmpty()) {
@@ -125,7 +107,7 @@ public class StoreServiceImpl implements StoreService {
 
         storeRepository.save(store);
 
-        return storeDto;
+        return mapTodo(store);
     }
 
     @Override
@@ -135,5 +117,19 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
         storeRepository.delete(store);
+    }
+
+    private StoreDto mapTodo(Store store) {
+        return StoreDto.builder()
+                .storeId(store.getStoreId())
+                .storeName(store.getStoreName())
+                .address(store.getAddress())
+                .phone(store.getPhone())
+                .provinceName(store.getProvinceName())
+                .ownerName(store.getOwnerName())
+                .status(store.getStatus())
+                .contractStartDate(store.getContractStartDate())
+                .contractEndDate(store.getContractEndDate())
+                .build();
     }
 }

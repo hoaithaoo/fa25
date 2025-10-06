@@ -29,7 +29,7 @@ public class UserController {
                 .message("User created successfully")
                 .data(createdUser)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{name}")

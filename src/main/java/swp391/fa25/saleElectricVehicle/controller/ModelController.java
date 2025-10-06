@@ -26,11 +26,11 @@ public class ModelController {
                 .message("Create model successfully")
                 .data(createdModel)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<ApiResponse<ModelDto>> getModelById(@PathVariable String name) {
+    public ResponseEntity<ApiResponse<ModelDto>> getModelByName(@PathVariable String name) {
         ModelDto modelDto = modelService.getModelByName(name);
         ApiResponse<ModelDto> response = ApiResponse.<ModelDto>builder()
                 .code(HttpStatus.OK.value())

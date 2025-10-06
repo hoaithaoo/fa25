@@ -26,7 +26,7 @@ public class Store {
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String address;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     @Pattern(regexp = "^0\\d{9}$", message = "Phone không hợp lệ")
     private String phone;
 

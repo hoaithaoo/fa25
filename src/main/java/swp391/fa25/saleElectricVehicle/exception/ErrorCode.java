@@ -27,6 +27,7 @@ public enum ErrorCode {
     PHONE_EXISTED(1017, "Số điện thoại đã tồn tại", HttpStatus.BAD_REQUEST),
     ROLE_EXISTED(1018, "Role đã tồn tại", HttpStatus.BAD_REQUEST),
     STORE_EXISTED(1019, "Store đã tồn tại", HttpStatus.BAD_REQUEST),
+    INVALID_END_DATE_TIME(1020, "Ngày kết thúc không được trước ngày hiện tại", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

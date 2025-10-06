@@ -41,19 +41,7 @@ public class ModelServiceImpl implements ModelService {
                 .build();
 
         modelRepository.save(newModel);
-        return ModelDto.builder()
-                .modelName(newModel.getModelName())
-                .modelYear(newModel.getModelYear())
-                .batteryCapacity(newModel.getBatteryCapacity())
-                .range(newModel.getRange())
-                .powerHp(newModel.getPowerHp())
-                .torqueNm(newModel.getTorqueNm())
-                .acceleration(newModel.getAcceleration())
-                .seatingCapacity(newModel.getSeatingCapacity())
-                .price(newModel.getPrice())
-                .bodyType(newModel.getBodyType())
-                .description(newModel.getDescription())
-                .build();
+        return mapToDto(newModel);
     }
 
     @Override
@@ -62,37 +50,13 @@ public class ModelServiceImpl implements ModelService {
         if (model == null) {
             throw new AppException(ErrorCode.MODEL_NOT_FOUND);
         }
-        return ModelDto.builder()
-                .modelName(model.getModelName())
-                .modelYear(model.getModelYear())
-                .batteryCapacity(model.getBatteryCapacity())
-                .range(model.getRange())
-                .powerHp(model.getPowerHp())
-                .torqueNm(model.getTorqueNm())
-                .acceleration(model.getAcceleration())
-                .seatingCapacity(model.getSeatingCapacity())
-                .price(model.getPrice())
-                .bodyType(model.getBodyType())
-                .description(model.getDescription())
-                .build();
+        return mapToDto(model);
     }
 
     @Override
     public List<ModelDto> getAllModels() {
         List<Model> models = modelRepository.findAll();
-        return models.stream().map(model -> ModelDto.builder()
-                .modelName(model.getModelName())
-                .modelYear(model.getModelYear())
-                .batteryCapacity(model.getBatteryCapacity())
-                .range(model.getRange())
-                .powerHp(model.getPowerHp())
-                .torqueNm(model.getTorqueNm())
-                .acceleration(model.getAcceleration())
-                .seatingCapacity(model.getSeatingCapacity())
-                .price(model.getPrice())
-                .bodyType(model.getBodyType())
-                .description(model.getDescription())
-                .build()).toList();
+        return models.stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -102,5 +66,21 @@ public class ModelServiceImpl implements ModelService {
             throw new AppException(ErrorCode.MODEL_NOT_FOUND);
         }
         modelRepository.delete(model);
+    }
+
+    private ModelDto mapToDto(Model model) {
+        return ModelDto.builder()
+                .modelName(model.getModelName())
+                .modelYear(model.getModelYear())
+                .batteryCapacity(model.getBatteryCapacity())
+                .range(model.getRange())
+                .powerHp(model.getPowerHp())
+                .torqueNm(model.getTorqueNm())
+                .acceleration(model.getAcceleration())
+                .seatingCapacity(model.getSeatingCapacity())
+                .price(model.getPrice())
+                .bodyType(model.getBodyType())
+                .description(model.getDescription())
+                .build();
     }
 }

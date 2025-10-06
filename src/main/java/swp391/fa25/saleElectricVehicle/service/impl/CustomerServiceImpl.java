@@ -38,7 +38,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         customerRepository.save(newCustomer);
 
-        return customerDto;
+        return mapToDto(newCustomer);
     }
 
     @Override
@@ -49,25 +49,19 @@ public class CustomerServiceImpl implements CustomerService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        return CustomerDto.builder()
-                .customerId(customer.getCustomerId())
-                .fullName(customer.getFullName())
-                .address(customer.getAddress())
-                .email(customer.getEmail())
-                .phone(customer.getPhone())
-                .build();
+        return mapToDto(customer);
     }
 
     @Override
     public List<CustomerDto> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
-        return customers.stream().map(customer -> CustomerDto.builder()
-                .customerId(customer.getCustomerId())
-                .fullName(customer.getFullName())
-                .address(customer.getAddress())
-                .email(customer.getEmail())
-                .phone(customer.getPhone())
-                .build()).toList();
+        return customers.stream().map(this::mapToDto).toList();
+    }
+
+    @Override
+    public List<CustomerDto> getAllCustomersByStaffId(int staffId) {
+        List<Customer> customers = customerRepository.findCustomersByStaffId(staffId);
+        return customers.stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -105,7 +99,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         customerRepository.save(customer);
 
-        return customerDto;
+        return mapToDto(customer);
     }
 
     @Override
@@ -117,5 +111,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         customerRepository.delete(customer);
+    }
+
+    private CustomerDto mapToDto(Customer customer) {
+        return CustomerDto.builder()
+                .customerId(customer.getCustomerId())
+                .fullName(customer.getFullName())
+                .address(customer.getAddress())
+                .email(customer.getEmail())
+                .phone(customer.getPhone())
+                .build();
     }
 }

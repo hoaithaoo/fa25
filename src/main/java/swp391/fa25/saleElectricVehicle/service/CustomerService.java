@@ -8,6 +8,7 @@ public interface CustomerService {
     CustomerDto createCustomer(CustomerDto customerDto);
     CustomerDto getCustomerByPhone(String phone);
     List<CustomerDto> getAllCustomers();
+    List<CustomerDto> getAllCustomersByStaffId(int staffId);
     CustomerDto updateCustomer(int customerId, CustomerDto customerDto);
     void deleteCustomer(int customerId);
 }

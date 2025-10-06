@@ -25,11 +25,11 @@ public class StoreController {
                 .message("Store created successfully")
                 .data(createdStore)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{storeId}")
-    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoreByName(String storeName) {
+    @GetMapping("/{storeName}")
+    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoreByName(@PathVariable String storeName) {
         List<StoreDto> stores = storeService.findStoreByName(storeName);
         ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
                 .code(HttpStatus.OK.value())

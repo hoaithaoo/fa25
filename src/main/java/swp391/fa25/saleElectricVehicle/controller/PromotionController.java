@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swp391.fa25.saleElectricVehicle.entity.Promotion;
 import swp391.fa25.saleElectricVehicle.payload.dto.PromotionDto;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.PromotionService;
@@ -26,13 +25,13 @@ public class PromotionController {
                 .message("Promotion created successfully")
                 .data(createdPromotion)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PromotionDto>> getPromotionById(@PathVariable("id") int promotionId) {
-        PromotionDto promotionDto = promotionService.getPromotionById(promotionId);
-        ApiResponse<PromotionDto> response = ApiResponse.<PromotionDto>builder()
+    @GetMapping("/{name}")
+    public ResponseEntity<ApiResponse<List<PromotionDto>>> getPromotionByName(@PathVariable String name) {
+        List<PromotionDto> promotionDto = promotionService.getPromotionByName(name);
+        ApiResponse<List<PromotionDto>> response = ApiResponse.<List<PromotionDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Promotion retrieved successfully")
                 .data(promotionDto)

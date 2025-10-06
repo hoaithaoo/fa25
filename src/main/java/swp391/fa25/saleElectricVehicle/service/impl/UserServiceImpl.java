@@ -90,6 +90,7 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    //use at AuthTokenService
     @Override
     public UserDto findUserById(int userId) {
         User user = userRepository.findById(userId).orElse(null);
@@ -158,6 +159,7 @@ public class UserServiceImpl implements UserService {
 //        return userDto;
 //    }
 
+    //update profile of any user by admin
     @Override
     public UpdateUserProfileResponse updateUserProfile(int userId, UpdateUserProfileRequest updateUserProfileRequest) {
         User user = userRepository.findById(userId).orElse(null);
