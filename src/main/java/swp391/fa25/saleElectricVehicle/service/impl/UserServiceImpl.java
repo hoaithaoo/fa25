@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
 
         if (updateUserProfileRequest.getStoreId() != 0) {
             Store store = storeRepository.findById(updateUserProfileRequest.getStoreId()).orElse(null);
-            if (store == null && (updateUserProfileRequest.getRoleId() != 1 || updateUserProfileRequest.getRoleId() != 2)) {
+            if (store == null && (updateUserProfileRequest.getRoleId() != 1 && updateUserProfileRequest.getRoleId() != 2)) {
                 throw new AppException(ErrorCode.STORE_NOT_EXIST);
             }
         }
