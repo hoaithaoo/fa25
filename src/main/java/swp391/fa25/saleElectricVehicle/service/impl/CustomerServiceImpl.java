@@ -72,7 +72,9 @@ public class CustomerServiceImpl implements CustomerService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        if (customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
+//        if (customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
+        if (!customer.getPhone().equals(customerDto.getPhone()) &&
+                customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 

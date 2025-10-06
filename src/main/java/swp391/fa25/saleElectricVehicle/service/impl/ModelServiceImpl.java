@@ -68,6 +68,11 @@ public class ModelServiceImpl implements ModelService {
         modelRepository.delete(model);
     }
 
+//    @Override
+//    public ModelDto updateModel(int id, ModelDto modelDto) {
+//        return null;
+//    }
+
     private ModelDto mapToDto(Model model) {
         return ModelDto.builder()
                 .modelName(model.getModelName())

@@ -25,8 +25,12 @@ public class RoleServiceImpl implements RoleService {
         Role newRole = Role.builder()
                 .roleName(roleDto.getRoleName())
                 .build();
-        roleRepository.save(newRole);
-        return roleDto;
+        Role savedRole = roleRepository.save(newRole);
+//        return roleDto;
+        return RoleDto.builder()
+                .roleId(savedRole.getRoleId()) // ← Có roleId từ DB
+                .roleName(savedRole.getRoleName())
+                .build();
     }
 
     @Override
