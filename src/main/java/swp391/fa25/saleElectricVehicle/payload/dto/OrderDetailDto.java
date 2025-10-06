@@ -58,7 +58,6 @@ public class OrderDetailDto {
     // Display fields (from relationships)
     private String modelName;       // From StoreStock -> ModelColor -> Model
     private String colorName;       // From StoreStock -> ModelColor -> Color
-    private String brandName;       // From StoreStock -> ModelColor -> Model -> Brand
     private BigDecimal modelPrice;  // From StoreStock -> priceOfStore
     private int availableStock;     // From StoreStock -> quantity
 

@@ -96,15 +96,4 @@ public class OrderDetailController {
         return ResponseEntity.ok(response);
     }
 
-    // ANALYTICS - Get details by model
-    @GetMapping("/model/{modelId}")
-    public ResponseEntity<ApiResponse<List<OrderDetailDto>>> getOrderDetailsByModel(@PathVariable int modelId) {
-        List<OrderDetailDto> orderDetails = orderDetailService.getOrderDetailsByModel(modelId);
-        ApiResponse<List<OrderDetailDto>> response = ApiResponse.<List<OrderDetailDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Order details by model retrieved successfully")
-                .data(orderDetails)
-                .build();
-        return ResponseEntity.ok(response);
-    }
 }

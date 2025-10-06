@@ -26,6 +26,9 @@ public enum ErrorCode {
     COLOR_EXISTED(1016, "Màu sắc đã tồn tại", HttpStatus.BAD_REQUEST),
     ORDER_NOT_FOUND(1017, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_EXISTED(1018, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
+    ORDER_DETAIL_NOT_FOUND(1019, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
+    STORE_STOCK_NOT_FOUND(1020, "Kho hàng không tồn tại", HttpStatus.NOT_FOUND),
+    INSUFFICIENT_STOCK(1021, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

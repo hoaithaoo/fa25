@@ -13,6 +13,7 @@ import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.repository.UserRepository;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -81,16 +82,16 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Update fields
-        if (orderDto.getTotalPrice() != null) {
+        if (orderDto.getTotalPrice() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
             order.setTotalPrice(orderDto.getTotalPrice());
         }
-        if (orderDto.getTotalTaxPrice() != null) {
+        if (orderDto.getTotalTaxPrice() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
             order.setTotalTaxPrice(orderDto.getTotalTaxPrice());
         }
-        if (orderDto.getTotalPromotionAmount() != null) {
+        if (orderDto.getTotalPromotionAmount() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
             order.setTotalPromotionAmount(orderDto.getTotalPromotionAmount());
         }
-        if (orderDto.getTotalPayment() != null) {
+        if (orderDto.getTotalPayment() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
             order.setTotalPayment(orderDto.getTotalPayment());
         }
         if (orderDto.getStatus() != null) {
@@ -126,7 +127,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDto> getOrdersByCustomerId(int customerId) {
-        return orderRepository.findByCustomer_CustomerId(customerId).stream()
+        return orderRepository.findByCustomer_CustomerId(customerId)
+                .stream()
                 .map(this::mapToDto)
                 .toList();
     }
@@ -161,12 +163,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public long countOrdersByStatus(Order.OrderStatus status) {
+
         return orderRepository.countByStatus(status);
     }
 
     @Override
     public List<OrderDto> getRecentOrders() {
-        return orderRepository.findTop10ByOrderByOrderDateDesc().stream()
+        return orderRepository.findTop10ByOrderByOrderDateDesc()
+                .stream()
                 .map(this::mapToDto)
                 .toList();
     }
