@@ -4,8 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
+import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.user.UpdateUserProfileResponse;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.util.List;
@@ -18,9 +22,9 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<UserDto>> createUser(@RequestBody UserDto userDto) {
-        UserDto createdUser = userService.createUser(userDto);
-        ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
+    public ResponseEntity<ApiResponse<CreateUserResponse>> createUser(@RequestBody CreateUserRequest userRequest) {
+        CreateUserResponse createdUser = userService.createUser(userRequest);
+        ApiResponse<CreateUserResponse> response = ApiResponse.<CreateUserResponse>builder()
                 .code(HttpStatus.CREATED.value())
                 .message("User created successfully")
                 .data(createdUser)
@@ -28,10 +32,10 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserDto>> getUserById(@PathVariable int userId) {
-        UserDto user = userService.findUserById(userId);
-        ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
+    @GetMapping("/{name}")
+    public ResponseEntity<ApiResponse<List<GetUserResponse>>> getUserById(@PathVariable String name) {
+        List<GetUserResponse> user = userService.findUserByName(name);
+        ApiResponse<List<GetUserResponse>> response = ApiResponse.<List<GetUserResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("User fetched successfully")
                 .data(user)
@@ -40,9 +44,9 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
-        List<UserDto> users = userService.findAllUsers();
-        ApiResponse<List<UserDto>> response = ApiResponse.<List<UserDto>>builder()
+    public ResponseEntity<ApiResponse<List<GetUserResponse>>> getAllUsers() {
+        List<GetUserResponse> users = userService.findAllUsers();
+        ApiResponse<List<GetUserResponse>> response = ApiResponse.<List<GetUserResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Users fetched successfully")
                 .data(users)
@@ -51,10 +55,11 @@ public class UserController {
     }
 
     @PutMapping("/update/{userId}")
-    public ResponseEntity<ApiResponse<UserDto>> updateUser(@PathVariable int userId, @RequestBody UserDto userDto) {
-        UserDto updatedUser = userService.updateOwnProfile(userId, userDto);
+    public ResponseEntity<ApiResponse<UpdateUserProfileResponse>> updateUserProfile
+            (@PathVariable int userId, @RequestBody UpdateUserProfileRequest updateUserProfileRequest) {
+        UpdateUserProfileResponse updatedUser = userService.updateUserProfile(userId, updateUserProfileRequest);
 
-        ApiResponse<UserDto> response = ApiResponse.<UserDto>builder()
+        ApiResponse<UpdateUserProfileResponse> response = ApiResponse.<UpdateUserProfileResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message("User updated successfully")
                 .data(updatedUser)
