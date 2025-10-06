@@ -61,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto getOrderById(int orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
-            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
         return mapToDto(order);
     }
@@ -77,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto updateOrder(int orderId, OrderDto orderDto) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
-            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
 
         // Update fields
@@ -106,7 +106,7 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrder(int orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
-            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
         orderRepository.delete(order);
     }
@@ -115,7 +115,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDto updateOrderStatus(int orderId, Order.OrderStatus status) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
-            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
 
         order.setStatus(status);
