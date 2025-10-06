@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface ColorService {
     ColorDto createColor(ColorDto colorDto);
+    ColorDto getColorById(int colorId);
     List<ColorDto> getColorByName(String colorName);
     List<ColorDto> getAllColors();
     ColorDto updateColor(int colorId, ColorDto colorDto);

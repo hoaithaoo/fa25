@@ -26,8 +26,25 @@ public class ColorServiceImpl implements ColorService {
         Color color = Color.builder()
                 .colorName(colorDto.getColorName())
                 .build();
-        colorRepository.save(color);
-        return colorDto;
+        Color savedColor = colorRepository.save(color);
+//        return colorDto;
+        return ColorDto.builder()
+                .colorId(savedColor.getColorId())
+                .colorName(savedColor.getColorName())
+                .build();
+    }
+
+    @Override
+    public ColorDto getColorById(int colorId) {
+        Color color = colorRepository.findById(colorId).orElse(null);
+        if (color == null) {
+            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
+        }
+
+        return ColorDto.builder()
+                .colorId(color.getColorId())
+                .colorName(color.getColorName())
+                .build();
     }
 
     @Override
@@ -57,13 +74,26 @@ public class ColorServiceImpl implements ColorService {
         if (color == null) {
             throw new AppException(ErrorCode.COLOR_NOT_EXIST);
         }
-        if (colorRepository.existsColorByColorName(colorDto.getColorName())) {
+//        if (colorRepository.existsColorByColorName(colorDto.getColorName())) {
+//            throw new AppException(ErrorCode.COLOR_EXISTED);
+//        } else {
+//            color.setColorName(colorDto.getColorName());
+//        }
+//        colorRepository.save(color);
+//        return colorDto;
+        if (!color.getColorName().equals(colorDto.getColorName()) &&
+                colorRepository.existsColorByColorName(colorDto.getColorName())) {
             throw new AppException(ErrorCode.COLOR_EXISTED);
-        } else {
-            color.setColorName(colorDto.getColorName());
         }
-        colorRepository.save(color);
-        return colorDto;
+
+        color.setColorName(colorDto.getColorName());
+        Color savedColor = colorRepository.save(color);
+
+        // Trả về data đã update
+        return ColorDto.builder()
+                .colorId(savedColor.getColorId())
+                .colorName(savedColor.getColorName())
+                .build();
     }
 
     @Override

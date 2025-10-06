@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SaleElectricVehicleApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SaleElectricVehicleApplication.class, args);
+        SpringApplication.run(SaleElectricVehicleApplication.class, args);
 	}
 
 }
