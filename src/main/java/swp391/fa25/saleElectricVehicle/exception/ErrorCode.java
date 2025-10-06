@@ -24,8 +24,8 @@ public enum ErrorCode {
     INVALID_END_DATE(1014, "Ngày kết thúc không được trước ngày bắt đầu", HttpStatus.BAD_REQUEST),
     COLOR_NOT_EXIST(1015, "Màu sắc không tồn tại", HttpStatus.NOT_FOUND),
     COLOR_EXISTED(1016, "Màu sắc đã tồn tại", HttpStatus.BAD_REQUEST),
-    ORDER_NOT_FOUND(1017, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    ORDER_EXISTED(1018, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
+    ORDER_EXISTED(1017, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_EXIST(1018, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
     ;
 
     private final int code;

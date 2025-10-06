@@ -7,14 +7,19 @@ import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Role;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.User;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.jwt.Jwt;
 import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
+import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.LoginRequest;
-import swp391.fa25.saleElectricVehicle.payload.response.IntrospectResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.LoginResponse;
+import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
+import swp391.fa25.saleElectricVehicle.payload.response.*;
+import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.user.UpdateUserProfileResponse;
 import swp391.fa25.saleElectricVehicle.repository.RoleRepository;
 import swp391.fa25.saleElectricVehicle.repository.StoreRepository;
 import swp391.fa25.saleElectricVehicle.repository.UserRepository;
@@ -43,143 +48,171 @@ public class UserServiceImpl implements UserService {
     Jwt jwt;
 
     @Override
-    public UserDto createUser(UserDto userDto) {
-        if (userRepository.existsByEmail(userDto.getEmail())) {
+    public CreateUserResponse createUser(CreateUserRequest userRequest) {
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        Role role = roleRepository.findById(userDto.getRoleId()).orElse(null);
+        if (userRepository.existsByPhone(userRequest.getPhone())) {
+            throw new AppException(ErrorCode.PHONE_EXISTED);
+        }
+
+        Role role = roleRepository.findById(userRequest.getRoleId()).orElse(null);
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
 
-        Store store = storeRepository.findById(userDto.getStoreId()).orElse(null);
-        if (store == null && (userDto.getRoleId() != 1 && userDto.getRoleId() != 2)) { //Sửa lại || thành &&
+        Store store = storeRepository.findById(userRequest.getStoreId()).orElse(null);
+        if (store == null && (userRequest.getRoleId() != 1 || userRequest.getRoleId() != 2)) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
         User newUser = User.builder()
-                .fullName(userDto.getFullName())
-                .email(userDto.getEmail())
-                .phone(userDto.getPhone())
-                .password(passwordEncoder.encode(userDto.getPassword()))
-                .isActive(userDto.getIsActive())
+                .fullName(userRequest.getFullName())
+                .email(userRequest.getEmail())
+                .phone(userRequest.getPhone())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
+                .status(UserStatus.PENDING)
                 .store(store)
                 .role(role)
                 .createdAt(LocalDateTime.now())
                 .build();
 
         userRepository.save(newUser);
-        return userDto;
+        return CreateUserResponse.builder()
+                .userId(newUser.getUserId())
+                .fullName(newUser.getFullName())
+                .email(newUser.getEmail())
+                .phone(newUser.getPhone())
+                .status(newUser.getStatus())
+                .storeId(newUser.getStore().getStoreId())
+                .roleId(newUser.getRole().getRoleId())
+                .build();
     }
 
     @Override
     public UserDto findUserById(int userId) {
         User user = userRepository.findById(userId).orElse(null);
-
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        UserDto userDto = UserDto.builder()
-                .fullName(user.getFullName())
+        return UserDto.builder()
+                .userId(user.getUserId())
                 .email(user.getEmail())
-                .phone(user.getPhone())
-                .isActive(user.getIsActive())
-                .storeId(user.getStore().getStoreId())
                 .roleId(user.getRole().getRoleId())
                 .build();
-        return userDto;
     }
 
     @Override
-    public List<UserDto> findAllUsers() {
-        return userRepository.findAll().stream().map(user -> UserDto.builder()
-                .userId(user.getUserId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .isActive(user.getIsActive())
-                .storeId(user.getStore().getStoreId())
-                .roleId(user.getRole().getRoleId())
+    public List<GetUserResponse> findUserByName(String name) {
+        List<User> user = userRepository.findUsersByFullNameContaining(name);
+
+        if (user.isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+
+        return user.stream().map(u -> GetUserResponse.builder()
+                .userId(u.getUserId())
+                .fullName(u.getFullName())
+                .email(u.getEmail())
+                .phone(u.getPhone())
+                .status(u.getStatus())
+                .storeId(u.getStore().getStoreId())
+                .roleId(u.getRole().getRoleId())
                 .build()).toList();
     }
 
     @Override
-    public UserDto updateOwnProfile(int userId, UserDto userDto) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXIST);
-        }
-
-        if (userDto.getFullName() != null && !userDto.getFullName().trim().isEmpty()) {
-            user.setFullName(userDto.getFullName());
-        }
-
-        if (userDto.getPhone() != null && !userDto.getPhone().trim().isEmpty()) {
-            user.setPhone(userDto.getPhone());
-        }
-
-        user.setUpdatedAt(LocalDateTime.now());
-
-        User updatedUser = userRepository.save(user);
-
-//        return userDto;
-        return UserDto.builder()
-                .fullName(updatedUser.getFullName())
-                .email(updatedUser.getEmail())
-                .phone(updatedUser.getPhone())
-                .isActive(updatedUser.getIsActive())
-                .storeId(updatedUser.getStore().getStoreId())
-                .roleId(updatedUser.getRole().getRoleId())
-                .build();
+    public List<GetUserResponse> findAllUsers() {
+        return userRepository.findAll().stream().map(u -> GetUserResponse.builder()
+                .userId(u.getUserId())
+                .fullName(u.getFullName())
+                .email(u.getEmail())
+                .phone(u.getPhone())
+                .status(u.getStatus())
+                .storeId(u.getStore().getStoreId())
+                .roleId(u.getRole().getRoleId())
+                .build()).toList();
     }
 
+//    @Override
+//    public UserDto updateOwnProfile(int userId, UserDto userDto) {
+//        User user = userRepository.findById(userId).orElse(null);
+//        if (user == null) {
+//            throw new AppException(ErrorCode.USER_NOT_EXIST);
+//        }
+//
+//        if (userDto.getFullName() != null && !userDto.getFullName().trim().isEmpty()) {
+//            user.setFullName(userDto.getFullName());
+//        }
+//
+//        if (userDto.getPhone() != null && !userDto.getPhone().trim().isEmpty()) {
+//            user.setPhone(userDto.getPhone());
+//        }
+//
+//        user.setUpdatedAt(LocalDateTime.now());
+//
+//        userRepository.save(user);
+//
+//        return userDto;
+//    }
+
     @Override
-    public UserDto updateUserProfile(int userId, UserDto userDto) {
+    public UpdateUserProfileResponse updateUserProfile(int userId, UpdateUserProfileRequest updateUserProfileRequest) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        Role role = roleRepository.findById(userDto.getRoleId()).orElse(null);
-        if (role == null) {
-            throw new AppException(ErrorCode.ROLE_NOT_EXIST);
-        }
-
-        Store store = storeRepository.findById(userDto.getStoreId()).orElse(null);
-        if (store == null && (userDto.getRoleId() != 1 || userDto.getRoleId() != 2)) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST);
-        }
-
-        if (userDto.getFullName() != null && !userDto.getFullName().trim().isEmpty()) {
-            user.setFullName(userDto.getFullName());
-        }
-
-        if (userDto.getEmail() != null && !userDto.getEmail().trim().isEmpty()) {
-            if (!user.getEmail().equals(userDto.getEmail()) && userRepository.existsByEmail(userDto.getEmail())) {
+        if (updateUserProfileRequest.getEmail() != null && !updateUserProfileRequest.getEmail().trim().isEmpty()) {
+            if (!user.getEmail().equals(updateUserProfileRequest.getEmail()) && userRepository.existsByEmail(updateUserProfileRequest.getEmail())) {
                 throw new AppException(ErrorCode.USER_EXISTED);
             }
-            user.setEmail(userDto.getEmail());
+            user.setEmail(updateUserProfileRequest.getEmail());
         }
 
-        if (userDto.getPhone() != null && !userDto.getPhone().trim().isEmpty()) {
-            user.setPhone(userDto.getPhone());
+        if (updateUserProfileRequest.getPhone() != null && !updateUserProfileRequest.getPhone().trim().isEmpty()) {
+            if (!user.getPhone().equals(updateUserProfileRequest.getPhone()) && userRepository.existsByPhone(updateUserProfileRequest.getPhone())) {
+                throw new AppException(ErrorCode.PHONE_EXISTED);
+            }
+            user.setPhone(updateUserProfileRequest.getPhone());
         }
 
-        if (userDto.getPassword() != null && !userDto.getPassword().trim().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        if (updateUserProfileRequest.getRoleId() != 0) {
+            Role role = roleRepository.findById(updateUserProfileRequest.getRoleId()).orElse(null);
+            if (role == null) {
+                throw new AppException(ErrorCode.ROLE_NOT_EXIST);
+            }
         }
 
-        if (userDto.getIsActive() != null) {
-            user.setIsActive(userDto.getIsActive());
+        if (updateUserProfileRequest.getStoreId() != 0) {
+            Store store = storeRepository.findById(updateUserProfileRequest.getStoreId()).orElse(null);
+            if (store == null && (updateUserProfileRequest.getRoleId() != 1 || updateUserProfileRequest.getRoleId() != 2)) {
+                throw new AppException(ErrorCode.STORE_NOT_EXIST);
+            }
+        }
+
+        if (updateUserProfileRequest.getFullName() != null && !updateUserProfileRequest.getFullName().trim().isEmpty()) {
+            user.setFullName(updateUserProfileRequest.getFullName());
+        }
+
+        if (updateUserProfileRequest.getStatus() != null) {
+            user.setStatus(updateUserProfileRequest.getStatus());
         }
 
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
 
-        return userDto;
+        return UpdateUserProfileResponse.builder()
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .status(user.getStatus())
+                .storeId(user.getStore().getStoreId())
+                .roleId(user.getRole().getRoleId())
+                .build();
     }
 
     @Override
