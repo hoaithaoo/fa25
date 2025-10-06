@@ -7,4 +7,5 @@ import swp391.fa25.saleElectricVehicle.entity.Model;
 @Repository
 public interface ModelRepository extends JpaRepository<Model, Integer> {
     boolean existsModelByModelName(String modelName);
+    Model findByModelName(String modelName);
 }

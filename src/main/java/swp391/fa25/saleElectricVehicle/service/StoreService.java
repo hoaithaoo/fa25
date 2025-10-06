@@ -6,7 +6,8 @@ import java.util.List;
 
 public interface StoreService {
     StoreDto createStore(StoreDto storeDto);
-    StoreDto findStoreById(int storeId);
+//    StoreDto findStoreById(int storeId);
+    List<StoreDto> findStoreByName(String storeName);
     List<StoreDto> findAllStores();
     StoreDto updateStore(int storeId, StoreDto storeDto);
     void deleteStore(int storeId);

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
+import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
 
@@ -12,14 +13,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/models")
-@CrossOrigin(origins = "*") // Allow requests from any origin
 public class ModelController {
 
     @Autowired
     private ModelService modelService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<ModelDto>> createModel(@RequestBody ModelDto modelDto) {
+    public ResponseEntity<ApiResponse<ModelDto>> createModel(@RequestBody CreateModelRequest modelDto) {
         ModelDto createdModel = modelService.createModel(modelDto);
         ApiResponse<ModelDto> response = ApiResponse.<ModelDto>builder()
                 .code(HttpStatus.CREATED.value())
@@ -31,9 +31,9 @@ public class ModelController {
         //nhưng .code(HttpStatus.CREATED.value()) trả về 201 (Created) nềuu tạo thành công
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ModelDto>> getModelById(@PathVariable int id) {
-        ModelDto modelDto = modelService.getModelById(id);
+    @GetMapping("/{name}")
+    public ResponseEntity<ApiResponse<ModelDto>> getModelById(@PathVariable String name) {
+        ModelDto modelDto = modelService.getModelByName(name);
         ApiResponse<ModelDto> response = ApiResponse.<ModelDto>builder()
                 .code(HttpStatus.OK.value())
                 .message("Get model successfully")

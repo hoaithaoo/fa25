@@ -18,7 +18,7 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 
     // Find by store
     List<Promotion> findByStore_StoreId(int storeId);
-
-    // Find by model
+    List<Promotion> findByPromotionNameContainingIgnoreCase(String promotionName);
+    boolean existsByPromotionNameIgnoreCase(String promotionName);
     List<Promotion> findByModel_ModelId(int modelId);
 }

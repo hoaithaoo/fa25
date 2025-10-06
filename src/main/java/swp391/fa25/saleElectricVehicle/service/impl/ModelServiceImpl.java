@@ -6,6 +6,7 @@ import swp391.fa25.saleElectricVehicle.entity.Model;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
+import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelRequest;
 import swp391.fa25.saleElectricVehicle.repository.ModelRepository;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
 
@@ -19,67 +20,43 @@ public class ModelServiceImpl implements ModelService {
     private ModelRepository modelRepository;
 
     @Override
-    public ModelDto createModel(ModelDto modelDto) {
-        if (modelRepository.existsModelByModelName(modelDto.getModelName())) {
+    public ModelDto createModel(CreateModelRequest creatModelRequest) {
+        if (modelRepository.existsModelByModelName(creatModelRequest.getModelName())) {
             throw new AppException(ErrorCode.MODEL_EXISTED);
         }
 
         Model newModel = Model.builder()
-                .modelName(modelDto.getModelName())
-                .modelYear(modelDto.getModelYear())
-                .batteryCapacity(modelDto.getBatteryCapacity())
-                .range(modelDto.getRange())
-                .powerHp(modelDto.getPowerHp())
-                .torqueNm(modelDto.getTorqueNm())
-                .acceleration(modelDto.getAcceleration())
-                .seatingCapacity(modelDto.getSeatingCapacity())
-                .price(modelDto.getPrice())
-                .bodyType(modelDto.getBodyType())
-                .description(modelDto.getDescription())
+                .modelName(creatModelRequest.getModelName())
+                .modelYear(creatModelRequest.getModelYear())
+                .batteryCapacity(creatModelRequest.getBatteryCapacity())
+                .range(creatModelRequest.getRange())
+                .powerHp(creatModelRequest.getPowerHp())
+                .torqueNm(creatModelRequest.getTorqueNm())
+                .acceleration(creatModelRequest.getAcceleration())
+                .seatingCapacity(creatModelRequest.getSeatingCapacity())
+                .price(creatModelRequest.getPrice())
+                .bodyType(creatModelRequest.getBodyType())
+                .description(creatModelRequest.getDescription())
                 .createAt(LocalDateTime.now())
                 .build();
 
         modelRepository.save(newModel);
-        return modelDto;
+        return mapToDto(newModel);
     }
 
     @Override
-    public ModelDto getModelById(int id) {
-        Model model = modelRepository.findById(id).orElse(null);
+    public ModelDto getModelByName(String name) {
+        Model model = modelRepository.findByModelName(name);
         if (model == null) {
             throw new AppException(ErrorCode.MODEL_NOT_FOUND);
         }
-        return ModelDto.builder()
-                .modelName(model.getModelName())
-                .modelYear(model.getModelYear())
-                .batteryCapacity(model.getBatteryCapacity())
-                .range(model.getRange())
-                .powerHp(model.getPowerHp())
-                .torqueNm(model.getTorqueNm())
-                .acceleration(model.getAcceleration())
-                .seatingCapacity(model.getSeatingCapacity())
-                .price(model.getPrice())
-                .bodyType(model.getBodyType())
-                .description(model.getDescription())
-                .build();
+        return mapToDto(model);
     }
 
     @Override
     public List<ModelDto> getAllModels() {
         List<Model> models = modelRepository.findAll();
-        return models.stream().map(model -> ModelDto.builder()
-                .modelName(model.getModelName())
-                .modelYear(model.getModelYear())
-                .batteryCapacity(model.getBatteryCapacity())
-                .range(model.getRange())
-                .powerHp(model.getPowerHp())
-                .torqueNm(model.getTorqueNm())
-                .acceleration(model.getAcceleration())
-                .seatingCapacity(model.getSeatingCapacity())
-                .price(model.getPrice())
-                .bodyType(model.getBodyType())
-                .description(model.getDescription())
-                .build()).toList();
+        return models.stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -91,51 +68,24 @@ public class ModelServiceImpl implements ModelService {
         modelRepository.delete(model);
     }
 
-    @Override
-    public ModelDto updateModel(int id, ModelDto modelDto) {
-        // Bước 1: Tìm model cần update
-        Model existingModel = modelRepository.findById(id).orElse(null);
-        if (existingModel == null) {
-            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
-        }
+//    @Override
+//    public ModelDto updateModel(int id, ModelDto modelDto) {
+//        return null;
+//    }
 
-        // Bước 2: Kiểm tra tên model có bị trùng không (nếu đổi tên)
-        if (!existingModel.getModelName().equals(modelDto.getModelName()) &&
-                modelRepository.existsModelByModelName(modelDto.getModelName())) {
-            throw new AppException(ErrorCode.MODEL_EXISTED);
-        }
-
-        // Bước 3: Update các fields
-        existingModel.setModelName(modelDto.getModelName());
-        existingModel.setModelYear(modelDto.getModelYear());
-        existingModel.setBatteryCapacity(modelDto.getBatteryCapacity());
-        existingModel.setRange(modelDto.getRange());
-        existingModel.setPowerHp(modelDto.getPowerHp());
-        existingModel.setTorqueNm(modelDto.getTorqueNm());
-        existingModel.setAcceleration(modelDto.getAcceleration());
-        existingModel.setSeatingCapacity(modelDto.getSeatingCapacity());
-        existingModel.setPrice(modelDto.getPrice());
-        existingModel.setBodyType(modelDto.getBodyType());
-        existingModel.setDescription(modelDto.getDescription());
-        existingModel.setUpdatedAt(LocalDateTime.now()); // ← Dùng đúng field name
-
-        // Bước 4: Save vào database
-        Model updatedModel = modelRepository.save(existingModel);
-
-        // Bước 5: Convert Entity → DTO và return
+    private ModelDto mapToDto(Model model) {
         return ModelDto.builder()
-                .modelId(updatedModel.getModelId()) // ← Thêm modelId
-                .modelName(updatedModel.getModelName())
-                .modelYear(updatedModel.getModelYear())
-                .batteryCapacity(updatedModel.getBatteryCapacity())
-                .range(updatedModel.getRange())
-                .powerHp(updatedModel.getPowerHp())
-                .torqueNm(updatedModel.getTorqueNm())
-                .acceleration(updatedModel.getAcceleration())
-                .seatingCapacity(updatedModel.getSeatingCapacity())
-                .price(updatedModel.getPrice())
-                .bodyType(updatedModel.getBodyType())
-                .description(updatedModel.getDescription())
+                .modelName(model.getModelName())
+                .modelYear(model.getModelYear())
+                .batteryCapacity(model.getBatteryCapacity())
+                .range(model.getRange())
+                .powerHp(model.getPowerHp())
+                .torqueNm(model.getTorqueNm())
+                .acceleration(model.getAcceleration())
+                .seatingCapacity(model.getSeatingCapacity())
+                .price(model.getPrice())
+                .bodyType(model.getBodyType())
+                .description(model.getDescription())
                 .build();
     }
 }

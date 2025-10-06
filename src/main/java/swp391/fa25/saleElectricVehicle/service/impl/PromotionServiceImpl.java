@@ -1,7 +1,9 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import swp391.fa25.saleElectricVehicle.entity.Model;
 import swp391.fa25.saleElectricVehicle.entity.Promotion;
 import swp391.fa25.saleElectricVehicle.entity.Store;
@@ -58,7 +60,7 @@ public class PromotionServiceImpl implements PromotionService {
         Promotion newPromotion = Promotion.builder()
                 .promotionName(promotionDto.getPromotionName())
                 .description(promotionDto.getDescription())
-                .promotionType(PromotionType.valueOf(promotionDto.getPromotionType()))
+                .promotionType(promotionDto.getPromotionType())
                 .amount(promotionDto.getAmount())
                 .startDate(promotionDto.getStartDate())
                 .endDate(promotionDto.getEndDate())
@@ -70,47 +72,23 @@ public class PromotionServiceImpl implements PromotionService {
 
         promotionRepository.save(newPromotion);
 
-        return promotionDto;
+        return mapToDto(newPromotion);
     }
 
     @Override
-    public PromotionDto getPromotionById(int promotionId) {
-        Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
-        if (promotion == null) {
+    public List<PromotionDto> getPromotionByName(String promotionName) {
+        List<Promotion> promotion = promotionRepository.findByPromotionNameContainingIgnoreCase(promotionName);
+        if (promotion.isEmpty()) {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
 
-        PromotionDto promotionDto = PromotionDto.builder()
-                .promotionId(promotion.getPromotionId())
-                .promotionName(promotion.getPromotionName())
-                .description(promotion.getDescription())
-                .promotionType(promotion.getPromotionType().name())
-                .amount(promotion.getAmount())
-                .startDate(promotion.getStartDate())
-                .endDate(promotion.getEndDate())
-                .isActive(promotion.isActive())
-                .modelId(promotion.getModel().getModelId())
-                .storeId(promotion.getStore().getStoreId())
-                .build();
-
-        return promotionDto;
+        return promotion.stream().map(this::mapToDto).toList();
     }
 
     @Override
     public List<PromotionDto> getAllPromotions() {
         List<Promotion> promotions = promotionRepository.findAll();
-        return promotions.stream().map(promotion -> PromotionDto.builder()
-                .promotionId(promotion.getPromotionId())
-                .promotionName(promotion.getPromotionName())
-                .description(promotion.getDescription())
-                .promotionType(promotion.getPromotionType().name())
-                .amount(promotion.getAmount())
-                .startDate(promotion.getStartDate())
-                .endDate(promotion.getEndDate())
-                .isActive(promotion.isActive())
-                .modelId(promotion.getModel().getModelId())
-                .storeId(promotion.getStore().getStoreId())
-                .build()).toList();
+        return promotions.stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -118,6 +96,10 @@ public class PromotionServiceImpl implements PromotionService {
         Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
         if (promotion == null) {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+
+        if (promotionRepository.existsByPromotionNameIgnoreCase(promotion.getPromotionName())) {
+            throw new AppException(ErrorCode.PROMOTION_EXISTED);
         }
 
         Model model = modelRepository.findById(promotionDto.getModelId()).orElse(null);
@@ -148,6 +130,9 @@ public class PromotionServiceImpl implements PromotionService {
 
         if (promotionDto.getEndDate() != null) {
             if (!promotionDto.getEndDate().isBefore(promotion.getStartDate())) {
+                if (promotionDto.getEndDate().isBefore(LocalDateTime.now())) {
+                    throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
+                }
                 promotion.setEndDate(promotionDto.getEndDate());
             } else {
                 throw new AppException(ErrorCode.INVALID_END_DATE);
@@ -163,8 +148,8 @@ public class PromotionServiceImpl implements PromotionService {
             promotion.setDescription(promotionDto.getDescription());
         }
 
-        if (promotionDto.getPromotionType() != null && !promotionDto.getPromotionType().isEmpty()) {
-            promotion.setPromotionType(PromotionType.valueOf(promotionDto.getPromotionType()));
+        if (promotionDto.getPromotionType() != null) {
+            promotion.setPromotionType(promotionDto.getPromotionType());
         }
 
         if (promotionDto.isActive() != promotion.isActive()) {
@@ -185,5 +170,35 @@ public class PromotionServiceImpl implements PromotionService {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
         promotionRepository.delete(promotion);
+    }
+
+    private PromotionDto mapToDto(Promotion promotion) {
+        return PromotionDto.builder()
+                .promotionId(promotion.getPromotionId())
+                .promotionName(promotion.getPromotionName())
+                .description(promotion.getDescription())
+                .promotionType(promotion.getPromotionType())
+                .amount(promotion.getAmount())
+                .startDate(promotion.getStartDate())
+                .endDate(promotion.getEndDate())
+                .isActive(promotion.isActive())
+                .modelId(promotion.getModel().getModelId())
+                .storeId(promotion.getStore().getStoreId())
+                .build();
+    }
+
+    // Runs every day at midnight
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void deactivateExpiredPromotions() {
+        List<Promotion> activePromotions = promotionRepository.findByIsActiveTrue();
+        LocalDateTime now = LocalDateTime.now();
+        for (Promotion promotion : activePromotions) {
+            if (promotion.getEndDate().isBefore(now)) {
+                promotion.setActive(false);
+                promotion.setUpdatedAt(now);
+                promotionRepository.save(promotion);
+            }
+        }
     }
 }

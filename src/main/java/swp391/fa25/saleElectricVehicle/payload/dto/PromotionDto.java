@@ -1,6 +1,7 @@
 package swp391.fa25.saleElectricVehicle.payload.dto;
 
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PromotionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ public class PromotionDto {
     private int promotionId;
     private String promotionName;
     private String description;
-    private String promotionType;
+    private PromotionType promotionType;
     private BigDecimal amount;
     private LocalDateTime startDate;
     private LocalDateTime endDate;

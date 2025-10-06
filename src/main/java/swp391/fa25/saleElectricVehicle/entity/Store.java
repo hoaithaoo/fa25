@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,13 +20,13 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int storeId;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, columnDefinition = "nvarchar(255)", unique = true)
     private String storeName;
 
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String address;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     @Pattern(regexp = "^0\\d{9}$", message = "Phone không hợp lệ")
     private String phone;
 
@@ -37,12 +38,7 @@ public class Store {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private StoreStatus status = StoreStatus.ACTIVE;
-
-    public enum StoreStatus {
-        ACTIVE,
-        INACTIVE;
-    }
+    private StoreStatus status;
 
     @Column(nullable = false)
     private LocalDateTime contractStartDate;

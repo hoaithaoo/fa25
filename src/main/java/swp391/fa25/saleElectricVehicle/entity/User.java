@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +41,8 @@ public class User {
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
-    private Boolean isActive = true;
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Appointment> appointments = new java.util.ArrayList<>();
