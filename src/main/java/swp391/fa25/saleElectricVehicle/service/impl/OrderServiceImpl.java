@@ -33,7 +33,7 @@ public class OrderServiceImpl implements OrderService {
         // Validate customer exists
         Customer customer = customerRepository.findById(orderDto.getCustomerId()).orElse(null);
         if (customer == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXIST);
+            throw new AppException(ErrorCode.ORDER_EXISTED);
         }
 
         // Validate staff exists
