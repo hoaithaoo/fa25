@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.payload.dto.ColorDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
-import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.ModelColorService;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
@@ -24,7 +23,7 @@ public class ModelController {
     private ModelColorService modelColorService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<ModelDto>> createModel(@RequestBody CreateModelRequest modelDto) {
+    public ResponseEntity<ApiResponse<ModelDto>> createModel(@RequestBody ModelDto modelDto) {
         ModelDto createdModel = modelService.createModel(modelDto);
         ApiResponse<ModelDto> response = ApiResponse.<ModelDto>builder()
                 .code(HttpStatus.CREATED.value())

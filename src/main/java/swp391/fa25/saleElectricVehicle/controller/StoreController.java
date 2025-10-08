@@ -30,7 +30,7 @@ public class StoreController {
 
     @GetMapping("/{storeName}")
     public ResponseEntity<ApiResponse<List<StoreDto>>> getStoreByName(@PathVariable String storeName) {
-        List<StoreDto> stores = storeService.findStoreByName(storeName);
+        List<StoreDto> stores = storeService.getStoreByNameContaining(storeName);
         ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Stores retrieved successfully")
@@ -41,7 +41,7 @@ public class StoreController {
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<StoreDto>>> getAllStores() {
-        List<StoreDto> stores = storeService.findAllStores();
+        List<StoreDto> stores = storeService.getAllStores();
         ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("All stores retrieved successfully")
@@ -75,7 +75,7 @@ public class StoreController {
     // BUSINESS - Get stores by status
     @GetMapping("/status/{status}")
     public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByStatus(@PathVariable String status) {
-        List<StoreDto> stores = storeService.findAllStores().stream()
+        List<StoreDto> stores = storeService.getAllStores().stream()
                 .filter(store -> store.getStatus().name().equals(status.toUpperCase()))
                 .toList();
 
@@ -90,7 +90,7 @@ public class StoreController {
     // BUSINESS - Get stores by province
     @GetMapping("/province/{provinceName}")
     public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByProvince(@PathVariable String provinceName) {
-        List<StoreDto> stores = storeService.findAllStores().stream()
+        List<StoreDto> stores = storeService.getAllStores().stream()
                 .filter(store -> store.getProvinceName().toLowerCase().contains(provinceName.toLowerCase()))
                 .toList();
 
@@ -109,7 +109,7 @@ public class StoreController {
             @RequestParam(required = false) String provinceName,
             @RequestParam(required = false) String ownerName) {
 
-        List<StoreDto> stores = storeService.findAllStores();
+        List<StoreDto> stores = storeService.getAllStores();
 
         if (storeName != null && !storeName.trim().isEmpty()) {
             stores = stores.stream()

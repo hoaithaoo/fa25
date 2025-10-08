@@ -34,7 +34,7 @@ public class UserController {
 
     @GetMapping("/{name}")
     public ResponseEntity<ApiResponse<List<GetUserResponse>>> getUserById(@PathVariable String name) {
-        List<GetUserResponse> user = userService.findUserByName(name);
+        List<GetUserResponse> user = userService.getUserByName(name);
         ApiResponse<List<GetUserResponse>> response = ApiResponse.<List<GetUserResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("User fetched successfully")
@@ -45,7 +45,7 @@ public class UserController {
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<GetUserResponse>>> getAllUsers() {
-        List<GetUserResponse> users = userService.findAllUsers();
+        List<GetUserResponse> users = userService.getAllUsers();
         ApiResponse<List<GetUserResponse>> response = ApiResponse.<List<GetUserResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Users fetched successfully")

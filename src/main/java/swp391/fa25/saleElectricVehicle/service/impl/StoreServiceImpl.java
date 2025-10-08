@@ -50,8 +50,9 @@ public class StoreServiceImpl implements StoreService {
         return mapTodo(store);
     }
 
+    // dùng để tìm kiếm store
     @Override
-    public List<StoreDto> findStoreByName(String name) {
+    public List<StoreDto> getStoreByNameContaining(String name) {
         List<Store> store = storeRepository.findStoresByStoreNameContaining(name);
         if (store.isEmpty()) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
@@ -59,8 +60,28 @@ public class StoreServiceImpl implements StoreService {
         return store.stream().map(this::mapTodo).toList();
     }
 
+    // dùng để add vào staff và store stock
+//    @Override
+//    public StoreDto getStoreByName(String storeName) {
+//        Store store = storeRepository.findStoreByStoreName(storeName);
+//        if (store == null) {
+//            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+//        }
+//        return mapTodo(store);
+//    }
+
+    // dùng để add store vào staff
     @Override
-    public List<StoreDto> findAllStores() {
+    public Store getStoreEntityByName(String storeName) {
+        Store store = storeRepository.findStoreByStoreName(storeName);
+        if (store == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        return store;
+    }
+
+    @Override
+    public List<StoreDto> getAllStores() {
         return storeRepository.findAll().stream().map(this::mapTodo).toList();
     }
 

@@ -37,7 +37,7 @@ public class AuthTokenServiceImpl implements AuthTokenService {
                 throw new AppException(ErrorCode.INVALID_TOKEN);
             }
 
-            UserDto userDto = userService.findUserById(userId);
+            UserDto userDto = userService.getUserById(userId);
 
             // Tạo access token mới
             return jwt.generateAccessTokenInfor(userDto);

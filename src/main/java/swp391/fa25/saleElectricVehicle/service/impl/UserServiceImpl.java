@@ -11,6 +11,7 @@ import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.jwt.Jwt;
+import swp391.fa25.saleElectricVehicle.payload.dto.RoleDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
@@ -23,6 +24,8 @@ import swp391.fa25.saleElectricVehicle.payload.response.user.UpdateUserProfileRe
 import swp391.fa25.saleElectricVehicle.repository.RoleRepository;
 import swp391.fa25.saleElectricVehicle.repository.StoreRepository;
 import swp391.fa25.saleElectricVehicle.repository.UserRepository;
+import swp391.fa25.saleElectricVehicle.service.RoleService;
+import swp391.fa25.saleElectricVehicle.service.StoreService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.text.ParseException;
@@ -36,10 +39,10 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Autowired
-    StoreRepository storeRepository;
+    StoreService storeService;
 
     @Autowired
-    RoleRepository roleRepository;
+    RoleService roleService;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -59,16 +62,16 @@ public class UserServiceImpl implements UserService {
         }
 
         // cannot create ADMIN role
-        if (!userRequest.getRoleName().equals("ADMIN")) {
+        if (userRequest.getRoleName().equalsIgnoreCase("Admin")) {
             throw new AppException(ErrorCode.UNAUTHORIZED_CREATE_ADMIN);
         }
-        Role role = roleRepository.findByRoleName(userRequest.getRoleName());
+        Role role = roleService.getRoleEntityByName(userRequest.getRoleName());
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
 
-        Store store = storeRepository.findStoreByStoreName(userRequest.getStoreName());
-        if (store != null && role.getRoleName().equals("EVM Staff")) {
+        Store store = storeService.getStoreEntityByName(userRequest.getStoreName());
+        if (store != null && role.getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
             throw new AppException(ErrorCode.INVALID_CREATE_STORE_MANUFACTURER);
         }
         if (store == null) {
@@ -100,7 +103,7 @@ public class UserServiceImpl implements UserService {
 
     //use at AuthTokenService
     @Override
-    public UserDto findUserById(int userId) {
+    public UserDto getUserById(int userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
@@ -114,7 +117,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<GetUserResponse> findUserByName(String name) {
+    public List<GetUserResponse> getUserByName(String name) {
         List<User> user = userRepository.findUsersByFullNameContaining(name);
 
         if (user.isEmpty()) {
@@ -133,7 +136,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<GetUserResponse> findAllUsers() {
+    public List<GetUserResponse> getAllUsers() {
         return userRepository.findAll().stream().map(u -> GetUserResponse.builder()
                 .userId(u.getUserId())
                 .fullName(u.getFullName())
@@ -191,21 +194,23 @@ public class UserServiceImpl implements UserService {
         }
 
         // không được phép update thành Admin
-        if (updateUserProfileRequest.getRoleName().equals("Admin")) {
+        if (updateUserProfileRequest.getRoleName().equalsIgnoreCase("Admin")) {
             throw new AppException(ErrorCode.UNAUTHORIZED_UPDATE_ADMIN);
         }
-        Role role = roleRepository.findByRoleName(updateUserProfileRequest.getRoleName());
+        Role role = roleService.getRoleEntityByName(updateUserProfileRequest.getRoleName());
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
+        user.setRole(role);
 
-        Store store = storeRepository.findStoreByStoreName(updateUserProfileRequest.getStoreName());
-        if (store != null && role.getRoleName().equals("EVM Staff")) {
+        Store store = storeService.getStoreEntityByName(updateUserProfileRequest.getStoreName());
+        if (store != null && role.getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
             throw new AppException(ErrorCode.INVALID_CREATE_STORE_MANUFACTURER);
         }
         if (store == null) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
+        user.setStore(store);
 
         if (updateUserProfileRequest.getFullName() != null && !updateUserProfileRequest.getFullName().trim().isEmpty()) {
             user.setFullName(updateUserProfileRequest.getFullName());

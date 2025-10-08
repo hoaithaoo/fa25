@@ -28,20 +28,20 @@ public class RoleController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{roleId}")
-    public ResponseEntity<ApiResponse<RoleDto>> getRoleByName(@PathVariable int roleId) {
-        RoleDto role = roleService.findRoleByName(String.valueOf(roleId));
+    @GetMapping("/{roleName}")
+    public ResponseEntity<ApiResponse<RoleDto>> getRoleByName(@PathVariable String roleName) {
+        RoleDto role = roleService.getRoleByName(roleName);
         ApiResponse<RoleDto> response = ApiResponse.<RoleDto>builder()
                 .code(HttpStatus.OK.value())
                 .message("Role fetched successfully")
                 .data(role)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<RoleDto>>> getAllRoles() {
-        List<RoleDto> roles = roleService.findAllRoles();
+        List<RoleDto> roles = roleService.getAllRoles();
         ApiResponse<List<RoleDto>> response = ApiResponse.<List<RoleDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Roles fetched successfully")

@@ -41,31 +41,42 @@ public class ColorServiceImpl implements ColorService {
             throw new AppException(ErrorCode.COLOR_NOT_EXIST);
         }
 
-        return ColorDto.builder()
-                .colorId(color.getColorId())
-                .colorName(color.getColorName())
-                .build();
+        return mapToDto(color);
     }
 
     @Override
-    public List<ColorDto> getColorByName(String colorName) {
-        List<Color> colors = colorRepository.findColorsByColorName(colorName);
+    public List<ColorDto> getColorByNameContaining(String colorName) {
+        List<Color> colors = colorRepository.findColorsByColorNameContaining(colorName);
         if (colors.isEmpty()) {
             throw new AppException(ErrorCode.COLOR_NOT_EXIST);
         }
-        return colors.stream().map(color -> ColorDto.builder()
-                .colorId(color.getColorId())
-                .colorName(color.getColorName())
-                .build()).toList();
+        return colors.stream().map(this::mapToDto).toList();
+    }
+
+    // truy vấn color theo name
+    @Override
+    public ColorDto getColorByName(String colorName) {
+        Color color = colorRepository.findColorByColorName(colorName);
+        if (color == null) {
+            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
+        }
+        return mapToDto(color);
+    }
+
+    // add color vào store stock
+    @Override
+    public Color getColorEntityByName(String colorName) {
+        Color color = colorRepository.findColorByColorName(colorName);
+        if (color == null) {
+            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
+        }
+        return color;
     }
 
     @Override
     public List<ColorDto> getAllColors() {
         List<Color> colors = colorRepository.findAll();
-        return colors.stream().map(color -> ColorDto.builder()
-                .colorId(color.getColorId())
-                .colorName(color.getColorName())
-                .build()).toList();
+        return colors.stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -81,19 +92,16 @@ public class ColorServiceImpl implements ColorService {
 //        }
 //        colorRepository.save(color);
 //        return colorDto;
-        if (!color.getColorName().equals(colorDto.getColorName()) &&
-                colorRepository.existsColorByColorName(colorDto.getColorName())) {
+        if (color.getColorName() != null && !color.getColorName().trim().isEmpty()
+                && colorRepository.existsColorByColorName(colorDto.getColorName())) {
             throw new AppException(ErrorCode.COLOR_EXISTED);
         }
 
         color.setColorName(colorDto.getColorName());
-        Color savedColor = colorRepository.save(color);
 
-        // Trả về data đã update
-        return ColorDto.builder()
-                .colorId(savedColor.getColorId())
-                .colorName(savedColor.getColorName())
-                .build();
+        colorRepository.save(color);
+
+        return mapToDto(color);
     }
 
     @Override
@@ -103,5 +111,12 @@ public class ColorServiceImpl implements ColorService {
             throw new AppException(ErrorCode.COLOR_NOT_EXIST);
         }
         colorRepository.delete(color);
+    }
+
+    private ColorDto mapToDto(Color color) {
+        return ColorDto.builder()
+                .colorId(color.getColorId())
+                .colorName(color.getColorName())
+                .build();
     }
 }

@@ -21,8 +21,8 @@ public class ModelColorServiceImpl implements ModelColorService {
 
 
     @Override
-    public ModelColorDto getModelColorById(int id) {
-        ModelColor modelColor = modelColorRepository.findById(id).orElse(null);
+    public ModelColorDto getModelColor(int modelId, int colorId) {
+        ModelColor modelColor = modelColorRepository.findByModel_ModelIdAndColor_ColorId(modelId, colorId);
         if (modelColor == null) {
             throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
         }
@@ -30,6 +30,7 @@ public class ModelColorServiceImpl implements ModelColorService {
                 .modelId(modelColor.getModel().getModelId())
                 .colorId(modelColor.getColor().getColorId())
                 .build();
+
     }
 
     @Override

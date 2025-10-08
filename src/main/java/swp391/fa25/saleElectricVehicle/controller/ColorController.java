@@ -42,7 +42,7 @@ public class ColorController {
 
     @GetMapping("/name/{name}")
     public ResponseEntity<ApiResponse<List<ColorDto>>> getColorByName(@PathVariable String name) {
-        List<ColorDto> colorDto = colorService.getColorByName(name);
+        List<ColorDto> colorDto = colorService.getColorByNameContaining(name);
         ApiResponse<List<ColorDto>> response = ApiResponse.<List<ColorDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Color retrieved successfully")

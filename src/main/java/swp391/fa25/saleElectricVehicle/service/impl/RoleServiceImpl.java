@@ -26,34 +26,33 @@ public class RoleServiceImpl implements RoleService {
                 .roleName(roleDto.getRoleName())
                 .build();
         Role savedRole = roleRepository.save(newRole);
-//        return roleDto;
-        return RoleDto.builder()
-                .roleId(savedRole.getRoleId()) // ← Có roleId từ DB
-                .roleName(savedRole.getRoleName())
-                .build();
+        return mapToDto(savedRole);
     }
 
+    // dùng để tìm kiếm role (?)
     @Override
-    public RoleDto findRoleByName(String roleName) {
+    public RoleDto getRoleByName(String roleName) {
         Role role = roleRepository.findByRoleName(roleName);
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
-        return RoleDto.builder()
-                .roleId(role.getRoleId())
-                .roleName(role.getRoleName())
-                .build();
+        return mapToDto(role);
+    }
+
+    // dùng để gán role cho user
+    @Override
+    public Role getRoleEntityByName(String roleName) {
+        Role role = roleRepository.findByRoleName(roleName);
+        if (role == null) {
+            throw new AppException(ErrorCode.ROLE_NOT_EXIST);
+        }
+        return role;
     }
 
     @Override
-    public List<RoleDto> findAllRoles() {
-        return roleRepository.findAll().stream().map(role -> {
-            RoleDto roleDto = RoleDto.builder()
-                    .roleId(role.getRoleId())
-                    .roleName(role.getRoleName())
-                    .build();
-            return roleDto;
-        }).toList();
+    public List<RoleDto> getAllRoles() {
+        List<Role> roles = roleRepository.findAll();
+        return roles.stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -71,10 +70,7 @@ public class RoleServiceImpl implements RoleService {
         }
 
         roleRepository.save(role);
-        return RoleDto.builder()
-                .roleId(role.getRoleId())
-                .roleName(role.getRoleName())
-                .build();
+        return mapToDto(role);
     }
 
     @Override
@@ -84,5 +80,12 @@ public class RoleServiceImpl implements RoleService {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
         roleRepository.delete(role);
+    }
+
+    private RoleDto mapToDto(Role role) {
+        return RoleDto.builder()
+                .roleId(role.getRoleId())
+                .roleName(role.getRoleName())
+                .build();
     }
 }
