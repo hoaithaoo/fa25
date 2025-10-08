@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import swp391.fa25.saleElectricVehicle.payload.dto.ColorDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
 import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.service.ModelColorService;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
 
 import java.util.List;
@@ -17,6 +19,9 @@ public class ModelController {
 
     @Autowired
     private ModelService modelService;
+
+    @Autowired
+    private ModelColorService modelColorService;
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<ModelDto>> createModel(@RequestBody CreateModelRequest modelDto) {
@@ -32,7 +37,7 @@ public class ModelController {
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<ApiResponse<ModelDto>> getModelById(@PathVariable String name) {
+    public ResponseEntity<ApiResponse<ModelDto>> getModelByName(@PathVariable String name) {
         ModelDto modelDto = modelService.getModelByName(name);
         ApiResponse<ModelDto> response = ApiResponse.<ModelDto>builder()
                 .code(HttpStatus.OK.value())
@@ -41,6 +46,31 @@ public class ModelController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    // lay model theo colorId
+    @GetMapping("/{colorId}/models")
+    public ResponseEntity<ApiResponse<List<ModelDto>>> getModelsByColor(@PathVariable int colorId) {
+        List<ModelDto> models = modelColorService.getModelsByColorId(colorId);
+        ApiResponse<List<ModelDto>> response = ApiResponse.<List<ModelDto>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Models fetched successfully")
+                .data(models)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    // lay color theo modelId
+    @GetMapping("/{modelId}/colors")
+    public ResponseEntity<ApiResponse<List<ColorDto>>> getColorsByModel(@PathVariable int modelId) {
+        List<ColorDto> colors = modelColorService.getColorsByModelId(modelId);
+        ApiResponse<List<ColorDto>> response = ApiResponse.<List<ColorDto>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Colors fetched successfully")
+                .data(colors)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<ModelDto>>> getAllModels() {
