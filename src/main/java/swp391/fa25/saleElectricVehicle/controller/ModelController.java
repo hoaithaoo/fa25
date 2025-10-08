@@ -53,8 +53,6 @@ public class ModelController {
         return ResponseEntity.ok(response);
     }
 
-    //PUT model here
-
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteModel(@PathVariable int id) {
         modelService.deleteModelById(id);

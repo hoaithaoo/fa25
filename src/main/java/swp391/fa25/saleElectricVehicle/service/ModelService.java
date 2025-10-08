@@ -10,5 +10,5 @@ public interface ModelService {
     ModelDto getModelByName(String name);
     List<ModelDto> getAllModels();
     void deleteModelById(int id);
-//    ModelDto updateModel(int id, ModelDto modelDto);
+    ModelDto updateModel(int id, ModelDto modelDto);
 }

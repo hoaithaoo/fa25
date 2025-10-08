@@ -10,6 +10,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelRequest;
 import swp391.fa25.saleElectricVehicle.repository.ModelRepository;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -68,13 +69,75 @@ public class ModelServiceImpl implements ModelService {
         modelRepository.delete(model);
     }
 
-//    @Override
-//    public ModelDto updateModel(int id, ModelDto modelDto) {
-//        return null;
-//    }
+    @Override
+    public ModelDto updateModel(int id, ModelDto modelDto) {
+        Model existingModel = modelRepository.findById(id).orElse(null);
+        if (existingModel == null) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
+        if (modelDto.getModelName() != null
+                && modelDto.getModelName().trim().isEmpty()
+                && modelRepository.existsModelByModelName(modelDto.getModelName())) {
+            throw new AppException(ErrorCode.MODEL_EXISTED);
+        }
+        existingModel.setModelName(modelDto.getModelName());
+
+        if (modelDto.getModelYear() <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        existingModel.setModelYear(modelDto.getModelYear());
+
+        if (modelDto.getBatteryCapacity().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        existingModel.setBatteryCapacity(modelDto.getBatteryCapacity());
+
+        if (modelDto.getRange().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        existingModel.setRange(modelDto.getRange());
+
+        if (modelDto.getPowerHp().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        existingModel.setPowerHp(modelDto.getPowerHp());
+
+        if (modelDto.getTorqueNm().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        existingModel.setTorqueNm(modelDto.getTorqueNm());
+
+        if (modelDto.getAcceleration().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        existingModel.setAcceleration(modelDto.getAcceleration());
+
+        if (modelDto.getSeatingCapacity() <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        existingModel.setSeatingCapacity(modelDto.getSeatingCapacity());
+
+        if (modelDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        existingModel.setPrice(modelDto.getPrice());
+
+        // body type phải được dropdown
+        if (modelDto.getBodyType() != null && modelDto.getBodyType().trim().isEmpty()) {
+            existingModel.setBodyType(modelDto.getBodyType());
+        }
+
+        if (modelDto.getDescription() != null && modelDto.getDescription().trim().isEmpty()) {
+            existingModel.setDescription(modelDto.getDescription());
+        }
+
+        modelRepository.save(existingModel);
+        return mapToDto(existingModel);
+    }
 
     private ModelDto mapToDto(Model model) {
         return ModelDto.builder()
+                .modelId(model.getModelId())
                 .modelName(model.getModelName())
                 .modelYear(model.getModelYear())
                 .batteryCapacity(model.getBatteryCapacity())

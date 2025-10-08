@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/colors")
-@CrossOrigin(origins = "*")
 public class ColorController {
 
     @Autowired
@@ -41,7 +40,7 @@ public class ColorController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/name/{name}}")
+    @GetMapping("/name/{name}")
     public ResponseEntity<ApiResponse<List<ColorDto>>> getColorByName(@PathVariable String name) {
         List<ColorDto> colorDto = colorService.getColorByName(name);
         ApiResponse<List<ColorDto>> response = ApiResponse.<List<ColorDto>>builder()

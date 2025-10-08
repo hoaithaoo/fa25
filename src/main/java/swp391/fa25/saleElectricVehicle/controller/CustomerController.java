@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = "*") // Cho phép tất cả các nguồn truy cập (có thể điều chỉnh theo nhu cầu)
 public class CustomerController {
 
     @Autowired
@@ -32,16 +31,16 @@ public class CustomerController {
 
     // Thêm method này vào CustomerController:
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CustomerDto>> getCustomerById(@PathVariable int id) {
-        CustomerDto customerDto = customerService.getCustomerById(id);
-        ApiResponse<CustomerDto> response = ApiResponse.<CustomerDto>builder()
-                .code(HttpStatus.OK.value())
-                .message("Customer retrieved successfully")
-                .data(customerDto)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ApiResponse<CustomerDto>> getCustomerById(@PathVariable int id) {
+//        CustomerDto customerDto = customerService.getCustomerById(id);
+//        ApiResponse<CustomerDto> response = ApiResponse.<CustomerDto>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Customer retrieved successfully")
+//                .data(customerDto)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 
     @GetMapping("/{phone}")
     public ResponseEntity<ApiResponse<CustomerDto>> getCustomerByPhone(@PathVariable String phone) {
@@ -50,6 +49,17 @@ public class CustomerController {
                 .code(HttpStatus.OK.value())
                 .message("Customer retrieved successfully")
                 .data(customerDto)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/staff/{staffId}")
+    public ResponseEntity<ApiResponse<List<CustomerDto>>> getAllCustomersByStaffId(@PathVariable int staffId) {
+        List<CustomerDto> customers = customerService.getAllCustomersByStaffId(staffId);
+        ApiResponse<List<CustomerDto>> response = ApiResponse.<List<CustomerDto>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Customers retrieved successfully")
+                .data(customers)
                 .build();
         return ResponseEntity.ok(response);
     }

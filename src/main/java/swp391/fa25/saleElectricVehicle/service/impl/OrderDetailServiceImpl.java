@@ -34,7 +34,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public OrderDetailDto createOrderDetail(OrderDetailDto orderDetailDto) {
         // Validate dependencies
         Order order = orderRepository.findById(orderDetailDto.getOrderId())
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_EXISTED));
 
         StoreStock storeStock = storeStockRepository.findById(orderDetailDto.getStoreStockId())
                 .orElseThrow(() -> new AppException(ErrorCode.STORE_STOCK_NOT_FOUND));
