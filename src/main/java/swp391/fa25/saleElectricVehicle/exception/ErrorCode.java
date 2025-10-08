@@ -31,11 +31,13 @@ public enum ErrorCode {
     MODEL_COLOR_NOT_EXIST(1021, "Model màu không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_EXISTED(1021, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
     ORDER_NOT_EXIST(1022, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    ORDER_NOT_FOUND(1017, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    ORDER_EXISTED(1018, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
-    ORDER_DETAIL_NOT_FOUND(1019, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    STORE_STOCK_NOT_FOUND(1020, "Kho hàng không tồn tại", HttpStatus.NOT_FOUND),
-    INSUFFICIENT_STOCK(1021, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
+    ORDER_DETAIL_NOT_FOUND(1023, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
+    STORE_STOCK_NOT_FOUND(1024, "Kho hàng không tồn tại", HttpStatus.NOT_FOUND),
+    INSUFFICIENT_STOCK(1025, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_CREATE_ADMIN(1026, "Cannot create Admin role", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED_UPDATE_ADMIN(1027, "Cannot update Admin role", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED_DELETE_ADMIN(1028, "Cannot delete Admin role", HttpStatus.FORBIDDEN),
+    INVALID_CREATE_STORE_MANUFACTURER(1029, "EVM Staff does not have store", HttpStatus.FORBIDDEN),
     ;
 
     private final int code;

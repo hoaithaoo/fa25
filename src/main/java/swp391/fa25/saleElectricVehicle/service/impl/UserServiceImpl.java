@@ -47,6 +47,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     Jwt jwt;
 
+    // note: nhớ check authorization
     @Override
     public CreateUserResponse createUser(CreateUserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
@@ -57,13 +58,20 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
 
-        Role role = roleRepository.findById(userRequest.getRoleId()).orElse(null);
+        // cannot create ADMIN role
+        if (!userRequest.getRoleName().equals("ADMIN")) {
+            throw new AppException(ErrorCode.UNAUTHORIZED_CREATE_ADMIN);
+        }
+        Role role = roleRepository.findByRoleName(userRequest.getRoleName());
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
 
-        Store store = storeRepository.findById(userRequest.getStoreId()).orElse(null);
-        if (store == null && (userRequest.getRoleId() != 1 || userRequest.getRoleId() != 2)) {
+        Store store = storeRepository.findStoreByStoreName(userRequest.getStoreName());
+        if (store != null && role.getRoleName().equals("EVM Staff")) {
+            throw new AppException(ErrorCode.INVALID_CREATE_STORE_MANUFACTURER);
+        }
+        if (store == null) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
@@ -85,8 +93,8 @@ public class UserServiceImpl implements UserService {
                 .email(newUser.getEmail())
                 .phone(newUser.getPhone())
                 .status(newUser.getStatus())
-                .storeId(newUser.getStore().getStoreId())
-                .roleId(newUser.getRole().getRoleId())
+                .storeName(newUser.getStore().getStoreName())
+                .roleName(newUser.getRole().getRoleName())
                 .build();
     }
 
@@ -101,7 +109,7 @@ public class UserServiceImpl implements UserService {
         return UserDto.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
-                .roleId(user.getRole().getRoleId())
+                .roleName(user.getRole().getRoleName())
                 .build();
     }
 
@@ -119,8 +127,8 @@ public class UserServiceImpl implements UserService {
                 .email(u.getEmail())
                 .phone(u.getPhone())
                 .status(u.getStatus())
-                .storeId(u.getStore().getStoreId())
-                .roleId(u.getRole().getRoleId())
+                .storeName(u.getStore().getStoreName())
+                .roleName(u.getRole().getRoleName())
                 .build()).toList();
     }
 
@@ -132,8 +140,8 @@ public class UserServiceImpl implements UserService {
                 .email(u.getEmail())
                 .phone(u.getPhone())
                 .status(u.getStatus())
-                .storeId(u.getStore().getStoreId())
-                .roleId(u.getRole().getRoleId())
+                .storeName(u.getStore().getStoreName())
+                .roleName(u.getRole().getRoleName())
                 .build()).toList();
     }
 
@@ -160,6 +168,7 @@ public class UserServiceImpl implements UserService {
 //    }
 
     //update profile of any user by admin
+    // note: nhớ check authorization
     @Override
     public UpdateUserProfileResponse updateUserProfile(int userId, UpdateUserProfileRequest updateUserProfileRequest) {
         User user = userRepository.findById(userId).orElse(null);
@@ -181,18 +190,21 @@ public class UserServiceImpl implements UserService {
             user.setPhone(updateUserProfileRequest.getPhone());
         }
 
-        if (updateUserProfileRequest.getRoleId() != 0) {
-            Role role = roleRepository.findById(updateUserProfileRequest.getRoleId()).orElse(null);
-            if (role == null) {
-                throw new AppException(ErrorCode.ROLE_NOT_EXIST);
-            }
+        // không được phép update thành Admin
+        if (updateUserProfileRequest.getRoleName().equals("Admin")) {
+            throw new AppException(ErrorCode.UNAUTHORIZED_UPDATE_ADMIN);
+        }
+        Role role = roleRepository.findByRoleName(updateUserProfileRequest.getRoleName());
+        if (role == null) {
+            throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
 
-        if (updateUserProfileRequest.getStoreId() != 0) {
-            Store store = storeRepository.findById(updateUserProfileRequest.getStoreId()).orElse(null);
-            if (store == null && (updateUserProfileRequest.getRoleId() != 1 && updateUserProfileRequest.getRoleId() != 2)) {
-                throw new AppException(ErrorCode.STORE_NOT_EXIST);
-            }
+        Store store = storeRepository.findStoreByStoreName(updateUserProfileRequest.getStoreName());
+        if (store != null && role.getRoleName().equals("EVM Staff")) {
+            throw new AppException(ErrorCode.INVALID_CREATE_STORE_MANUFACTURER);
+        }
+        if (store == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
         if (updateUserProfileRequest.getFullName() != null && !updateUserProfileRequest.getFullName().trim().isEmpty()) {
@@ -212,8 +224,8 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .status(user.getStatus())
-                .storeId(user.getStore().getStoreId())
-                .roleId(user.getRole().getRoleId())
+                .storeName(user.getStore().getStoreName())
+                .roleName(user.getRole().getRoleName())
                 .build();
     }
 
@@ -222,6 +234,11 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+        // note: nhớ check authorization
+        // không được phép delete Admin
+        if (user.getRole().getRoleName().equals("Admin")) {
+            throw new AppException(ErrorCode.UNAUTHORIZED_DELETE_ADMIN);
         }
         userRepository.delete(user);
     }
@@ -241,7 +258,7 @@ public class UserServiceImpl implements UserService {
         UserDto userDto = UserDto.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
-                .roleId(user.getRole().getRoleId())
+                .roleName(user.getRole().getRoleName())
                 .build();
 
         Jwt.TokenPair tokenPair = jwt.generateTokenPair(userDto);

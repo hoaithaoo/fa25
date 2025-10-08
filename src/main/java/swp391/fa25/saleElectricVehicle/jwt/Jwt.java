@@ -61,7 +61,7 @@ public class Jwt {
 
             if (tokenType.equals("accessToken")) {
                 claimsSet.subject(userDto.getEmail())
-                        .claim("roleName", userDto.getRoleId());
+                        .claim("roleName", userDto.getRoleName());
             } else {
                 claimsSet.claim("userId", userDto.getUserId());
             }
