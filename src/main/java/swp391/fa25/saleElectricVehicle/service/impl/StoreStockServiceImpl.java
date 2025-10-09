@@ -48,30 +48,10 @@ public class StoreStockServiceImpl implements StoreStockService {
         }
 
         // model và color không tồn tại
-        if (modelColorService.getModelColor(model.getModelId(), color.getColorId()) == null) {
+        ModelColor modelColor = modelColorService.getModelColor(model.getModelId(), color.getColorId());
+        if (modelColor == null) {
             throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
         }
-        ModelColor modelColor = ModelColor.builder()
-                .modelColorId(model.getModelId())
-                .model(Model.builder()
-                        .modelId(model.getModelId())
-                        .modelName(model.getModelName())
-                        .modelYear(model.getModelYear())
-                        .batteryCapacity(model.getBatteryCapacity())
-                        .range(model.getRange())
-                        .powerHp(model.getPowerHp())
-                        .torqueNm(model.getTorqueNm())
-                        .acceleration(model.getAcceleration())
-                        .seatingCapacity(model.getSeatingCapacity())
-                        .price(model.getPrice())
-                        .bodyType(model.getBodyType())
-                        .description(model.getDescription())
-                        .build())
-                .color(Color.builder()
-                        .colorId(color.getColorId())
-                        .colorName(color.getColorName())
-                        .build())
-                .build();
 
         StoreStock storeStock = StoreStock.builder()
                         .store(store)

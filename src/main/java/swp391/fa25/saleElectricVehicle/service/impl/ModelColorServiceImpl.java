@@ -52,19 +52,29 @@ public class ModelColorServiceImpl implements ModelColorService {
                 .build();
     }
 
-    // dùng để kiểm tra sự tồn tại của model và color ở store stock
     @Override
-    public ModelColorDto getModelColor(int modelId, int colorId) {
+    public ModelColor getModelColor(int modelId, int colorId) {
         ModelColor modelColor = modelColorRepository.findByModel_ModelIdAndColor_ColorId(modelId, colorId);
         if (modelColor == null) {
             throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
         }
-        return ModelColorDto.builder()
-                .modelName(modelColor.getModel().getModelName())
-                .colorName(modelColor.getColor().getColorName())
-                .build();
-
+        return modelColor;
     }
+
+    // dùng để kiểm tra sự tồn tại của model và color ở store stock
+
+//    @Override
+//    public ModelColorDto getModelColor(int modelId, int colorId) {
+//        ModelColor modelColor = modelColorRepository.findByModel_ModelIdAndColor_ColorId(modelId, colorId);
+//        if (modelColor == null) {
+//            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
+//        }
+//        return ModelColorDto.builder()
+//                .modelName(modelColor.getModel().getModelName())
+//                .colorName(modelColor.getColor().getColorName())
+//                .build();
+//
+//    }
 
     @Override
     public List<ModelDto> getModelsByColorName(String colorName) {
