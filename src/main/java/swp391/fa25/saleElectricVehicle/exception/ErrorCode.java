@@ -28,7 +28,6 @@ public enum ErrorCode {
     ROLE_EXISTED(1018, "Role đã tồn tại", HttpStatus.BAD_REQUEST),
     STORE_EXISTED(1019, "Store đã tồn tại", HttpStatus.BAD_REQUEST),
     INVALID_END_DATE_TIME(1020, "Ngày kết thúc không được trước ngày hiện tại", HttpStatus.BAD_REQUEST),
-    MODEL_COLOR_NOT_EXIST(1021, "Model màu không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_EXISTED(1021, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
     ORDER_NOT_EXIST(1022, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_DETAIL_NOT_FOUND(1023, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
@@ -40,6 +39,8 @@ public enum ErrorCode {
     INVALID_CREATE_STORE_MANUFACTURER(1029, "EVM Staff does not have store", HttpStatus.FORBIDDEN),
     UNAUTHORIZED_UPDATE_STORE_MANUFACTURER(1030, "Cannot update store of EVM Staff", HttpStatus.FORBIDDEN),
     INVALID_NUMBER(1031, "The value of this field must be greater than 0", HttpStatus.BAD_REQUEST),
+    MODEL_COLOR_NOT_EXIST(1032, "Model màu không tồn tại", HttpStatus.NOT_FOUND),
+    MODEL_COLOR_EXISTED(1033, "Model màu đã tồn tại", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

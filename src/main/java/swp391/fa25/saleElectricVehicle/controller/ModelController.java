@@ -46,10 +46,10 @@ public class ModelController {
         return ResponseEntity.ok(response);
     }
 
-    // lay model theo colorId
-    @GetMapping("/{colorId}/models")
-    public ResponseEntity<ApiResponse<List<ModelDto>>> getModelsByColor(@PathVariable int colorId) {
-        List<ModelDto> models = modelColorService.getModelsByColorId(colorId);
+    // lay model theo color name
+    @GetMapping("/{colorName}/models")
+    public ResponseEntity<ApiResponse<List<ModelDto>>> getModelsByColor(@PathVariable String colorName) {
+        List<ModelDto> models = modelColorService.getModelsByColorName(colorName);
         ApiResponse<List<ModelDto>> response = ApiResponse.<List<ModelDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Models fetched successfully")
@@ -58,10 +58,10 @@ public class ModelController {
         return ResponseEntity.ok(response);
     }
 
-    // lay color theo modelId
-    @GetMapping("/{modelId}/colors")
-    public ResponseEntity<ApiResponse<List<ColorDto>>> getColorsByModel(@PathVariable int modelId) {
-        List<ColorDto> colors = modelColorService.getColorsByModelId(modelId);
+    // lay color theo model name
+    @GetMapping("/{modelName}/colors")
+    public ResponseEntity<ApiResponse<List<ColorDto>>> getColorsByModel(@PathVariable String modelName) {
+        List<ColorDto> colors = modelColorService.getColorsByModelName(modelName);
         ApiResponse<List<ColorDto>> response = ApiResponse.<List<ColorDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Colors fetched successfully")

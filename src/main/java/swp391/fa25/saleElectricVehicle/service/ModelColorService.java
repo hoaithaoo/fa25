@@ -7,7 +7,8 @@ import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
 import java.util.List;
 
 public interface ModelColorService {
+    ModelColorDto createModelColor(String modelName, String colorName);
     ModelColorDto getModelColor(int modelId, int colorId);
-    List<ModelDto> getModelsByColorId(int colorId);
-    List<ColorDto> getColorsByModelId(int modelId);
+    List<ModelDto> getModelsByColorName(String colorName);
+    List<ColorDto> getColorsByModelName(String modelName);
 }
