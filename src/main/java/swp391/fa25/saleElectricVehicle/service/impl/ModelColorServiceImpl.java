@@ -91,18 +91,18 @@ public class ModelColorServiceImpl implements ModelColorService {
             throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
         }
 
-        // Check model mới
-        if (modelColorDto.getModelId() != 0) {
-            Model model = modelRepository.findById(modelColorDto.getModelId()).orElse(null);
+        // Check model mới bằng TÊN
+        if (modelColorDto.getModelName() != null && !modelColorDto.getModelName().trim().isEmpty()) {
+            Model model = modelRepository.findByModelName(modelColorDto.getModelName()); // ← Cần check ModelRepository có method này không
             if (model == null) {
                 throw new AppException(ErrorCode.MODEL_NOT_FOUND);
             }
             existingModelColor.setModel(model);
         }
 
-        // Check color mới
-        if (modelColorDto.getColorId() != 0) {
-            Color color = colorRepository.findById(modelColorDto.getColorId()).orElse(null);
+        // Check color mới bằng TÊN - SỬA ĐÂY
+        if (modelColorDto.getColorName() != null && !modelColorDto.getColorName().trim().isEmpty()) {
+            Color color = colorRepository.findColorByColorName(modelColorDto.getColorName()); // ← SỬA thêm chữ "Color"
             if (color == null) {
                 throw new AppException(ErrorCode.COLOR_NOT_EXIST);
             }
@@ -125,8 +125,8 @@ public class ModelColorServiceImpl implements ModelColorService {
     private ModelColorDto mapToDto(ModelColor modelColor) {
         return ModelColorDto.builder()
                 .modelColorId(modelColor.getModelColorId())
-                .modelId(modelColor.getModel().getModelId())
-                .colorId(modelColor.getColor().getColorId())
+                .modelName(modelColor.getModel().getModelName())    // ← Lấy tên model
+                .colorName(modelColor.getColor().getColorName())    // ← Lấy tên color
                 .build();
     }
 }
