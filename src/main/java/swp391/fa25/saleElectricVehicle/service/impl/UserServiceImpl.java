@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
         }
 
         Store store = storeRepository.findById(userRequest.getStoreId()).orElse(null);
-        if (store == null && (userRequest.getRoleId() != 1 || userRequest.getRoleId() != 2)) {
+        if (store == null && (userRequest.getRoleId() != 1 && userRequest.getRoleId() != 2)) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
@@ -85,7 +85,8 @@ public class UserServiceImpl implements UserService {
                 .email(newUser.getEmail())
                 .phone(newUser.getPhone())
                 .status(newUser.getStatus())
-                .storeId(newUser.getStore().getStoreId())
+//                .storeId(newUser.getStore().getStoreId()) Có thể bị null nếu user không có store
+                .storeId(newUser.getStore() != null ? newUser.getStore().getStoreId() : 0)
                 .roleId(newUser.getRole().getRoleId())
                 .build();
     }

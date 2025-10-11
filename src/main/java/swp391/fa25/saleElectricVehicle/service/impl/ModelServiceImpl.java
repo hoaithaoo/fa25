@@ -45,6 +45,40 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
+    public ModelDto updateModel(int id, ModelDto modelDto) {
+        Model existingModel = modelRepository.findById(id).orElse(null);
+        if (existingModel == null) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
+
+        // Update fields
+        existingModel.setModelName(modelDto.getModelName());
+        existingModel.setModelYear(modelDto.getModelYear());
+        existingModel.setBatteryCapacity(modelDto.getBatteryCapacity());
+        existingModel.setRange(modelDto.getRange());
+        existingModel.setPowerHp(modelDto.getPowerHp());
+        existingModel.setTorqueNm(modelDto.getTorqueNm());
+        existingModel.setAcceleration(modelDto.getAcceleration());
+        existingModel.setSeatingCapacity(modelDto.getSeatingCapacity());
+        existingModel.setPrice(modelDto.getPrice());
+        existingModel.setBodyType(modelDto.getBodyType());
+        existingModel.setDescription(modelDto.getDescription());
+        existingModel.setUpdatedAt(LocalDateTime.now());
+
+        Model updatedModel = modelRepository.save(existingModel);
+        return mapToDto(updatedModel);
+    }
+
+    @Override
+    public ModelDto getModelById(int id) {
+        Model model = modelRepository.findById(id).orElse(null);
+        if (model == null) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
+        return mapToDto(model);
+    }
+
+    @Override
     public ModelDto getModelByName(String name) {
         Model model = modelRepository.findByModelName(name);
         if (model == null) {
@@ -75,6 +109,7 @@ public class ModelServiceImpl implements ModelService {
 
     private ModelDto mapToDto(Model model) {
         return ModelDto.builder()
+                .modelId(model.getModelId()) //Thêm dòng này
                 .modelName(model.getModelName())
                 .modelYear(model.getModelYear())
                 .batteryCapacity(model.getBatteryCapacity())

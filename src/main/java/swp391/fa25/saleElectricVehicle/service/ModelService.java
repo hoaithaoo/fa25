@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface ModelService {
     ModelDto createModel(CreateModelRequest modelDto);
+    ModelDto updateModel(int id, ModelDto modelDto);
+    ModelDto getModelById(int id);
     ModelDto getModelByName(String name);
     List<ModelDto> getAllModels();
     void deleteModelById(int id);

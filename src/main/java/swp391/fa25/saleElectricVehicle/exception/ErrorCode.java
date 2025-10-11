@@ -31,11 +31,11 @@ public enum ErrorCode {
     MODEL_COLOR_NOT_EXIST(1021, "Model màu không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_EXISTED(1021, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
     ORDER_NOT_EXIST(1022, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    ORDER_NOT_FOUND(1017, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    ORDER_EXISTED(1018, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
-    ORDER_DETAIL_NOT_FOUND(1019, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    STORE_STOCK_NOT_FOUND(1020, "Kho hàng không tồn tại", HttpStatus.NOT_FOUND),
-    INSUFFICIENT_STOCK(1021, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_FOUND(1023, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
+    ORDER_DETAIL_NOT_FOUND(1024, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
+    STORE_STOCK_NOT_FOUND(1025, "Kho hàng không tồn tại", HttpStatus.NOT_FOUND),
+    INSUFFICIENT_STOCK(1026, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
+    MODEL_COLOR_EXISTED(1027, "Màu của model đã tồn tại", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

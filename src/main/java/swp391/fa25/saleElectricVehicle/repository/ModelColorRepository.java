@@ -4,6 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import swp391.fa25.saleElectricVehicle.entity.ModelColor;
 
+import java.util.List;
+
 @Repository
 public interface ModelColorRepository extends JpaRepository<ModelColor, Integer> {
+    boolean existsByModelIdAndColorId(int modelId, int colorId);
+    List<ModelColor> findByModelId(int modelId);
+    List<ModelColor> findByColorId(int colorId);
 }

@@ -42,6 +42,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public CustomerDto getCustomerById(int customerId) {
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+
+        if (customer == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST); // Nên tạo CUSTOMER_NOT_EXIST
+        }
+
+        return mapToDto(customer);
+    }
+
+    @Override
     public CustomerDto getCustomerByPhone(String phone) {
         Customer customer = customerRepository.findCustomerByPhone(phone);
 
@@ -78,7 +89,12 @@ public class CustomerServiceImpl implements CustomerService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        if (customerRepository.existsCustomerByEmail(customerDto.getEmail())) {
+//        if (customerRepository.existsCustomerByEmail(customerDto.getEmail())) {
+//            throw new AppException(ErrorCode.EMAIL_EXISTED);
+//        }
+        // ✅ SỬA LẠI:
+        if (!customer.getEmail().equals(customerDto.getEmail()) &&
+                customerRepository.existsCustomerByEmail(customerDto.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
         if (customerDto.getEmail() != null && !customerDto.getEmail().trim().isEmpty()) {

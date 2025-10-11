@@ -1,7 +1,17 @@
 package swp391.fa25.saleElectricVehicle.service;
 
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelColorDto;
+import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelColorRequest;
+
+import java.util.List;
 
 public interface ModelColorService {
+    ModelColorDto createModelColor(CreateModelColorRequest request);
     ModelColorDto getModelColorById(int id);
+    List<ModelColorDto> getAllModelColors();
+    List<ModelColorDto> getModelColorsByModelId(int modelId);
+    List<ModelColorDto> getModelColorsByColorId(int colorId);
+    ModelColorDto updateModelColor(int id, ModelColorDto modelColorDto);
+    void deleteModelColor(int id);
+
 }

@@ -32,7 +32,7 @@ public class CustomerController {
 
     // Thêm method này vào CustomerController:
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<ApiResponse<CustomerDto>> getCustomerById(@PathVariable int id) {
         CustomerDto customerDto = customerService.getCustomerById(id);
         ApiResponse<CustomerDto> response = ApiResponse.<CustomerDto>builder()
@@ -43,7 +43,7 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{phone}")
+    @GetMapping("/phone/{phone}")
     public ResponseEntity<ApiResponse<CustomerDto>> getCustomerByPhone(@PathVariable String phone) {
         CustomerDto customerDto = customerService.getCustomerByPhone(phone);
         ApiResponse<CustomerDto> response = ApiResponse.<CustomerDto>builder()
