@@ -92,7 +92,7 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
-        if (storeRepository.existsByStoreName(store.getStoreName())) {
+        if (storeRepository.existsByStoreName(storeDto.getStoreName())) {
             throw new AppException(ErrorCode.STORE_EXISTED);
         }
 
