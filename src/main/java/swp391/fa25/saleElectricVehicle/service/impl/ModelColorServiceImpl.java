@@ -7,13 +7,12 @@ import swp391.fa25.saleElectricVehicle.entity.Model;
 import swp391.fa25.saleElectricVehicle.entity.ModelColor;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.payload.dto.ColorDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelColorDto;
-import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
+import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelColorRequest;
+import swp391.fa25.saleElectricVehicle.repository.ColorRepository;
 import swp391.fa25.saleElectricVehicle.repository.ModelColorRepository;
-import swp391.fa25.saleElectricVehicle.service.ColorService;
+import swp391.fa25.saleElectricVehicle.repository.ModelRepository;
 import swp391.fa25.saleElectricVehicle.service.ModelColorService;
-import swp391.fa25.saleElectricVehicle.service.ModelService;
 
 import java.util.List;
 
@@ -24,20 +23,28 @@ public class ModelColorServiceImpl implements ModelColorService {
     ModelColorRepository modelColorRepository;
 
     @Autowired
-    ColorService colorService;
+    ModelRepository modelRepository;
 
     @Autowired
-    ModelService modelService;
+    ColorRepository colorRepository;
 
     @Override
-    public ModelColorDto createModelColor(String modelName, String colorName) {
-        Color color = colorService.getColorEntityByName(colorName);
-        Model model = modelService.getModelEntityByName(modelName);
+    public ModelColorDto createModelColor(CreateModelColorRequest request) {
+        // Check model tồn tại
+        Model model = modelRepository.findById(request.getModelId()).orElse(null);
+        if (model == null) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
 
-        // check sự tồn tại của model và color trong bảng model_color
-        ModelColor existingModelColor = modelColorRepository.findByModel_ModelIdAndColor_ColorId(model.getModelId(), color.getColorId());
-        if (existingModelColor != null) {
-            throw new AppException(ErrorCode.MODEL_COLOR_EXISTED);
+        // Check color tồn tại
+        Color color = colorRepository.findById(request.getColorId()).orElse(null);
+        if (color == null) {
+            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
+        }
+
+        // Check đã tồn tại combination này chưa
+        if (modelColorRepository.existsByModelIdAndColorId(request.getModelId(), request.getColorId())) {
+            throw new AppException(ErrorCode.MODEL_COLOR_EXISTED); // Cần thêm ErrorCode này
         }
 
         ModelColor newModelColor = ModelColor.builder()
@@ -46,75 +53,80 @@ public class ModelColorServiceImpl implements ModelColorService {
                 .build();
 
         modelColorRepository.save(newModelColor);
-        return ModelColorDto.builder()
-                .modelName(model.getModelName())
-                .colorName(color.getColorName())
-                .build();
+
+        return mapToDto(newModelColor);
     }
 
     @Override
-    public ModelColor getModelColor(int modelId, int colorId) {
-        ModelColor modelColor = modelColorRepository.findByModel_ModelIdAndColor_ColorId(modelId, colorId);
+    public ModelColorDto getModelColorById(int id) {
+        ModelColor modelColor = modelColorRepository.findById(id).orElse(null);
         if (modelColor == null) {
             throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
         }
-        return modelColor;
-    }
-
-    // dùng để kiểm tra sự tồn tại của model và color ở store stock
-
-//    @Override
-//    public ModelColorDto getModelColor(int modelId, int colorId) {
-//        ModelColor modelColor = modelColorRepository.findByModel_ModelIdAndColor_ColorId(modelId, colorId);
-//        if (modelColor == null) {
-//            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
-//        }
-//        return ModelColorDto.builder()
-//                .modelName(modelColor.getModel().getModelName())
-//                .colorName(modelColor.getColor().getColorName())
-//                .build();
-//
-//    }
-
-    @Override
-    public List<ModelDto> getModelsByColorName(String colorName) {
-        ColorDto colorDto = colorService.getColorByName(colorName);
-        List<ModelColor> modelColors = modelColorRepository.findByColor_ColorId(colorDto.getColorId());
-        if (modelColors.isEmpty()) {
-            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
-        }
-        return modelColors.stream()
-                .map(mc -> ModelDto.builder()
-                        .modelId(mc.getModel().getModelId())
-                        .modelName(mc.getModel().getModelName())
-                        .modelYear(mc.getModel().getModelYear())
-                        .batteryCapacity(mc.getModel().getBatteryCapacity())
-                        .range(mc.getModel().getRange())
-                        .powerHp(mc.getModel().getPowerHp())
-                        .torqueNm(mc.getModel().getTorqueNm())
-                        .acceleration(mc.getModel().getAcceleration())
-                        .seatingCapacity(mc.getModel().getSeatingCapacity())
-                        .price(mc.getModel().getPrice())
-                        .bodyType(mc.getModel().getBodyType())
-                        .description(mc.getModel().getDescription())
-                        .build())
-                .toList();
+        return mapToDto(modelColor);
     }
 
     @Override
-    public List<ColorDto> getColorsByModelName(String modelName) {
-        ModelDto modelDto = modelService.getModelByName(modelName);
-        List<ModelColor> modelColors = modelColorRepository.findByModel_ModelId(modelDto.getModelId());
-        if (modelColors.isEmpty()) {
-            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
-        }
-        return modelColors.stream()
-                .map(mc -> ColorDto.builder()
-                        .colorId(mc.getColor().getColorId())
-                        .colorName(mc.getColor().getColorName())
-                        .build())
-                .toList();
+    public List<ModelColorDto> getAllModelColors() {
+        List<ModelColor> modelColors = modelColorRepository.findAll();
+        return modelColors.stream().map(this::mapToDto).toList();
     }
 
+    @Override
+    public List<ModelColorDto> getModelColorsByModelId(int modelId) {
+        List<ModelColor> modelColors = modelColorRepository.findByModelId(modelId);
+        return modelColors.stream().map(this::mapToDto).toList();
+    }
 
+    @Override
+    public List<ModelColorDto> getModelColorsByColorId(int colorId) {
+        List<ModelColor> modelColors = modelColorRepository.findByColorId(colorId);
+        return modelColors.stream().map(this::mapToDto).toList();
+    }
+
+    @Override
+    public ModelColorDto updateModelColor(int id, ModelColorDto modelColorDto) {
+        ModelColor existingModelColor = modelColorRepository.findById(id).orElse(null);
+        if (existingModelColor == null) {
+            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
+        }
+
+        // Check model mới
+        if (modelColorDto.getModelId() != 0) {
+            Model model = modelRepository.findById(modelColorDto.getModelId()).orElse(null);
+            if (model == null) {
+                throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+            }
+            existingModelColor.setModel(model);
+        }
+
+        // Check color mới
+        if (modelColorDto.getColorId() != 0) {
+            Color color = colorRepository.findById(modelColorDto.getColorId()).orElse(null);
+            if (color == null) {
+                throw new AppException(ErrorCode.COLOR_NOT_EXIST);
+            }
+            existingModelColor.setColor(color);
+        }
+
+        modelColorRepository.save(existingModelColor);
+        return mapToDto(existingModelColor);
+    }
+
+    @Override
+    public void deleteModelColor(int id) {
+        ModelColor modelColor = modelColorRepository.findById(id).orElse(null);
+        if (modelColor == null) {
+            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
+        }
+        modelColorRepository.delete(modelColor);
+    }
+
+    private ModelColorDto mapToDto(ModelColor modelColor) {
+        return ModelColorDto.builder()
+                .modelColorId(modelColor.getModelColorId())
+                .modelId(modelColor.getModel().getModelId())
+                .colorId(modelColor.getColor().getColorId())
+                .build();
+    }
 }

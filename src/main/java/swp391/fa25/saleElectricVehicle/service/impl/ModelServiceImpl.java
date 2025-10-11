@@ -6,10 +6,10 @@ import swp391.fa25.saleElectricVehicle.entity.Model;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
+import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelRequest;
 import swp391.fa25.saleElectricVehicle.repository.ModelRepository;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,23 +20,23 @@ public class ModelServiceImpl implements ModelService {
     private ModelRepository modelRepository;
 
     @Override
-    public ModelDto createModel(ModelDto modelDto) {
-        if (modelRepository.existsModelByModelName(modelDto.getModelName())) {
+    public ModelDto createModel(CreateModelRequest creatModelRequest) {
+        if (modelRepository.existsModelByModelName(creatModelRequest.getModelName())) {
             throw new AppException(ErrorCode.MODEL_EXISTED);
         }
 
         Model newModel = Model.builder()
-                .modelName(modelDto.getModelName())
-                .modelYear(modelDto.getModelYear())
-                .batteryCapacity(modelDto.getBatteryCapacity())
-                .range(modelDto.getRange())
-                .powerHp(modelDto.getPowerHp())
-                .torqueNm(modelDto.getTorqueNm())
-                .acceleration(modelDto.getAcceleration())
-                .seatingCapacity(modelDto.getSeatingCapacity())
-                .price(modelDto.getPrice())
-                .bodyType(modelDto.getBodyType())
-                .description(modelDto.getDescription())
+                .modelName(creatModelRequest.getModelName())
+                .modelYear(creatModelRequest.getModelYear())
+                .batteryCapacity(creatModelRequest.getBatteryCapacity())
+                .range(creatModelRequest.getRange())
+                .powerHp(creatModelRequest.getPowerHp())
+                .torqueNm(creatModelRequest.getTorqueNm())
+                .acceleration(creatModelRequest.getAcceleration())
+                .seatingCapacity(creatModelRequest.getSeatingCapacity())
+                .price(creatModelRequest.getPrice())
+                .bodyType(creatModelRequest.getBodyType())
+                .description(creatModelRequest.getDescription())
                 .createAt(LocalDateTime.now())
                 .build();
 
@@ -44,7 +44,40 @@ public class ModelServiceImpl implements ModelService {
         return mapToDto(newModel);
     }
 
-    // dùng cho truy vấn model theo name
+    @Override
+    public ModelDto updateModel(int id, ModelDto modelDto) {
+        Model existingModel = modelRepository.findById(id).orElse(null);
+        if (existingModel == null) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
+
+        // Update fields
+        existingModel.setModelName(modelDto.getModelName());
+        existingModel.setModelYear(modelDto.getModelYear());
+        existingModel.setBatteryCapacity(modelDto.getBatteryCapacity());
+        existingModel.setRange(modelDto.getRange());
+        existingModel.setPowerHp(modelDto.getPowerHp());
+        existingModel.setTorqueNm(modelDto.getTorqueNm());
+        existingModel.setAcceleration(modelDto.getAcceleration());
+        existingModel.setSeatingCapacity(modelDto.getSeatingCapacity());
+        existingModel.setPrice(modelDto.getPrice());
+        existingModel.setBodyType(modelDto.getBodyType());
+        existingModel.setDescription(modelDto.getDescription());
+        existingModel.setUpdatedAt(LocalDateTime.now());
+
+        Model updatedModel = modelRepository.save(existingModel);
+        return mapToDto(updatedModel);
+    }
+
+    @Override
+    public ModelDto getModelById(int id) {
+        Model model = modelRepository.findById(id).orElse(null);
+        if (model == null) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
+        return mapToDto(model);
+    }
+
     @Override
     public ModelDto getModelByName(String name) {
         Model model = modelRepository.findByModelName(name);
@@ -52,16 +85,6 @@ public class ModelServiceImpl implements ModelService {
             throw new AppException(ErrorCode.MODEL_NOT_FOUND);
         }
         return mapToDto(model);
-    }
-
-    // dùng để add model vào store stock
-    @Override
-    public Model getModelEntityByName(String name) {
-        Model model = modelRepository.findByModelName(name);
-        if (model == null) {
-            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
-        }
-        return model;
     }
 
     @Override
@@ -79,77 +102,14 @@ public class ModelServiceImpl implements ModelService {
         modelRepository.delete(model);
     }
 
-    @Override
-    public ModelDto updateModel(int id, ModelDto modelDto) {
-        Model existingModel = modelRepository.findById(id).orElse(null);
-        if (existingModel == null) {
-            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
-        }
-        if (modelDto.getModelName() != null
-                && !modelDto.getModelName().trim().isEmpty()
-                && modelRepository.existsModelByModelName(modelDto.getModelName())) {
-            throw new AppException(ErrorCode.MODEL_EXISTED);
-        }
-        existingModel.setModelName(modelDto.getModelName());
-
-        if (modelDto.getModelYear() <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setModelYear(modelDto.getModelYear());
-
-        if (modelDto.getBatteryCapacity().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setBatteryCapacity(modelDto.getBatteryCapacity());
-
-        if (modelDto.getRange().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setRange(modelDto.getRange());
-
-        if (modelDto.getPowerHp().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setPowerHp(modelDto.getPowerHp());
-
-        if (modelDto.getTorqueNm().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setTorqueNm(modelDto.getTorqueNm());
-
-        if (modelDto.getAcceleration().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setAcceleration(modelDto.getAcceleration());
-
-        if (modelDto.getSeatingCapacity() <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setSeatingCapacity(modelDto.getSeatingCapacity());
-
-        if (modelDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setPrice(modelDto.getPrice());
-
-        // body type phải được dropdown
-        if (modelDto.getBodyType() != null && modelDto.getBodyType().trim().isEmpty()) {
-            existingModel.setBodyType(modelDto.getBodyType());
-        }
-
-        if (modelDto.getDescription() != null && modelDto.getDescription().trim().isEmpty()) {
-            existingModel.setDescription(modelDto.getDescription());
-        }
-
-        existingModel.setUpdatedAt(LocalDateTime.now());
-
-        modelRepository.save(existingModel);
-        return mapToDto(existingModel);
-    }
+//    @Override
+//    public ModelDto updateModel(int id, ModelDto modelDto) {
+//        return null;
+//    }
 
     private ModelDto mapToDto(Model model) {
         return ModelDto.builder()
-                .modelId(model.getModelId())
+                .modelId(model.getModelId()) //Thêm dòng này
                 .modelName(model.getModelName())
                 .modelYear(model.getModelYear())
                 .batteryCapacity(model.getBatteryCapacity())

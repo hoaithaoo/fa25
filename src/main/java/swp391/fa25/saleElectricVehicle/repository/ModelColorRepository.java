@@ -8,8 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ModelColorRepository extends JpaRepository<ModelColor, Integer> {
-
-    ModelColor findByModel_ModelIdAndColor_ColorId(int modelId, int colorId);
-    List<ModelColor> findByColor_ColorId(int colorId);
-    List<ModelColor> findByModel_ModelId(int modelId);
+    boolean existsByModelIdAndColorId(int modelId, int colorId);
+    List<ModelColor> findByModelId(int modelId);
+    List<ModelColor> findByColorId(int colorId);
 }
