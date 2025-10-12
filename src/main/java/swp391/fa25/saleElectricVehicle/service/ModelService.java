@@ -1,14 +1,14 @@
 package swp391.fa25.saleElectricVehicle.service;
 
+import swp391.fa25.saleElectricVehicle.entity.Model;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
-import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelRequest;
 
 import java.util.List;
 
 public interface ModelService {
-    ModelDto createModel(CreateModelRequest modelDto);
+    ModelDto createModel(ModelDto modelDto);
     ModelDto updateModel(int id, ModelDto modelDto);
-    ModelDto getModelById(int id);
+    Model getModelEntityById(int modelId);
     ModelDto getModelByName(String name);
     List<ModelDto> getAllModels();
     void deleteModelById(int id);

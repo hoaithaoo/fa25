@@ -1,3 +1,4 @@
+
 package swp391.fa25.saleElectricVehicle.exception;
 
 import lombok.Getter;
@@ -31,11 +32,15 @@ public enum ErrorCode {
     MODEL_COLOR_NOT_EXIST(1021, "Model màu không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_EXISTED(1021, "Đơn hàng đã tồn tại", HttpStatus.BAD_REQUEST),
     ORDER_NOT_EXIST(1022, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    ORDER_NOT_FOUND(1023, "Đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    ORDER_DETAIL_NOT_FOUND(1024, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
-    STORE_STOCK_NOT_FOUND(1025, "Kho hàng không tồn tại", HttpStatus.NOT_FOUND),
-    INSUFFICIENT_STOCK(1026, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
-    MODEL_COLOR_EXISTED(1027, "Màu của model đã tồn tại", HttpStatus.BAD_REQUEST),
+    ORDER_DETAIL_NOT_FOUND(1023, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
+    STORE_STOCK_NOT_FOUND(1024, "Kho hàng không tồn tại", HttpStatus.NOT_FOUND),
+    INSUFFICIENT_STOCK(1025, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
+//    UNAUTHORIZED_CREATE_ADMIN(1026, "Cannot create Admin role", HttpStatus.FORBIDDEN),
+//    UNAUTHORIZED_UPDATE_ADMIN(1027, "Cannot update Admin role", HttpStatus.FORBIDDEN),
+//    UNAUTHORIZED_DELETE_ADMIN(1028, "Cannot delete Admin role", HttpStatus.FORBIDDEN),
+    INVALID_CREATE_STORE_MANUFACTURER(1029, "EVM Staff does not have store", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED_UPDATE_STORE_MANUFACTURER(1030, "Cannot update store of EVM Staff", HttpStatus.FORBIDDEN),
+    INVALID_NUMBER(1031, "The value of this field must be greater than 0", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

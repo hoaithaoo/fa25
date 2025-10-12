@@ -46,29 +46,29 @@ public class ModelController {
         return ResponseEntity.ok(response);
     }
 
-    // lay model theo color name
-    @GetMapping("/{colorName}/models")
-    public ResponseEntity<ApiResponse<List<ModelDto>>> getModelsByColor(@PathVariable String colorName) {
-        List<ModelDto> models = modelColorService.getModelsByColorName(colorName);
-        ApiResponse<List<ModelDto>> response = ApiResponse.<List<ModelDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Models fetched successfully")
-                .data(models)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    // lay color theo model name
-    @GetMapping("/{modelName}/colors")
-    public ResponseEntity<ApiResponse<List<ColorDto>>> getColorsByModel(@PathVariable String modelName) {
-        List<ColorDto> colors = modelColorService.getColorsByModelName(modelName);
-        ApiResponse<List<ColorDto>> response = ApiResponse.<List<ColorDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Colors fetched successfully")
-                .data(colors)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    // lay model theo color name
+//    @GetMapping("/{colorName}/models")
+//    public ResponseEntity<ApiResponse<List<ModelDto>>> getModelsByColor(@PathVariable String colorName) {
+//        List<ModelDto> models = modelColorService.getModelsByColorName(colorName);
+//        ApiResponse<List<ModelDto>> response = ApiResponse.<List<ModelDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Models fetched successfully")
+//                .data(models)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
+//
+//    // lay color theo model name
+//    @GetMapping("/{modelName}/colors")
+//    public ResponseEntity<ApiResponse<List<ColorDto>>> getColorsByModel(@PathVariable String modelName) {
+//        List<ColorDto> colors = modelColorService.getColorsByModelName(modelName);
+//        ApiResponse<List<ColorDto>> response = ApiResponse.<List<ColorDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Colors fetched successfully")
+//                .data(colors)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 
 
     @GetMapping("/all")
