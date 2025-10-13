@@ -35,7 +35,14 @@ public class PromotionServiceImpl implements PromotionService {
     @Override
     public PromotionDto createPromotion(PromotionDto promotionDto) {
         Promotion promotion = promotionRepository.findById(promotionDto.getPromotionId()).orElse(null);
-        if (promotion != null) {
+        // ❌ Bug nghiêm trọng - check name của promotion hiện tại
+//        if (promotionRepository.existsByPromotionNameIgnoreCase(promotion.getPromotionName())) {
+//            throw new AppException(ErrorCode.PROMOTION_EXISTED);
+//        }
+
+        // ✅ Phải check name mới và khác với name hiện tại
+        if (!promotion.getPromotionName().equals(promotionDto.getPromotionName()) &&
+                promotionRepository.existsByPromotionNameIgnoreCase(promotionDto.getPromotionName())) {
             throw new AppException(ErrorCode.PROMOTION_EXISTED);
         }
 
@@ -98,7 +105,14 @@ public class PromotionServiceImpl implements PromotionService {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
 
-        if (promotionRepository.existsByPromotionNameIgnoreCase(promotion.getPromotionName())) {
+        // ❌ Bug nghiêm trọng - check name của promotion hiện tại
+//        if (promotionRepository.existsByPromotionNameIgnoreCase(promotion.getPromotionName())) {
+//            throw new AppException(ErrorCode.PROMOTION_EXISTED);
+//        }
+
+        // ✅ Phải check name mới và khác với name hiện tại
+        if (!promotion.getPromotionName().equals(promotionDto.getPromotionName()) &&
+                promotionRepository.existsByPromotionNameIgnoreCase(promotionDto.getPromotionName())) {
             throw new AppException(ErrorCode.PROMOTION_EXISTED);
         }
 
@@ -160,7 +174,8 @@ public class PromotionServiceImpl implements PromotionService {
 
         promotionRepository.save(promotion);
 
-        return promotionDto;
+        // ✅ Nên return mapped từ entity đã save
+        return mapToDto(promotion);
     }
 
     @Override
