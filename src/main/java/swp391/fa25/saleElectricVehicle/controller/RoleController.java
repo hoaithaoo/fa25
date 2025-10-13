@@ -25,7 +25,7 @@ public class RoleController {
                 .message("Role created successfully")
                 .data(createdRole)
                 .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{roleName}")
@@ -36,7 +36,7 @@ public class RoleController {
                 .message("Role fetched successfully")
                 .data(role)
                 .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/all")

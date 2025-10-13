@@ -62,8 +62,18 @@ public class RoleServiceImpl implements RoleService {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
 
-        if (roleDto.getRoleName() != null && !roleDto.getRoleName().isEmpty()) {
-            if (roleRepository.existsByRoleName(roleDto.getRoleName())) {
+        // ❌ Bug tương tự các entities khác - luôn check duplicate
+//        if (roleDto.getRoleName() != null && !roleDto.getRoleName().isEmpty()) {
+//            if (roleRepository.existsByRoleName(roleDto.getRoleName())) {
+//                throw new AppException(ErrorCode.ROLE_EXISTED); // ← Sẽ fail khi update cùng tên
+//            }
+//            role.setRoleName(roleDto.getRoleName());
+//        }
+
+        // ✅ Phải check nếu tên khác với tên hiện tại
+        if (roleDto.getRoleName() != null && !roleDto.getRoleName().trim().isEmpty()) {
+            if (!role.getRoleName().equals(roleDto.getRoleName()) &&
+                    roleRepository.existsByRoleName(roleDto.getRoleName())) {
                 throw new AppException(ErrorCode.ROLE_EXISTED);
             }
             role.setRoleName(roleDto.getRoleName());
