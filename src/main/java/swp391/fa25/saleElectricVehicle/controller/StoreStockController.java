@@ -9,6 +9,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.StoreStockService;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/store-stocks")
@@ -26,6 +27,17 @@ public class StoreStockController {
                 .data(storeStockDto)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("all")
+    public ResponseEntity<ApiResponse<List<StoreStockDto>>> getAllStoreStock() {
+        List<StoreStockDto> storeStockDto = storeStockService.getAllStoreStock();
+        ApiResponse<List<StoreStockDto>> response = ApiResponse.<List<StoreStockDto>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Get all store stock successfully")
+                .data(storeStockDto)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{stockId}/update-price")
@@ -46,6 +58,17 @@ public class StoreStockController {
                 .code(HttpStatus.OK.value())
                 .message("Store stock quantity updated successfully")
                 .data(updatedStoreStock)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{stockId}/delete")
+    public ResponseEntity<ApiResponse<Void>> deleteStoreStock(@PathVariable int stockId) {
+        storeStockService.deleteStoreStock(stockId);
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("Store stock deleted successfully")
+                .data(null)
                 .build();
         return ResponseEntity.ok(response);
     }

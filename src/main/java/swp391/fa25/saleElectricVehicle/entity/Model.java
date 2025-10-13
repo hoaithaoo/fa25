@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.BodyType;
 
 
 import java.math.BigDecimal;
@@ -49,8 +50,9 @@ public class Model {
     @Column(columnDefinition = "DECIMAL(10,2)", nullable = false)
     private BigDecimal price;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    private String bodyType;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BodyType bodyType;
 
     @Column(columnDefinition = "NVARCHAR(1000)")
     private String description;

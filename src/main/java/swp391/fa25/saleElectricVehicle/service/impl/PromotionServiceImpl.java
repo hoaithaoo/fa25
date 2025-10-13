@@ -102,7 +102,7 @@ public class PromotionServiceImpl implements PromotionService {
 
         if (promotionDto.getPromotionName() != null && !promotionDto.getPromotionName().trim().isEmpty() &&
                 !promotionDto.getPromotionName().equalsIgnoreCase(promotion.getPromotionName()) &&
-                promotionRepository.existsByPromotionNameIgnoreCase(promotionDto.getPromotionName())) {
+                !promotionRepository.existsByPromotionNameIgnoreCase(promotionDto.getPromotionName())) {
             promotion.setPromotionName(promotionDto.getPromotionName());
         }
 
@@ -142,7 +142,7 @@ public class PromotionServiceImpl implements PromotionService {
 
         promotionRepository.save(promotion);
 
-        return promotionDto;
+        return mapToDto(promotion);
     }
 
     @Override

@@ -25,6 +25,38 @@ public class ModelServiceImpl implements ModelService {
             throw new AppException(ErrorCode.MODEL_EXISTED);
         }
 
+        if (modelDto.getModelYear() <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        if (modelDto.getBatteryCapacity().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        if (modelDto.getRange().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        if (modelDto.getPowerHp().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        if (modelDto.getTorqueNm().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        if (modelDto.getAcceleration().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        if (modelDto.getSeatingCapacity() <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        if (modelDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
         Model newModel = Model.builder()
                 .modelName(modelDto.getModelName())
                 .modelYear(modelDto.getModelYear())
@@ -133,7 +165,7 @@ public class ModelServiceImpl implements ModelService {
         existingModel.setPrice(modelDto.getPrice());
 
         // body type phải được dropdown
-        if (modelDto.getBodyType() != null && modelDto.getBodyType().trim().isEmpty()) {
+        if (modelDto.getBodyType() != null && modelDto.getBodyType().name().trim().isEmpty()) {
             existingModel.setBodyType(modelDto.getBodyType());
         }
 

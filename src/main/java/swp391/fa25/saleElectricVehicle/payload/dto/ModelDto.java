@@ -1,6 +1,7 @@
 package swp391.fa25.saleElectricVehicle.payload.dto;
 
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.BodyType;
 
 import java.math.BigDecimal;
 
@@ -19,6 +20,6 @@ public class ModelDto {
     private BigDecimal acceleration;
     private int seatingCapacity;
     private BigDecimal price;
-    private String bodyType;
+    private BodyType bodyType;
     private String description;
 }
