@@ -61,13 +61,4 @@ public class Contract {
     @OneToOne
     @JoinColumn(name = "orderId", nullable = false)
     private Order order;
-
-
-
-
-
-
-
-
-
 }

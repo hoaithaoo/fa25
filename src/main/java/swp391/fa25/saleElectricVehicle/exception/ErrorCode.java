@@ -42,6 +42,8 @@ public enum ErrorCode {
     UNAUTHORIZED_UPDATE_STORE_MANUFACTURER(1030, "Cannot update store of EVM Staff", HttpStatus.FORBIDDEN),
     INVALID_NUMBER(1031, "The value of this field must be greater than 0", HttpStatus.BAD_REQUEST),
     MODEL_COLOR_EXISTED(1032, "Model màu đã tồn tại", HttpStatus.BAD_REQUEST),
+    CONTRACT_NOT_FOUND(1033, "Hợp đồng không tồn tại", HttpStatus.NOT_FOUND),
+    CONTRACT_FILE_URL_EXISTED(1034, "URL file hợp đồng đã tồn tại", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
