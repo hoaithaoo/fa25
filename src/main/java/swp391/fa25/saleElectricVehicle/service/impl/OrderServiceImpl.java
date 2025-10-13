@@ -34,7 +34,7 @@ public class OrderServiceImpl implements OrderService {
         // Validate customer exists
         Customer customer = customerRepository.findById(orderDto.getCustomerId()).orElse(null);
         if (customer == null) {
-            throw new AppException(ErrorCode.ORDER_EXISTED);
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
         // Validate staff exists
@@ -85,13 +85,13 @@ public class OrderServiceImpl implements OrderService {
         if (orderDto.getTotalPrice() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
             order.setTotalPrice(orderDto.getTotalPrice());
         }
-        if (orderDto.getTotalTaxPrice() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
+        if (orderDto.getTotalTaxPrice() != null && orderDto.getTotalTaxPrice().compareTo(BigDecimal.ZERO) >= 0) {
             order.setTotalTaxPrice(orderDto.getTotalTaxPrice());
         }
-        if (orderDto.getTotalPromotionAmount() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
+        if (orderDto.getTotalPromotionAmount() != null && orderDto.getTotalPromotionAmount().compareTo(BigDecimal.ZERO) >= 0) {
             order.setTotalPromotionAmount(orderDto.getTotalPromotionAmount());
         }
-        if (orderDto.getTotalPayment() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
+        if (orderDto.getTotalPayment() != null && orderDto.getTotalPayment().compareTo(BigDecimal.ZERO) > 0) {
             order.setTotalPayment(orderDto.getTotalPayment());
         }
         if (orderDto.getStatus() != null) {
