@@ -42,6 +42,15 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Customer getCustomerEntityById(int customerId) {
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+        if (customer == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+        return customer;
+    }
+
+    @Override
     public CustomerDto getCustomerById(int customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
 

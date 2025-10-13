@@ -10,8 +10,11 @@ import java.math.BigDecimal;
 public class StoreStockDto {
 
     private int stockId;
+    private int storeId;
     private String storeName;
+    private int modelId;
     private String modelName;
+    private int colorId;
     private String colorName;
     private BigDecimal priceOfStore;
     private int quantity;

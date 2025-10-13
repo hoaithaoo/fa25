@@ -20,9 +20,9 @@ import swp391.fa25.saleElectricVehicle.payload.response.*;
 import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.UpdateUserProfileResponse;
-import swp391.fa25.saleElectricVehicle.repository.RoleRepository;
-import swp391.fa25.saleElectricVehicle.repository.StoreRepository;
 import swp391.fa25.saleElectricVehicle.repository.UserRepository;
+import swp391.fa25.saleElectricVehicle.service.RoleService;
+import swp391.fa25.saleElectricVehicle.service.StoreService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.text.ParseException;
@@ -36,10 +36,10 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Autowired
-    StoreRepository storeRepository;
+    StoreService storeService;
 
     @Autowired
-    RoleRepository roleRepository;
+    RoleService roleService;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -57,17 +57,17 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
 
-        Role role = roleRepository.findById(userRequest.getRoleId()).orElse(null);
+        Role role = roleService.getRoleEntityById(userRequest.getRoleId());
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
 
-        Store store = storeRepository.findById(userRequest.getStoreId()).orElse(null);
+        Store store = storeService.getStoreEntityById(userRequest.getStoreId());
         if (store == null && (userRequest.getRoleId() != 1 && userRequest.getRoleId() != 2)) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
-        User newUser = User.builder()
+        User newUser = userRepository.save(User.builder()
                 .fullName(userRequest.getFullName())
                 .email(userRequest.getEmail())
                 .phone(userRequest.getPhone())
@@ -76,24 +76,33 @@ public class UserServiceImpl implements UserService {
                 .store(store)
                 .role(role)
                 .createdAt(LocalDateTime.now())
-                .build();
+                .build());
 
-        userRepository.save(newUser);
         return CreateUserResponse.builder()
                 .userId(newUser.getUserId())
                 .fullName(newUser.getFullName())
                 .email(newUser.getEmail())
                 .phone(newUser.getPhone())
-                .status(newUser.getStatus())
-//                .storeId(newUser.getStore().getStoreId()) Có thể bị null nếu user không có store
+                .status(newUser.getStatus().toString())
                 .storeId(newUser.getStore() != null ? newUser.getStore().getStoreId() : 0)
+                .storeName(newUser.getStore() != null ? newUser.getStore().getStoreName() : null)
                 .roleId(newUser.getRole().getRoleId())
+                .roleName(newUser.getRole().getRoleName())
                 .build();
+    }
+
+    @Override
+    public User getUserEntityById(int userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+        return user;
     }
 
     //use at AuthTokenService
     @Override
-    public UserDto findUserById(int userId) {
+    public UserDto getUserById(int userId) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
@@ -107,7 +116,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<GetUserResponse> findUserByName(String name) {
+    public List<GetUserResponse> getUserByName(String name) {
         List<User> user = userRepository.findUsersByFullNameContaining(name);
 
         if (user.isEmpty()) {
@@ -119,22 +128,26 @@ public class UserServiceImpl implements UserService {
                 .fullName(u.getFullName())
                 .email(u.getEmail())
                 .phone(u.getPhone())
-                .status(u.getStatus())
-                .storeId(u.getStore().getStoreId())
+                .status(u.getStatus().name())
+                .storeId(u.getStore() != null ? u.getStore().getStoreId() : 0)
+                .storeName(u.getStore() != null ? u.getStore().getStoreName() : null)
                 .roleId(u.getRole().getRoleId())
+                .roleName(u.getRole().getRoleName())
                 .build()).toList();
     }
 
     @Override
-    public List<GetUserResponse> findAllUsers() {
+    public List<GetUserResponse> getAllUsers() {
         return userRepository.findAll().stream().map(u -> GetUserResponse.builder()
                 .userId(u.getUserId())
                 .fullName(u.getFullName())
                 .email(u.getEmail())
                 .phone(u.getPhone())
-                .status(u.getStatus())
-                .storeId(u.getStore().getStoreId())
+                .status(u.getStatus().name())
+                .storeId(u.getStore() != null ? u.getStore().getStoreId() : 0)
+                .storeName(u.getStore() != null ? u.getStore().getStoreName() : null)
                 .roleId(u.getRole().getRoleId())
+                .roleName(u.getRole().getRoleName())
                 .build()).toList();
     }
 
@@ -183,17 +196,13 @@ public class UserServiceImpl implements UserService {
         }
 
         if (updateUserProfileRequest.getRoleId() != 0) {
-            Role role = roleRepository.findById(updateUserProfileRequest.getRoleId()).orElse(null);
-            if (role == null) {
-                throw new AppException(ErrorCode.ROLE_NOT_EXIST);
-            }
+            Role role = roleService.getRoleEntityById(updateUserProfileRequest.getRoleId());
+            user.setRole(role);
         }
 
         if (updateUserProfileRequest.getStoreId() != 0) {
-            Store store = storeRepository.findById(updateUserProfileRequest.getStoreId()).orElse(null);
-            if (store == null && (updateUserProfileRequest.getRoleId() != 1 && updateUserProfileRequest.getRoleId() != 2)) {
-                throw new AppException(ErrorCode.STORE_NOT_EXIST);
-            }
+            Store store = storeService.getStoreEntityById(updateUserProfileRequest.getStoreId());
+            user.setStore(store);
         }
 
         if (updateUserProfileRequest.getFullName() != null && !updateUserProfileRequest.getFullName().trim().isEmpty()) {

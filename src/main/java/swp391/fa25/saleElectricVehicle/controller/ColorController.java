@@ -84,18 +84,18 @@ public class ColorController {
         return ResponseEntity.ok(response);
     }
 
-    // BUSINESS - Search colors
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<ColorDto>>> searchColors(@RequestParam String keyword) {
-        List<ColorDto> colors = colorService.getAllColors().stream()
-                .filter(color -> color.getColorName().toLowerCase().contains(keyword.toLowerCase()))
-                .toList();
-
-        ApiResponse<List<ColorDto>> response = ApiResponse.<List<ColorDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Search results retrieved successfully")
-                .data(colors)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    // BUSINESS - Search colors
+//    @GetMapping("/search")
+//    public ResponseEntity<ApiResponse<List<ColorDto>>> searchColors(@RequestParam String keyword) {
+//        List<ColorDto> colors = colorService.getAllColors().stream()
+//                .filter(color -> color.getColorName().toLowerCase().contains(keyword.toLowerCase()))
+//                .toList();
+//
+//        ApiResponse<List<ColorDto>> response = ApiResponse.<List<ColorDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Search results retrieved successfully")
+//                .data(colors)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 }

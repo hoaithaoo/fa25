@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface StoreService {
     StoreDto createStore(StoreDto storeDto);
-//    StoreDto findStoreById(int storeId);
+    Store getStoreEntityById(int storeId);
     List<StoreDto> getStoreByNameContaining(String storeName);
 //    StoreDto getStoreByName(String storeName);
     Store getStoreEntityByName(String storeName);

@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = "*") // Cho phép tất cả các nguồn truy cập (có thể điều chỉnh theo nhu cầu)
 public class CustomerController {
 
     @Autowired
@@ -26,7 +25,6 @@ public class CustomerController {
                 .message("Customer created successfully")
                 .data(createdCustomer)
                 .build();
-//        return ResponseEntity.ok(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

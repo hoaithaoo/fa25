@@ -1,12 +1,14 @@
 package swp391.fa25.saleElectricVehicle.service;
 
+import swp391.fa25.saleElectricVehicle.entity.Customer;
 import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
 
 import java.util.List;
 
 public interface CustomerService {
     CustomerDto createCustomer(CustomerDto customerDto);
-//    CustomerDto getCustomerById(int customerId);        // ← THÊM dòng này
+    CustomerDto getCustomerById(int customerId);        // ← THÊM dòng này
+    Customer getCustomerEntityById(int customerId);
     CustomerDto getCustomerByPhone(String phone);
     List<CustomerDto> getAllCustomers();
     List<CustomerDto> getAllCustomersByStaffId(int staffId);

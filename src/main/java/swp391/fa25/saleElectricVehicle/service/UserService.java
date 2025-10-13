@@ -1,6 +1,7 @@
 package swp391.fa25.saleElectricVehicle.service;
 
 
+import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
@@ -16,6 +17,7 @@ import java.util.List;
 public interface UserService {
     CreateUserResponse createUser(CreateUserRequest userRequest);
     UserDto getUserById(int userId);
+    User getUserEntityById(int userId);
     List<GetUserResponse> getUserByName(String name);
     List<GetUserResponse> getAllUsers();
 //    UserDto updateOwnProfile(int userId, UserDto userDto);

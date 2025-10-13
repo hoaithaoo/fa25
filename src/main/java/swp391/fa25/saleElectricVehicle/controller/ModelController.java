@@ -93,7 +93,7 @@ public class ModelController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse<ModelDto>> updateModel(@PathVariable int id, @RequestBody ModelDto modelDto) {
         ModelDto updatedModel = modelService.updateModel(id, modelDto);
         ApiResponse<ModelDto> response = ApiResponse.<ModelDto>builder()

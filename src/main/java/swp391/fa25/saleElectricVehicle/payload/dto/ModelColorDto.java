@@ -8,6 +8,8 @@ import lombok.*;
 @Builder
 public class ModelColorDto {
     private int modelColorId;
+    private int modelId;
     private String modelName;
+    private int colorId;
     private String colorName;
 }

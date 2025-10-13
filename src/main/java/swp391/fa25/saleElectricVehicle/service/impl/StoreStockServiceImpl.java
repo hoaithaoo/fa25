@@ -9,6 +9,8 @@ import swp391.fa25.saleElectricVehicle.payload.dto.*;
 import swp391.fa25.saleElectricVehicle.repository.StoreStockRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
+import java.math.BigDecimal;
+
 @Service
 public class StoreStockServiceImpl implements StoreStockService {
 
@@ -28,38 +30,35 @@ public class StoreStockServiceImpl implements StoreStockService {
     ModelColorService modelColorService;
 
     @Override
-    public StoreStockDto createStoreStock(StoreStockDto createStoreStock) {
-        // không tìm thấy store
-        Store store = storeService.getStoreEntityByName(createStoreStock.getStoreName());
-        if (store == null) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST);
-        }
-
-        // không tìm thấy model
-        Model model = modelService.getModelEntityByName(createStoreStock.getModelName());
-        if (model == null) {
-            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
-        }
-
-        // không tìm thấy color
-        Color color = colorService.getColorEntityByName(createStoreStock.getColorName());
-        if (color == null) {
-            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
-        }
-
-        // model và color không tồn tại
-        ModelColor modelColor = modelColorService.getModelColor(model.getModelId(), color.getColorId());
-        if (modelColor == null) {
-            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
-        }
+    public StoreStockDto createStoreStock(StoreStockDto request) {
+        Store store = storeService.getStoreEntityByName(request.getStoreName());
+        Model model = modelService.getModelEntityById(request.getModelId());
+        Color color = colorService.getColorEntityById(request.getColorId());
+        ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
 
         StoreStock storeStock = StoreStock.builder()
                         .store(store)
                         .modelColor(modelColor)
-                        .priceOfStore(createStoreStock.getPriceOfStore())
-                        .quantity(createStoreStock.getQuantity())
+                        .priceOfStore(request.getPriceOfStore())
+                        .quantity(request.getQuantity())
                         .build();
 
+        storeStockRepository.save(storeStock);
+
+        return mapToDto(storeStock);
+    }
+
+    @Override
+    public StoreStockDto updatePriceOfStore(int stockId, BigDecimal price) {
+        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+
+        if (price.compareTo(BigDecimal.ZERO) < 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        storeStock.setPriceOfStore(price);
         storeStockRepository.save(storeStock);
 
         return mapToDto(storeStock);

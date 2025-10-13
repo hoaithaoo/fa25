@@ -12,7 +12,9 @@ public class GetUserResponse {
     private String fullName;
     private String email;
     private String phone;
-    private UserStatus status;
+    private String status;
+    private int storeId;
     private String storeName;
+    private int roleId;
     private String roleName;
 }

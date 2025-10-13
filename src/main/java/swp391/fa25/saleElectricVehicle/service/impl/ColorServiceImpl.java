@@ -17,21 +17,15 @@ public class ColorServiceImpl implements ColorService {
     @Autowired
     ColorRepository colorRepository;
 
-
     @Override
     public ColorDto createColor(ColorDto colorDto) {
         if (colorRepository.existsColorByColorName(colorDto.getColorName())) {
             throw new AppException(ErrorCode.COLOR_EXISTED);
         }
-        Color color = Color.builder()
+        Color color = colorRepository.save(Color.builder()
                 .colorName(colorDto.getColorName())
-                .build();
-        Color savedColor = colorRepository.save(color);
-//        return colorDto;
-        return ColorDto.builder()
-                .colorId(savedColor.getColorId())
-                .colorName(savedColor.getColorName())
-                .build();
+                .build());
+        return mapToDto(color);
     }
 
     @Override
@@ -53,20 +47,30 @@ public class ColorServiceImpl implements ColorService {
         return colors.stream().map(this::mapToDto).toList();
     }
 
-    // truy vấn color theo name
-    @Override
-    public ColorDto getColorByName(String colorName) {
-        Color color = colorRepository.findColorByColorName(colorName);
-        if (color == null) {
-            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
-        }
-        return mapToDto(color);
-    }
+//    // truy vấn color theo name
+//    @Override
+//    public ColorDto getColorByName(String colorName) {
+//        Color color = colorRepository.findColorByColorName(colorName);
+//        if (color == null) {
+//            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
+//        }
+//        return mapToDto(color);
+//    }
+
+//    // add color vào store stock
+//    @Override
+//    public Color getColorEntityByName(String colorName) {
+//        Color color = colorRepository.findColorByColorName(colorName);
+//        if (color == null) {
+//            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
+//        }
+//        return color;
+//    }
 
     // add color vào store stock
     @Override
-    public Color getColorEntityByName(String colorName) {
-        Color color = colorRepository.findColorByColorName(colorName);
+    public Color getColorEntityById(int colorId) {
+        Color color = colorRepository.findById(colorId).orElse(null);
         if (color == null) {
             throw new AppException(ErrorCode.COLOR_NOT_EXIST);
         }

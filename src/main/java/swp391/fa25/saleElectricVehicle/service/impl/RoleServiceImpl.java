@@ -41,8 +41,8 @@ public class RoleServiceImpl implements RoleService {
 
     // dùng để gán role cho user
     @Override
-    public Role getRoleEntityByName(String roleName) {
-        Role role = roleRepository.findByRoleName(roleName);
+    public Role getRoleEntityById(int roleId) {
+        Role role = roleRepository.findById(roleId).orElse(null);
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }

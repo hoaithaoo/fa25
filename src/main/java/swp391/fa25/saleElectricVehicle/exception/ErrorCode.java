@@ -41,6 +41,7 @@ public enum ErrorCode {
     INVALID_CREATE_STORE_MANUFACTURER(1029, "EVM Staff does not have store", HttpStatus.FORBIDDEN),
     UNAUTHORIZED_UPDATE_STORE_MANUFACTURER(1030, "Cannot update store of EVM Staff", HttpStatus.FORBIDDEN),
     INVALID_NUMBER(1031, "The value of this field must be greater than 0", HttpStatus.BAD_REQUEST),
+    MODEL_COLOR_EXISTED(1032, "Model màu đã tồn tại", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

@@ -50,6 +50,15 @@ public class StoreServiceImpl implements StoreService {
         return mapTodo(store);
     }
 
+    @Override
+    public Store getStoreEntityById(int storeId) {
+        Store store = storeRepository.findById(storeId).orElse(null);
+        if (store == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        return store;
+    }
+
     // dùng để tìm kiếm store
     @Override
     public List<StoreDto> getStoreByNameContaining(String name) {

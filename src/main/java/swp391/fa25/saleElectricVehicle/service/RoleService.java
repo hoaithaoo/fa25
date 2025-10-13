@@ -9,7 +9,7 @@ public interface RoleService {
     RoleDto createRole(RoleDto roleDto);
 //    RoleDto findRoleById(int roleId);
     RoleDto getRoleByName(String roleName);
-    Role getRoleEntityByName(String roleName);
+    Role getRoleEntityById(int roleId);
     List<RoleDto> getAllRoles();
     RoleDto updateRole(int roleId, RoleDto roleDto);
     void deleteRole(int roleId);

@@ -12,6 +12,8 @@ public class UpdateUserProfileRequest {
     private String email;
     private String phone;
     private UserStatus status;
-    private String storeName;
-    private String roleName;
+    private int storeId;
+    private int roleId;
+//    private String storeName;
+//    private String roleName;
 }
