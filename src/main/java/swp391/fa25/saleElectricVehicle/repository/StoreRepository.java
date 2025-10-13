@@ -12,4 +12,5 @@ public interface StoreRepository extends JpaRepository<Store, Integer> {
     boolean existsByPhone(String phone);
     List<Store> findStoresByStoreNameContaining(String name);
     Store findStoreByStoreName(String storeName);
+    Store findStoreByUser_UserId(int userId);
 }

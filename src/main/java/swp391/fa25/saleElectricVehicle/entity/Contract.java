@@ -20,6 +20,9 @@ public class Contract {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int contractId;
 
+    @Column(nullable = false, unique = true)
+    private String contractCode;
+
     @Column(nullable = false)
     private LocalDate contractDate;
 

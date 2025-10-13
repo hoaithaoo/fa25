@@ -89,6 +89,16 @@ public class StoreServiceImpl implements StoreService {
         return store;
     }
 
+    // dùng để lấy store hiện tại của user
+    @Override
+    public Store getCurrentStoreEntity(int userId) {
+        Store store = storeRepository.findStoreByUser_UserId(userId);
+        if (store == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        return store;
+    }
+
     @Override
     public List<StoreDto> getAllStores() {
         return storeRepository.findAll().stream().map(this::mapTodo).toList();

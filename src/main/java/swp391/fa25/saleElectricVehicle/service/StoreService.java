@@ -11,6 +11,7 @@ public interface StoreService {
     List<StoreDto> getStoreByNameContaining(String storeName);
 //    StoreDto getStoreByName(String storeName);
     Store getStoreEntityByName(String storeName);
+    Store getCurrentStoreEntity(int userId);
     List<StoreDto> getAllStores();
     StoreDto updateStore(int storeId, StoreDto storeDto);
     void deleteStore(int storeId);

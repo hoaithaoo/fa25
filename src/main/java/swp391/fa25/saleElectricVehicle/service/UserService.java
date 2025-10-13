@@ -20,6 +20,7 @@ public interface UserService {
     User getUserEntityById(int userId);
     List<GetUserResponse> getUserByName(String name);
     List<GetUserResponse> getAllUsers();
+    User getCurrentUserEntity();
 //    UserDto updateOwnProfile(int userId, UserDto userDto);
     UpdateUserProfileResponse updateUserProfile(int userId, UpdateUserProfileRequest updateUserProfileRequest);
     void deleteUser(int userId);
