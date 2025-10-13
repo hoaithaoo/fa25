@@ -96,8 +96,15 @@ public class ColorServiceImpl implements ColorService {
 //        }
 //        colorRepository.save(color);
 //        return colorDto;
-        if (color.getColorName() != null && !color.getColorName().trim().isEmpty()
-                && colorRepository.existsColorByColorName(colorDto.getColorName())) {
+
+//        Sửa logic:
+//        if (color.getColorName() != null && !color.getColorName().trim().isEmpty()
+//                && colorRepository.existsColorByColorName(colorDto.getColorName())) {
+//            throw new AppException(ErrorCode.COLOR_EXISTED);
+//        }
+        // ✅ Sửa lại
+        if (!color.getColorName().equals(colorDto.getColorName()) &&
+                colorRepository.existsColorByColorName(colorDto.getColorName())) {
             throw new AppException(ErrorCode.COLOR_EXISTED);
         }
 
