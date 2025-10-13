@@ -48,6 +48,7 @@ public class StoreStockServiceImpl implements StoreStockService {
         return mapToDto(storeStock);
     }
 
+    // update giá bán của cửa hàng
     @Override
     public StoreStockDto updatePriceOfStore(int stockId, BigDecimal price) {
         StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
@@ -63,6 +64,24 @@ public class StoreStockServiceImpl implements StoreStockService {
 
         return mapToDto(storeStock);
     }
+
+    // update số lượng tồn kho của cửa hàng
+    @Override
+    public StoreStockDto updateQuantity(int stockId, int quantity) {
+        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+
+        if (quantity < 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        storeStock.setQuantity(quantity);
+        storeStockRepository.save(storeStock);
+
+        return mapToDto(storeStock);
+    }
+
 
     private StoreStockDto mapToDto(StoreStock storeStock) {
         return StoreStockDto.builder()

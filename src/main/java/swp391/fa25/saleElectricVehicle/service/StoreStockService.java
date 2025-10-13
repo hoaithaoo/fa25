@@ -7,4 +7,5 @@ import java.math.BigDecimal;
 public interface StoreStockService {
     StoreStockDto createStoreStock(StoreStockDto createStoreStock);
     StoreStockDto updatePriceOfStore(int stockId, BigDecimal price);
+    StoreStockDto updateQuantity(int stockId, int quantity);
 }
