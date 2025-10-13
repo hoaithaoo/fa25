@@ -9,6 +9,9 @@ import swp391.fa25.saleElectricVehicle.payload.dto.*;
 import swp391.fa25.saleElectricVehicle.repository.StoreStockRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Service
 public class StoreStockServiceImpl implements StoreStockService {
 
@@ -36,7 +39,7 @@ public class StoreStockServiceImpl implements StoreStockService {
         }
 
         // không tìm thấy model
-        Model model = modelService.getModelEntityByName(createStoreStock.getModelName());
+        ModelDto model = modelService.getModelByName(createStoreStock.getModelName());
         if (model == null) {
             throw new AppException(ErrorCode.MODEL_NOT_FOUND);
         }
@@ -60,9 +63,50 @@ public class StoreStockServiceImpl implements StoreStockService {
                         .quantity(createStoreStock.getQuantity())
                         .build();
 
-        storeStockRepository.save(storeStock);
+        StoreStock saved = storeStockRepository.save(storeStock);
 
+        return mapToDto(saved);
+    }
+
+    @Override
+    public StoreStockDto getStoreStockById(int stockId) {
+        StoreStock storeStock = storeStockRepository.findById(stockId)
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_STOCK_NOT_FOUND));
         return mapToDto(storeStock);
+    }
+
+    @Override
+    public List<StoreStockDto> getAllStoreStocks() {
+        return storeStockRepository.findAll().stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    @Override
+    public StoreStockDto updateStoreStock(int stockId, StoreStockDto storeStockDto) {
+        StoreStock storeStock = storeStockRepository.findById(stockId)
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_STOCK_NOT_FOUND));
+
+        // Update price
+        if (storeStockDto.getPriceOfStore() != null &&
+                storeStockDto.getPriceOfStore().compareTo(BigDecimal.ZERO) > 0) {
+            storeStock.setPriceOfStore(storeStockDto.getPriceOfStore());
+        }
+
+        // Update quantity
+        if (storeStockDto.getQuantity() >= 0) {
+            storeStock.setQuantity(storeStockDto.getQuantity());
+        }
+
+        StoreStock saved = storeStockRepository.save(storeStock);
+        return mapToDto(saved);
+    }
+
+    @Override
+    public void deleteStoreStock(int stockId) {
+        StoreStock storeStock = storeStockRepository.findById(stockId)
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_STOCK_NOT_FOUND));
+        storeStockRepository.delete(storeStock);
     }
 
     private StoreStockDto mapToDto(StoreStock storeStock) {

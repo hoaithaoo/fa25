@@ -1,5 +1,6 @@
 package swp391.fa25.saleElectricVehicle.service;
 
+import swp391.fa25.saleElectricVehicle.entity.ModelColor;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelColorDto;
 import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelColorRequest;
 
@@ -13,5 +14,7 @@ public interface ModelColorService {
     List<ModelColorDto> getModelColorsByColorId(int colorId);
     ModelColorDto updateModelColor(int id, ModelColorDto modelColorDto);
     void deleteModelColor(int id);
+    ModelColor getModelColor(int modelId, int colorId);
+
 
 }
