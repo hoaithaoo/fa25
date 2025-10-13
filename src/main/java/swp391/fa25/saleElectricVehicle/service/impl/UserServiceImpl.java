@@ -60,13 +60,12 @@ public class UserServiceImpl implements UserService {
         }
 
         Role role = roleService.getRoleEntityById(userRequest.getRoleId());
-        if (role == null) {
-            throw new AppException(ErrorCode.ROLE_NOT_EXIST);
-        }
 
-        Store store = storeService.getStoreEntityById(userRequest.getStoreId());
-        if (store == null && (userRequest.getRoleId() != 1 && userRequest.getRoleId() != 2)) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        Store store = null;
+        if (role.getRoleName().equalsIgnoreCase("Quản trị viên") || role.getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
+            userRequest.setStoreId(0); // Không gán store nếu role là Quản trị viên hoặc Nhân viên hãng xe
+        } else {
+            store = storeService.getStoreEntityById(userRequest.getStoreId());
         }
 
         User newUser = userRepository.save(User.builder()
@@ -190,7 +189,7 @@ public class UserServiceImpl implements UserService {
 //        return userDto;
 //    }
 
-    //update profile of any user by admin
+    //update profile of any user by Quản trị viên
     @Override
     public UpdateUserProfileResponse updateUserProfile(int userId, UpdateUserProfileRequest updateUserProfileRequest) {
         User user = userRepository.findById(userId).orElse(null);
@@ -215,11 +214,20 @@ public class UserServiceImpl implements UserService {
         if (updateUserProfileRequest.getRoleId() != 0) {
             Role role = roleService.getRoleEntityById(updateUserProfileRequest.getRoleId());
             user.setRole(role);
+            if (role.getRoleName().equalsIgnoreCase("Quản trị viên") || role.getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
+                user.setStore(null); // Nếu role là Quản trị viên hoặc Nhân viên hãng xe thì không được gán store
+            }
         }
 
         if (updateUserProfileRequest.getStoreId() != 0) {
-            Store store = storeService.getStoreEntityById(updateUserProfileRequest.getStoreId());
-            user.setStore(store);
+            if (!user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên")
+                    && !user.getRole().getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
+                Store store = storeService.getStoreEntityById(updateUserProfileRequest.getStoreId());
+                user.setStore(store);
+            } else {
+                // Nếu role là Quản trị viên hoặc Nhân viên hãng xe thì không được gán store
+                throw new AppException(ErrorCode.ROLE_CANNOT_ASSIGN_STORE);
+            }
         }
 
         if (updateUserProfileRequest.getFullName() != null && !updateUserProfileRequest.getFullName().trim().isEmpty()) {
@@ -239,8 +247,10 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .status(user.getStatus())
-                .storeId(user.getStore().getStoreId())
+                .storeId(user.getStore() != null ? user.getStore().getStoreId() : 0)
+                .storeName(user.getStore() != null ? user.getStore().getStoreName() : null)
                 .roleId(user.getRole().getRoleId())
+                .roleName(user.getRole().getRoleName())
                 .build();
     }
 

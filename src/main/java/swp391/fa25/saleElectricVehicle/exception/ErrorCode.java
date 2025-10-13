@@ -35,7 +35,7 @@ public enum ErrorCode {
     ORDER_DETAIL_NOT_FOUND(1023, "Chi tiết đơn hàng không tồn tại", HttpStatus.NOT_FOUND),
     STORE_STOCK_NOT_FOUND(1024, "Kho hàng không tồn tại", HttpStatus.NOT_FOUND),
     INSUFFICIENT_STOCK(1025, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
-//    UNAUTHORIZED_CREATE_ADMIN(1026, "Cannot create Admin role", HttpStatus.FORBIDDEN),
+    ROLE_CANNOT_ASSIGN_STORE(1026, "Admin và EVM Staff không được gán store", HttpStatus.FORBIDDEN),
 //    UNAUTHORIZED_UPDATE_ADMIN(1027, "Cannot update Admin role", HttpStatus.FORBIDDEN),
 //    UNAUTHORIZED_DELETE_ADMIN(1028, "Cannot delete Admin role", HttpStatus.FORBIDDEN),
     INVALID_CREATE_STORE_MANUFACTURER(1029, "EVM Staff does not have store", HttpStatus.FORBIDDEN),
