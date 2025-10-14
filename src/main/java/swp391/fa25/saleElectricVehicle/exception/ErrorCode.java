@@ -44,6 +44,12 @@ public enum ErrorCode {
     MODEL_COLOR_EXISTED(1032, "Model màu đã tồn tại", HttpStatus.BAD_REQUEST),
     CONTRACT_NOT_FOUND(1033, "Hợp đồng không tồn tại", HttpStatus.NOT_FOUND),
     CONTRACT_FILE_URL_EXISTED(1034, "URL file hợp đồng đã tồn tại", HttpStatus.BAD_REQUEST),
+    APPOINTMENT_NOT_FOUND(1035, "Lịch hẹn không tồn tại", HttpStatus.NOT_FOUND),
+    INVALID_TIME_RANGE(1036, "Thời gian không hợp lệ", HttpStatus.BAD_REQUEST),
+    START_TIME_AFTER_END_TIME(1037, "Thời gian bắt đầu phải trước thời gian kết thúc", HttpStatus.BAD_REQUEST),
+    PAST_APPOINTMENT_TIME(1038, "Thời gian lịch hẹn phải trong tương lai", HttpStatus.BAD_REQUEST),
+
+
     ;
 
     private final int code;
