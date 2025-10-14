@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,6 +19,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int orderId;
 
+    @Column(unique = true, nullable = false)
+    private String orderCode;
+
     @Column(precision = 15, scale = 2, nullable = false)
     private BigDecimal totalPrice;
 
@@ -32,21 +36,13 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column
-    private OrderStatus status = OrderStatus.PENDING;
+    private OrderStatus status;
 
     @Column(nullable = false)
     private LocalDateTime orderDate;
 
     @Column
     private LocalDateTime updatedAt;
-
-    public enum OrderStatus {
-        PENDING,
-        CONFIRMED,
-        PROCESSING,
-        DELIVERED,
-        CANCELLED
-    }
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "contract_id", nullable = false)

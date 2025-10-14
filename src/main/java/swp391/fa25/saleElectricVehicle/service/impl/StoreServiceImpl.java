@@ -89,6 +89,16 @@ public class StoreServiceImpl implements StoreService {
         return store;
     }
 
+    // dùng để lấy store hiện tại của user
+    @Override
+    public Store getCurrentStoreEntity(int userId) {
+        Store store = storeRepository.findStoreByUser_UserId(userId);
+        if (store == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        return store;
+    }
+
     @Override
     public List<StoreDto> getAllStores() {
         return storeRepository.findAll().stream().map(this::mapTodo).toList();
@@ -101,12 +111,21 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
-        if (storeRepository.existsByStoreName(storeDto.getStoreName())) {
+        if (!store.getStoreName().equals(storeDto.getStoreName()) &&
+                storeRepository.existsByStoreName(storeDto.getStoreName())) {
             throw new AppException(ErrorCode.STORE_EXISTED);
         }
 
-        if (storeDto.getContractEndDate().isBefore(storeDto.getContractStartDate())) {
-            throw new AppException(ErrorCode.INVALID_END_DATE);
+        // ✅ Cần check null trước
+        if (storeDto.getContractStartDate() != null && storeDto.getContractEndDate() != null) {
+            if (storeDto.getContractEndDate().isBefore(storeDto.getContractStartDate())) {
+                throw new AppException(ErrorCode.INVALID_END_DATE);
+            }
+            if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
+                throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
+            }
+            store.setContractStartDate(storeDto.getContractStartDate());
+            store.setContractEndDate(storeDto.getContractEndDate());
         }
 
         if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {

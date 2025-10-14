@@ -2,6 +2,8 @@ package swp391.fa25.saleElectricVehicle.service.impl;
 
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Role;
@@ -58,13 +60,12 @@ public class UserServiceImpl implements UserService {
         }
 
         Role role = roleService.getRoleEntityById(userRequest.getRoleId());
-        if (role == null) {
-            throw new AppException(ErrorCode.ROLE_NOT_EXIST);
-        }
 
-        Store store = storeService.getStoreEntityById(userRequest.getStoreId());
-        if (store == null && (userRequest.getRoleId() != 1 && userRequest.getRoleId() != 2)) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        Store store = null;
+        if (role.getRoleName().equalsIgnoreCase("Quản trị viên") || role.getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
+            userRequest.setStoreId(0); // Không gán store nếu role là Quản trị viên hoặc Nhân viên hãng xe
+        } else {
+            store = storeService.getStoreEntityById(userRequest.getStoreId());
         }
 
         User newUser = userRepository.save(User.builder()
@@ -151,6 +152,21 @@ public class UserServiceImpl implements UserService {
                 .build()).toList();
     }
 
+    // dùng ở tạo order, lấy user hiện tại
+    @Override
+    public User getCurrentUserEntity() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        User currentUser = userRepository.findByEmail(email);
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+
+        return currentUser;
+    }
+
 //    @Override
 //    public UserDto updateOwnProfile(int userId, UserDto userDto) {
 //        User user = userRepository.findById(userId).orElse(null);
@@ -173,7 +189,7 @@ public class UserServiceImpl implements UserService {
 //        return userDto;
 //    }
 
-    //update profile of any user by admin
+    //update profile of any user by Quản trị viên
     @Override
     public UpdateUserProfileResponse updateUserProfile(int userId, UpdateUserProfileRequest updateUserProfileRequest) {
         User user = userRepository.findById(userId).orElse(null);
@@ -198,11 +214,20 @@ public class UserServiceImpl implements UserService {
         if (updateUserProfileRequest.getRoleId() != 0) {
             Role role = roleService.getRoleEntityById(updateUserProfileRequest.getRoleId());
             user.setRole(role);
+            if (role.getRoleName().equalsIgnoreCase("Quản trị viên") || role.getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
+                user.setStore(null); // Nếu role là Quản trị viên hoặc Nhân viên hãng xe thì không được gán store
+            }
         }
 
         if (updateUserProfileRequest.getStoreId() != 0) {
-            Store store = storeService.getStoreEntityById(updateUserProfileRequest.getStoreId());
-            user.setStore(store);
+            if (!user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên")
+                    && !user.getRole().getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
+                Store store = storeService.getStoreEntityById(updateUserProfileRequest.getStoreId());
+                user.setStore(store);
+            } else {
+                // Nếu role là Quản trị viên hoặc Nhân viên hãng xe thì không được gán store
+                throw new AppException(ErrorCode.ROLE_CANNOT_ASSIGN_STORE);
+            }
         }
 
         if (updateUserProfileRequest.getFullName() != null && !updateUserProfileRequest.getFullName().trim().isEmpty()) {
@@ -222,8 +247,10 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .status(user.getStatus())
-                .storeId(user.getStore().getStoreId())
+                .storeId(user.getStore() != null ? user.getStore().getStoreId() : 0)
+                .storeName(user.getStore() != null ? user.getStore().getStoreName() : null)
                 .roleId(user.getRole().getRoleId())
+                .roleName(user.getRole().getRoleName())
                 .build();
     }
 

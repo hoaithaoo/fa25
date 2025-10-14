@@ -39,6 +39,9 @@ public class InventoryTransaction {
     @Column(nullable = false)
     private LocalDateTime transactionDate;
 
+    @Column
+    private LocalDateTime deliveryDate;
+
     @ManyToOne
     @JoinColumn(name = "storeStockId", nullable = false)
     private StoreStock storeStock;

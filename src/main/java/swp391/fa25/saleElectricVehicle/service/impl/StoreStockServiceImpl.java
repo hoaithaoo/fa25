@@ -10,6 +10,7 @@ import swp391.fa25.saleElectricVehicle.repository.StoreStockRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class StoreStockServiceImpl implements StoreStockService {
@@ -36,18 +37,37 @@ public class StoreStockServiceImpl implements StoreStockService {
         Color color = colorService.getColorEntityById(request.getColorId());
         ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
 
-        StoreStock storeStock = StoreStock.builder()
-                        .store(store)
-                        .modelColor(modelColor)
-                        .priceOfStore(request.getPriceOfStore())
-                        .quantity(request.getQuantity())
-                        .build();
+        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(store.getStoreId(), modelColor.getModelColorId());
+        if (storeStock != null) {
+            throw new AppException(ErrorCode.STORE_STOCK_EXISTED);
+        }
 
-        storeStockRepository.save(storeStock);
+        storeStock = storeStockRepository.save(StoreStock.builder()
+                .store(store)
+                .modelColor(modelColor)
+                .priceOfStore(request.getPriceOfStore())
+                .quantity(request.getQuantity())
+                .build());
 
         return mapToDto(storeStock);
     }
 
+    @Override
+    public List<StoreStockDto> getAllStoreStock() {
+        List<StoreStock> storeStocks = storeStockRepository.findAll();
+        return storeStocks.stream().map(this::mapToDto).toList();
+    }
+
+//    @Override
+//    public StoreStockDto getStoreStockByStoreIdAndModelIdAndColorId(int storeId, int modelId, int colorId) {
+//        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_Model_ModelIdAndModelColor_Color_ColorId(storeId, modelId, colorId);
+//        if (storeStock == null) {
+//            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+//        }
+//        return mapToDto(storeStock);
+//    }
+
+    // update giá bán của cửa hàng
     @Override
     public StoreStockDto updatePriceOfStore(int stockId, BigDecimal price) {
         StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
@@ -64,11 +84,40 @@ public class StoreStockServiceImpl implements StoreStockService {
         return mapToDto(storeStock);
     }
 
+    // update số lượng tồn kho của cửa hàng
+    @Override
+    public StoreStockDto updateQuantity(int stockId, int quantity) {
+        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+
+        if (quantity < 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+        storeStock.setQuantity(quantity);
+        storeStockRepository.save(storeStock);
+
+        return mapToDto(storeStock);
+    }
+
+    @Override
+    public void deleteStoreStock(int stockId) {
+        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+        storeStockRepository.delete(storeStock);
+    }
+
     private StoreStockDto mapToDto(StoreStock storeStock) {
         return StoreStockDto.builder()
                 .stockId(storeStock.getStockId())
+                .storeId(storeStock.getStore().getStoreId())
                 .storeName(storeStock.getStore().getStoreName())
+                .modelId(storeStock.getModelColor().getModel().getModelId())
                 .modelName(storeStock.getModelColor().getModel().getModelName())
+                .colorId(storeStock.getModelColor().getColor().getColorId())
                 .colorName(storeStock.getModelColor().getColor().getColorName())
                 .priceOfStore(storeStock.getPriceOfStore())
                 .quantity(storeStock.getQuantity())

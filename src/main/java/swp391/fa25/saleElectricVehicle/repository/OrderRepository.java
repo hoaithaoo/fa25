@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import swp391.fa25.saleElectricVehicle.entity.Order;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,7 +20,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByUser_UserId(int staffId);
 
     // Find by status
-    List<Order> findByStatus(Order.OrderStatus status);
+    List<Order> findByStatus(OrderStatus status);
 
     // Find by date range
     List<Order> findByOrderDateBetween(LocalDateTime startDate, LocalDateTime endDate);
@@ -29,7 +30,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByCustomerPhone(@Param("phone") String phone);
 
     // Count orders by status
-    long countByStatus(Order.OrderStatus status);
+    long countByStatus(OrderStatus status);
 
     // Find recent orders
     List<Order> findTop10ByOrderByOrderDateDesc();

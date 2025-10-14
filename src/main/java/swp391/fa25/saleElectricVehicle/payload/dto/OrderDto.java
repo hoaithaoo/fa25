@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.payload.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.Order;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ public class OrderDto {
     private BigDecimal totalTaxPrice;
     private BigDecimal totalPromotionAmount;
     private BigDecimal totalPayment;
-    private Order.OrderStatus status;
+    private OrderStatus status;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime orderDate;

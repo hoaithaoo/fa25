@@ -130,6 +130,25 @@ public class ModelColorServiceImpl implements ModelColorService {
         modelColorRepository.delete(modelColor);
     }
 
+    // Thêm method này vào ModelColorServiceImpl
+    @Override
+    public ModelColor getModelColor(int modelId, int colorId) {
+        // Tìm trong repository bằng cách lấy tất cả rồi filter
+        List<ModelColor> allModelColors = modelColorRepository.findAll();
+
+        ModelColor modelColor = allModelColors.stream()
+                .filter(mc -> mc.getModel().getModelId() == modelId &&
+                        mc.getColor().getColorId() == colorId)
+                .findFirst()
+                .orElse(null);
+
+        if (modelColor == null) {
+            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
+        }
+
+        return modelColor;
+    }
+
     private ModelColorDto mapToDto(ModelColor modelColor) {
         return ModelColorDto.builder()
                 .modelColorId(modelColor.getModelColorId())
