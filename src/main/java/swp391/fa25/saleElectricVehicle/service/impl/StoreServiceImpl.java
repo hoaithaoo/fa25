@@ -47,7 +47,7 @@ public class StoreServiceImpl implements StoreService {
 
         storeRepository.save(store);
 
-        return mapTodo(store);
+        return mapToDto(store);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class StoreServiceImpl implements StoreService {
         if (store.isEmpty()) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
-        return store.stream().map(this::mapTodo).toList();
+        return store.stream().map(this::mapToDto).toList();
     }
 
     // dùng để add vào staff và store stock
@@ -101,7 +101,7 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public List<StoreDto> getAllStores() {
-        return storeRepository.findAll().stream().map(this::mapTodo).toList();
+        return storeRepository.findAll().stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -128,10 +128,6 @@ public class StoreServiceImpl implements StoreService {
             store.setContractEndDate(storeDto.getContractEndDate());
         }
 
-        if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
-            throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
-        }
-
         if (storeDto.getStoreName() != null && !storeDto.getStoreName().trim().isEmpty()) {
             store.setStoreName(storeDto.getStoreName());
         }
@@ -156,7 +152,7 @@ public class StoreServiceImpl implements StoreService {
 
         storeRepository.save(store);
 
-        return mapTodo(store);
+        return mapToDto(store);
     }
 
     @Override
@@ -168,7 +164,7 @@ public class StoreServiceImpl implements StoreService {
         storeRepository.delete(store);
     }
 
-    private StoreDto mapTodo(Store store) {
+    private StoreDto mapToDto(Store store) {
         return StoreDto.builder()
                 .storeId(store.getStoreId())
                 .storeName(store.getStoreName())
