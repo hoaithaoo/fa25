@@ -8,7 +8,6 @@ import swp391.fa25.saleElectricVehicle.entity.ModelColor;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelColorDto;
-import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelColorRequest;
 import swp391.fa25.saleElectricVehicle.repository.ModelColorRepository;
 import swp391.fa25.saleElectricVehicle.service.ColorService;
 import swp391.fa25.saleElectricVehicle.service.ModelColorService;
@@ -29,7 +28,7 @@ public class ModelColorServiceImpl implements ModelColorService {
     ColorService colorService;
 
     @Override
-    public ModelColorDto createModelColor(CreateModelColorRequest request) {
+    public ModelColorDto createModelColor(ModelColorDto request) {
         Model model = modelService.getModelEntityById(request.getModelId());
         Color color = colorService.getColorEntityById(request.getColorId());
 
@@ -41,6 +40,7 @@ public class ModelColorServiceImpl implements ModelColorService {
         ModelColor newModelColor = modelColorRepository.save(ModelColor.builder()
                 .model(model)
                 .color(color)
+                .imagePath(request.getImagePath())
                 .build());
 
         return mapToDto(newModelColor);
@@ -99,6 +99,10 @@ public class ModelColorServiceImpl implements ModelColorService {
         existingModelColor.setModel(model);
         existingModelColor.setColor(color);
 
+        if (modelColorDto.getImagePath() != null && !modelColorDto.getImagePath().trim().isEmpty()) {
+            existingModelColor.setImagePath(modelColorDto.getImagePath());
+        }
+
 //        // Check model mới bằng TÊN
 //        if (modelColorDto.getModelName() != null && !modelColorDto.getModelName().trim().isEmpty()) {
 //            Model model = modelRepository.findByModelName(modelColorDto.getModelName()); // ← Cần check ModelRepository có method này không
@@ -156,6 +160,7 @@ public class ModelColorServiceImpl implements ModelColorService {
                 .modelName(modelColor.getModel().getModelName())
                 .colorId(modelColor.getColor().getColorId())
                 .colorName(modelColor.getColor().getColorName())
+                .imagePath(modelColor.getImagePath())
                 .build();
     }
 }
