@@ -93,6 +93,13 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackRepository.delete(feedback);
     }
 
+    @Override
+    public Feedback getFeedbackEntityById(int feedbackId) {
+        return feedbackRepository.findById(feedbackId)
+                .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
+    }
+
+
     private FeedbackDto mapToDto(Feedback feedback) {
         return FeedbackDto.builder()
                 .feedbackId(feedback.getFeedbackId())
