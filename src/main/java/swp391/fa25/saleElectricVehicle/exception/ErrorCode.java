@@ -48,6 +48,7 @@ public enum ErrorCode {
     INVALID_TIME_RANGE(1036, "Thời gian không hợp lệ", HttpStatus.BAD_REQUEST),
     START_TIME_AFTER_END_TIME(1037, "Thời gian bắt đầu phải trước thời gian kết thúc", HttpStatus.BAD_REQUEST),
     PAST_APPOINTMENT_TIME(1038, "Thời gian lịch hẹn phải trong tương lai", HttpStatus.BAD_REQUEST),
+    FEEDBACK_NOT_FOUND(1039, "Phản hồi không tồn tại", HttpStatus.NOT_FOUND),
 
 
     ;

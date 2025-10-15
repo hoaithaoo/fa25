@@ -22,7 +22,7 @@ public class InventoryTransactionController {
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<InventoryTransactionDto>> createInventoryTransaction(
-            @Valid @RequestBody InventoryTransactionDto dto) { // ✅ Đổi từ CreateInventoryTransactionRequest → InventoryTransactionDto
+            @Valid @RequestBody InventoryTransactionDto dto) {
 
         InventoryTransactionDto created = inventoryTransactionService.createInventoryTransaction(dto);
 
@@ -103,7 +103,7 @@ public class InventoryTransactionController {
     @PutMapping("/update/{inventoryId}")
     public ResponseEntity<ApiResponse<InventoryTransactionDto>> updateInventoryTransaction(
             @PathVariable int inventoryId,
-            @Valid @RequestBody InventoryTransactionDto dto) { // ✅ Đổi từ UpdateInventoryTransactionRequest → InventoryTransactionDto
+            @Valid @RequestBody InventoryTransactionDto dto) {
 
         InventoryTransactionDto updated =
                 inventoryTransactionService.updateInventoryTransaction(inventoryId, dto);
