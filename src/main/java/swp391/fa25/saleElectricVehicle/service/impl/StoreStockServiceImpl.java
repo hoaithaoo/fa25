@@ -42,6 +42,14 @@ public class StoreStockServiceImpl implements StoreStockService {
             throw new AppException(ErrorCode.STORE_STOCK_EXISTED);
         }
 
+        if (request.getPriceOfStore().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_AMOUNT);
+        }
+
+        if (request.getQuantity() <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
         storeStock = storeStockRepository.save(StoreStock.builder()
                 .store(store)
                 .modelColor(modelColor)
