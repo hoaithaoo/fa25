@@ -50,6 +50,7 @@ public enum ErrorCode {
     PAST_APPOINTMENT_TIME(1038, "Thời gian lịch hẹn phải trong tương lai", HttpStatus.BAD_REQUEST),
     FEEDBACK_NOT_FOUND(1039, "Phản hồi không tồn tại", HttpStatus.NOT_FOUND),
     FEEDBACK_DETAIL_NOT_FOUND(1040, "Chi tiết phản hồi không tồn tại", HttpStatus.NOT_FOUND),
+    TEST_DRIVE_CONFIG_NOT_FOUND(1041, "Cấu hình lái thử không tồn tại", HttpStatus.NOT_FOUND),
 
 
     ;
