@@ -1,9 +1,10 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import swp391.fa25.saleElectricVehicle.entity.Store;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
@@ -39,7 +40,8 @@ public class StoreServiceImpl implements StoreService {
                 .phone(storeDto.getPhone())
                 .provinceName(storeDto.getProvinceName())
                 .ownerName(storeDto.getOwnerName())
-                .status(StoreStatus.ACTIVE)
+                .imagePath(storeDto.getImagePath())
+                .isActive(true)
                 .contractStartDate(storeDto.getContractStartDate())
                 .contractEndDate(storeDto.getContractEndDate())
                 .createdAt(LocalDateTime.now())
@@ -47,7 +49,7 @@ public class StoreServiceImpl implements StoreService {
 
         storeRepository.save(store);
 
-        return mapTodo(store);
+        return mapToDto(store);
     }
 
     @Override
@@ -66,7 +68,7 @@ public class StoreServiceImpl implements StoreService {
         if (store.isEmpty()) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
-        return store.stream().map(this::mapTodo).toList();
+        return store.stream().map(this::mapToDto).toList();
     }
 
     // dùng để add vào staff và store stock
@@ -101,7 +103,7 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public List<StoreDto> getAllStores() {
-        return storeRepository.findAll().stream().map(this::mapTodo).toList();
+        return storeRepository.findAll().stream().map(this::mapToDto).toList();
     }
 
     @Override
@@ -116,7 +118,7 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.STORE_EXISTED);
         }
 
-        // ✅ Cần check null trước
+        // Cần check null trước
         if (storeDto.getContractStartDate() != null && storeDto.getContractEndDate() != null) {
             if (storeDto.getContractEndDate().isBefore(storeDto.getContractStartDate())) {
                 throw new AppException(ErrorCode.INVALID_END_DATE);
@@ -126,10 +128,6 @@ public class StoreServiceImpl implements StoreService {
             }
             store.setContractStartDate(storeDto.getContractStartDate());
             store.setContractEndDate(storeDto.getContractEndDate());
-        }
-
-        if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
-            throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
         }
 
         if (storeDto.getStoreName() != null && !storeDto.getStoreName().trim().isEmpty()) {
@@ -148,15 +146,16 @@ public class StoreServiceImpl implements StoreService {
             store.setOwnerName(storeDto.getOwnerName());
         }
 
-        if (storeDto.getStatus() != null) {
-            store.setStatus(storeDto.getStatus());
+
+        if (storeDto.getPhone() != null && !storeDto.getPhone().trim().isEmpty()) {
+            store.setPhone(storeDto.getPhone());
         }
 
         store.setUpdatedAt(LocalDateTime.now());
 
         storeRepository.save(store);
 
-        return mapTodo(store);
+        return mapToDto(store);
     }
 
     @Override
@@ -168,7 +167,7 @@ public class StoreServiceImpl implements StoreService {
         storeRepository.delete(store);
     }
 
-    private StoreDto mapTodo(Store store) {
+    private StoreDto mapToDto(Store store) {
         return StoreDto.builder()
                 .storeId(store.getStoreId())
                 .storeName(store.getStoreName())
@@ -176,9 +175,25 @@ public class StoreServiceImpl implements StoreService {
                 .phone(store.getPhone())
                 .provinceName(store.getProvinceName())
                 .ownerName(store.getOwnerName())
-                .status(store.getStatus())
+                .imagePath(store.getImagePath())
+                .isActive(store.isActive())
                 .contractStartDate(store.getContractStartDate())
                 .contractEndDate(store.getContractEndDate())
                 .build();
+    }
+
+    // Runs every day at midnight
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void deactivateExpiredStores() {
+        List<Store> activeStores = storeRepository.findStoresByIsActiveTrue();
+        LocalDateTime now = LocalDateTime.now();
+        for (Store store : activeStores) {
+            if (store.getContractEndDate().isBefore(now)) {
+                store.setActive(false);
+                store.setUpdatedAt(now);
+                storeRepository.save(store);
+            }
+        }
     }
 }

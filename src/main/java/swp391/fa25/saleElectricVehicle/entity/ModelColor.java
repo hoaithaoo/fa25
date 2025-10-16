@@ -16,6 +16,9 @@ public class ModelColor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int modelColorId;
 
+    @Column
+    private String imagePath;
+
     @ManyToOne
     @JoinColumn(name = "modelId", nullable = false)
     private Model model;

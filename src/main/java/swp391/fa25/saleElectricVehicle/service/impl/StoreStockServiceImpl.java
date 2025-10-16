@@ -32,7 +32,7 @@ public class StoreStockServiceImpl implements StoreStockService {
 
     @Override
     public StoreStockDto createStoreStock(StoreStockDto request) {
-        Store store = storeService.getStoreEntityByName(request.getStoreName());
+        Store store = storeService.getStoreEntityById(request.getStoreId());
         Model model = modelService.getModelEntityById(request.getModelId());
         Color color = colorService.getColorEntityById(request.getColorId());
         ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
@@ -40,6 +40,14 @@ public class StoreStockServiceImpl implements StoreStockService {
         StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(store.getStoreId(), modelColor.getModelColorId());
         if (storeStock != null) {
             throw new AppException(ErrorCode.STORE_STOCK_EXISTED);
+        }
+
+        if (request.getPriceOfStore().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_AMOUNT);
+        }
+
+        if (request.getQuantity() <= 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
         }
 
         storeStock = storeStockRepository.save(StoreStock.builder()

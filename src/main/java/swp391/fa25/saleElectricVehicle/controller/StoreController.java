@@ -72,68 +72,68 @@ public class StoreController {
         return ResponseEntity.ok(response);
     }
 
-    // BUSINESS - Get stores by status
-    @GetMapping("/status/{status}")
-    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByStatus(@PathVariable String status) {
-        List<StoreDto> stores = storeService.getAllStores().stream()
-                .filter(store -> store.getStatus().name().equals(status.toUpperCase()))
-                .toList();
-
-        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Stores by status retrieved successfully")
-                .data(stores)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    // BUSINESS - Get stores by province
-    @GetMapping("/province/{provinceName}")
-    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByProvince(@PathVariable String provinceName) {
-        List<StoreDto> stores = storeService.getAllStores().stream()
-                .filter(store -> store.getProvinceName().toLowerCase().contains(provinceName.toLowerCase()))
-                .toList();
-
-        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Stores by province retrieved successfully")
-                .data(stores)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    // BUSINESS - Search stores
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<StoreDto>>> searchStores(
-            @RequestParam(required = false) String storeName,
-            @RequestParam(required = false) String provinceName,
-            @RequestParam(required = false) String ownerName) {
-
-        List<StoreDto> stores = storeService.getAllStores();
-
-        if (storeName != null && !storeName.trim().isEmpty()) {
-            stores = stores.stream()
-                    .filter(s -> s.getStoreName().toLowerCase().contains(storeName.toLowerCase()))
-                    .toList();
-        }
-
-        if (provinceName != null && !provinceName.trim().isEmpty()) {
-            stores = stores.stream()
-                    .filter(s -> s.getProvinceName().toLowerCase().contains(provinceName.toLowerCase()))
-                    .toList();
-        }
-
-        if (ownerName != null && !ownerName.trim().isEmpty()) {
-            stores = stores.stream()
-                    .filter(s -> s.getOwnerName().toLowerCase().contains(ownerName.toLowerCase()))
-                    .toList();
-        }
-
-        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Search results retrieved successfully")
-                .data(stores)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    // BUSINESS - Get stores by status
+//    @GetMapping("/status/{status}")
+//    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByStatus(@PathVariable String status) {
+//        List<StoreDto> stores = storeService.getAllStores().stream()
+//                .filter(store -> store.getStatus().name().equals(status.toUpperCase()))
+//                .toList();
+//
+//        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Stores by status retrieved successfully")
+//                .data(stores)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
+//
+//    // BUSINESS - Get stores by province
+//    @GetMapping("/province/{provinceName}")
+//    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByProvince(@PathVariable String provinceName) {
+//        List<StoreDto> stores = storeService.getAllStores().stream()
+//                .filter(store -> store.getProvinceName().toLowerCase().contains(provinceName.toLowerCase()))
+//                .toList();
+//
+//        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Stores by province retrieved successfully")
+//                .data(stores)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
+//
+//    // BUSINESS - Search stores
+//    @GetMapping("/search")
+//    public ResponseEntity<ApiResponse<List<StoreDto>>> searchStores(
+//            @RequestParam(required = false) String storeName,
+//            @RequestParam(required = false) String provinceName,
+//            @RequestParam(required = false) String ownerName) {
+//
+//        List<StoreDto> stores = storeService.getAllStores();
+//
+//        if (storeName != null && !storeName.trim().isEmpty()) {
+//            stores = stores.stream()
+//                    .filter(s -> s.getStoreName().toLowerCase().contains(storeName.toLowerCase()))
+//                    .toList();
+//        }
+//
+//        if (provinceName != null && !provinceName.trim().isEmpty()) {
+//            stores = stores.stream()
+//                    .filter(s -> s.getProvinceName().toLowerCase().contains(provinceName.toLowerCase()))
+//                    .toList();
+//        }
+//
+//        if (ownerName != null && !ownerName.trim().isEmpty()) {
+//            stores = stores.stream()
+//                    .filter(s -> s.getOwnerName().toLowerCase().contains(ownerName.toLowerCase()))
+//                    .toList();
+//        }
+//
+//        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Search results retrieved successfully")
+//                .data(stores)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 }
