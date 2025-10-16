@@ -32,7 +32,7 @@ public class StoreStockServiceImpl implements StoreStockService {
 
     @Override
     public StoreStockDto createStoreStock(StoreStockDto request) {
-        Store store = storeService.getStoreEntityByName(request.getStoreName());
+        Store store = storeService.getStoreEntityById(request.getStoreId());
         Model model = modelService.getModelEntityById(request.getModelId());
         Color color = colorService.getColorEntityById(request.getColorId());
         ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
