@@ -1,5 +1,6 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Store;
@@ -86,6 +87,16 @@ public class TestDriveConfigServiceImpl implements TestDriveConfigService {
                 .orElseThrow(() -> new AppException(ErrorCode.TEST_DRIVE_CONFIG_NOT_FOUND));
         testDriveConfigRepository.delete(config);
     }
+//    @Override
+//    @Transactional
+//    public void deleteTestDriveConfig(int configId) {
+//        TestDriveConfig config = testDriveConfigRepository.findById(configId)
+//             .orElseThrow(() -> new AppException(ErrorCode.TEST_DRIVE_CONFIG_NOT_FOUND));
+//        testDriveConfigRepository.delete(config);
+//        testDriveConfigRepository.flush(); // ✅ Force commit ngay lập tức
+//}
+
+
 
     private TestDriveConfigDto mapToDto(TestDriveConfig config) {
         return TestDriveConfigDto.builder()
