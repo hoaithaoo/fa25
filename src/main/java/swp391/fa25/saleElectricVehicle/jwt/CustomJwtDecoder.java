@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
+import swp391.fa25.saleElectricVehicle.service.LoginService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -21,7 +22,7 @@ public class CustomJwtDecoder implements JwtDecoder {
     private String signerKey;
 
     @Autowired
-    UserService userService;
+    LoginService loginService;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
 
@@ -29,7 +30,7 @@ public class CustomJwtDecoder implements JwtDecoder {
     @Override
     public Jwt decode(String token) throws JwtException {
 
-        var response = userService.introspect(
+        var response = loginService.introspect(
                 IntrospectRequest.builder().token(token).build());
 
         if (!response.isValid()) throw new BadCredentialsException("Token invalid or expired"); // Ném BadCredentialsException;

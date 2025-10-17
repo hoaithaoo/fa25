@@ -46,9 +46,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Autowired
-    Jwt jwt;
-
     @Override
     public CreateUserResponse createUser(CreateUserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())) {
@@ -167,6 +164,15 @@ public class UserServiceImpl implements UserService {
         return currentUser;
     }
 
+    @Override
+    public User getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+        return user;
+    }
+
 //    @Override
 //    public UserDto updateOwnProfile(int userId, UserDto userDto) {
 //        User user = userRepository.findById(userId).orElse(null);
@@ -261,61 +267,5 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
         userRepository.delete(user);
-    }
-
-    @Override
-    public LoginResponse login(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail());
-
-        if (user == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXIST);
-        }
-
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new AppException(ErrorCode.WRONG_PASSWORD);
-        }
-
-        UserDto userDto = UserDto.builder()
-                .userId(user.getUserId())
-                .email(user.getEmail())
-                .roleId(user.getRole().getRoleId())
-                .build();
-
-        Jwt.TokenPair tokenPair = jwt.generateTokenPair(userDto);
-
-        return LoginResponse.builder()
-                .accessToken(tokenPair.accessToken().token())
-                .refreshToken(tokenPair.refreshToken().token())
-                .accessTokenExpiry(tokenPair.accessToken().expiryDate().getTime())
-                .refreshTokenExpiry(tokenPair.refreshToken().expiryDate().getTime())
-                .build();
-    }
-
-    @Override
-    public IntrospectResponse introspect(IntrospectRequest introspectRequest) {
-        var token = introspectRequest.getToken();
-        boolean isValid = true;
-
-        try {
-            // Kiểm tra tính hợp lệ của token
-            jwt.verifyToken(token);
-        } catch (AppException e) {
-            // Xử lý lỗi AppException
-            isValid = false;
-        } catch (JOSEException e) {
-            // Xử lý lỗi JOSEException
-            isValid = false;
-        } catch (ParseException e) {
-            // Xử lý lỗi ParseException
-            isValid = false;
-        } catch (Exception e) {
-            // Bắt tất cả các lỗi không xác định
-            isValid = false;
-        }
-
-        // Trả về IntrospectResponse với trạng thái valid và thông báo lỗi nếu có
-        return IntrospectResponse.builder()
-                .valid(isValid)
-                .build();
     }
 }
