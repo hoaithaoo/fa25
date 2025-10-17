@@ -86,7 +86,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
         // Kiểm tra StoreStock tồn tại
         storeStockService.getStoreStockEntityById(storeStockId);
 
-        return inventoryTransactionRepository.findByStoreStock_StoreStockId(storeStockId).stream()
+        return inventoryTransactionRepository.findByStoreStock_StockId(storeStockId).stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
@@ -168,7 +168,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .dept(transaction.getDept())
                 .transactionDate(transaction.getTransactionDate())
                 .deliveryDate(transaction.getDeliveryDate())
-                .storeStockId(transaction.getStoreStock().getStoreStockId())
+                .storeStockId(transaction.getStoreStock().getStockId())
                 .build();
     }
 }
