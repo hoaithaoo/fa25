@@ -15,7 +15,7 @@ public class TestDriveConfig {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int configId;
+    private Integer configId;
 
     @Column(nullable = false)
     private int maxAppointmentsPerDay;
@@ -33,6 +33,6 @@ public class TestDriveConfig {
     private LocalDateTime endTime;
 
     @OneToOne
-    @JoinColumn(name = "storeId", nullable = false)
+    @JoinColumn(name = "store_Id", nullable = false)
     private Store store;
 }

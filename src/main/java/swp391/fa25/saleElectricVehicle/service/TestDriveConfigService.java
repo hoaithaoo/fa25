@@ -8,7 +8,6 @@ public interface TestDriveConfigService {
     TestDriveConfigDto createTestDriveConfig(TestDriveConfigDto dto);
     TestDriveConfigDto getTestDriveConfigById(int configId);
     List<TestDriveConfigDto> getAllTestDriveConfigs();
-    TestDriveConfigDto getTestDriveConfigByStore(int storeId);
     TestDriveConfigDto updateTestDriveConfig(int configId, TestDriveConfigDto dto);
-    void deleteTestDriveConfig(int configId);
+    void deleteTestDriveConfig(Integer configId);
 }
