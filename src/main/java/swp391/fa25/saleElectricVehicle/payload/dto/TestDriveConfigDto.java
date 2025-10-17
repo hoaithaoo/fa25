@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class TestDriveConfigDto {
-    private int configId;
+    private Integer configId;
     private int maxAppointmentsPerDay;
     private int appointmentDurationMinutes;
     private int maxConcurrentAppointments;
