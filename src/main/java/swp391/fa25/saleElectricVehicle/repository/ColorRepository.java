@@ -9,6 +9,5 @@ import java.util.List;
 public interface ColorRepository extends JpaRepository<Color, Integer> {
     boolean existsColorByColorName(String colorName);
     List<Color> findColorsByColorNameContaining(String colorName);
-    boolean existsByColorCode(String colorCode);
-//    Color findColorByColorName(String colorName);
+    Color findColorByColorName(String colorName);
 }

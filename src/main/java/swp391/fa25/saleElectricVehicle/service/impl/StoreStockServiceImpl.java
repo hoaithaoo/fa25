@@ -42,14 +42,6 @@ public class StoreStockServiceImpl implements StoreStockService {
             throw new AppException(ErrorCode.STORE_STOCK_EXISTED);
         }
 
-        if (request.getPriceOfStore().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_AMOUNT);
-        }
-
-        if (request.getQuantity() <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-
         storeStock = storeStockRepository.save(StoreStock.builder()
                 .store(store)
                 .modelColor(modelColor)
@@ -66,14 +58,14 @@ public class StoreStockServiceImpl implements StoreStockService {
         return storeStocks.stream().map(this::mapToDto).toList();
     }
 
-//    @Override
-//    public StoreStockDto getStoreStockByStoreIdAndModelIdAndColorId(int storeId, int modelId, int colorId) {
-//        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_Model_ModelIdAndModelColor_Color_ColorId(storeId, modelId, colorId);
-//        if (storeStock == null) {
-//            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
-//        }
-//        return mapToDto(storeStock);
-//    }
+    @Override
+    public StoreStock getStoreStockEntityById(int stockId) {
+        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+        return storeStock;
+    }
 
     // update giá bán của cửa hàng
     @Override

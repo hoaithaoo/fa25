@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelColorDto;
+import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelColorRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.ModelColorService;
 
@@ -18,9 +19,9 @@ public class ModelColorController {
     private ModelColorService modelColorService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ModelColorDto>> createModelColor(@RequestBody ModelColorDto request) {
+    public ResponseEntity<ApiResponse<ModelColorDto>> createModelColor(@RequestBody CreateModelColorRequest request) {
         ModelColorDto createdModelColor = modelColorService.createModelColor(request);
-        ApiResponse<ModelColorDto> response = ApiResponse.<ModelColorDto>builder()
+        ApiResponse<ModelColorDto> response = ApiResponse.<ModelColorDto>   builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Model color created successfully")
                 .data(createdModelColor)

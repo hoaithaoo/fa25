@@ -13,6 +13,4 @@ public interface StoreRepository extends JpaRepository<Store, Integer> {
     List<Store> findStoresByStoreNameContaining(String name);
     Store findStoreByStoreName(String storeName);
     Store findStoreByUser_UserId(int userId);
-
-    List<Store> findStoresByIsActiveTrue();
 }

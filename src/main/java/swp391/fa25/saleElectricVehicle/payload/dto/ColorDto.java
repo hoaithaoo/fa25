@@ -9,5 +9,4 @@ import lombok.*;
 public class ColorDto {
     private int colorId;
     private String colorName;
-    private String colorCode;
 }

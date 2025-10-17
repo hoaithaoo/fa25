@@ -20,9 +20,6 @@ public class Color {
     @Column(nullable = false, unique = true, columnDefinition = "nvarchar(50)")
     private String colorName;
 
-    @Column(nullable = false, unique = true, columnDefinition = "varchar(7)")
-    private String colorCode;
-
     @OneToMany(mappedBy = "color", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ModelColor> modelColors = new ArrayList<>();
 }

@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,11 +36,9 @@ public class Store {
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String ownerName;
 
-    @Column
-    private String imagePath;
-
     @Column(nullable = false)
-    private boolean isActive;
+    @Enumerated(EnumType.STRING)
+    private StoreStatus status;
 
     @Column(nullable = false)
     private LocalDateTime contractStartDate;
