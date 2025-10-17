@@ -72,20 +72,17 @@ public class StoreController {
         return ResponseEntity.ok(response);
     }
 
-//    // BUSINESS - Get stores by status
-//    @GetMapping("/status/{status}")
-//    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByStatus(@PathVariable String status) {
-//        List<StoreDto> stores = storeService.getAllStores().stream()
-//                .filter(store -> store.getStatus().name().equals(status.toUpperCase()))
-//                .toList();
-//
-//        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
-//                .code(HttpStatus.OK.value())
-//                .message("Stores by status retrieved successfully")
-//                .data(stores)
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
+    // BUSINESS - Get stores by status
+    @GetMapping("/status/{status}")
+    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByStatus(@PathVariable String status) {
+        List<StoreDto> stores = storeService.getAllActiveStores();
+        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Stores by status retrieved successfully")
+                .data(stores)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 //
 //    // BUSINESS - Get stores by province
 //    @GetMapping("/province/{provinceName}")

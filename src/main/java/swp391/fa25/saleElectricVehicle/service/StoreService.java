@@ -9,10 +9,9 @@ public interface StoreService {
     StoreDto createStore(StoreDto storeDto);
     Store getStoreEntityById(int storeId);
     List<StoreDto> getStoreByNameContaining(String storeName);
-//    StoreDto getStoreByName(String storeName);
-    Store getStoreEntityByName(String storeName);
     Store getCurrentStoreEntity(int userId);
     List<StoreDto> getAllStores();
+    List<StoreDto> getAllActiveStores();
     StoreDto updateStore(int storeId, StoreDto storeDto);
     void deleteStore(int storeId);
 }
