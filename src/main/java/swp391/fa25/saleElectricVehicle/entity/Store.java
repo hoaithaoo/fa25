@@ -46,6 +46,9 @@ public class Store {
     @Column(nullable = false)
     private LocalDateTime contractEndDate;
 
+    @Column
+    private String imagePath;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 

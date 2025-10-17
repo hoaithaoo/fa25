@@ -17,6 +17,7 @@ public class StoreDto {
     private String provinceName;
     private String ownerName;
     private StoreStatus status;
+    private String imagePath;
     private LocalDateTime contractStartDate;
     private LocalDateTime contractEndDate;
 }

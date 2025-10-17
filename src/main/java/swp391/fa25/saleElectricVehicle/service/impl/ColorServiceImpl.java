@@ -22,8 +22,14 @@ public class ColorServiceImpl implements ColorService {
         if (colorRepository.existsColorByColorName(colorDto.getColorName())) {
             throw new AppException(ErrorCode.COLOR_EXISTED);
         }
+
+        if (colorRepository.existsByColorCode(colorDto.getColorCode())) {
+            throw new AppException(ErrorCode.COLOR_CODE_EXISTED);
+        }
+
         Color color = colorRepository.save(Color.builder()
                 .colorName(colorDto.getColorName())
+                .colorCode(colorDto.getColorCode())
                 .build());
         return mapToDto(color);
     }
@@ -107,8 +113,14 @@ public class ColorServiceImpl implements ColorService {
                 colorRepository.existsColorByColorName(colorDto.getColorName())) {
             throw new AppException(ErrorCode.COLOR_EXISTED);
         }
-
         color.setColorName(colorDto.getColorName());
+
+        if (colorDto.getColorCode() != null
+                && !colorDto.getColorCode().trim().isEmpty()
+                && colorRepository.existsByColorCode(colorDto.getColorCode())) {
+            throw new AppException(ErrorCode.COLOR_CODE_EXISTED);
+        }
+        color.setColorCode(colorDto.getColorCode());
 
         colorRepository.save(color);
 
@@ -128,6 +140,7 @@ public class ColorServiceImpl implements ColorService {
         return ColorDto.builder()
                 .colorId(color.getColorId())
                 .colorName(color.getColorName())
+                .colorCode(color.getColorCode())
                 .build();
     }
 }

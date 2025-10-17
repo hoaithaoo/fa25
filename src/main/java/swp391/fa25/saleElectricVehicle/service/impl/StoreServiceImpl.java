@@ -40,6 +40,7 @@ public class StoreServiceImpl implements StoreService {
                 .provinceName(storeDto.getProvinceName())
                 .ownerName(storeDto.getOwnerName())
                 .status(StoreStatus.ACTIVE)
+                .imagePath(storeDto.getImagePath())
                 .contractStartDate(storeDto.getContractStartDate())
                 .contractEndDate(storeDto.getContractEndDate())
                 .createdAt(LocalDateTime.now())
@@ -152,6 +153,10 @@ public class StoreServiceImpl implements StoreService {
             store.setStatus(storeDto.getStatus());
         }
 
+        if (storeDto.getImagePath() != null && !storeDto.getImagePath().trim().isEmpty()) {
+            store.setImagePath(storeDto.getImagePath());
+        }
+
         store.setUpdatedAt(LocalDateTime.now());
 
         storeRepository.save(store);
@@ -177,6 +182,7 @@ public class StoreServiceImpl implements StoreService {
                 .provinceName(store.getProvinceName())
                 .ownerName(store.getOwnerName())
                 .status(store.getStatus())
+                .imagePath(store.getImagePath())
                 .contractStartDate(store.getContractStartDate())
                 .contractEndDate(store.getContractEndDate())
                 .build();
