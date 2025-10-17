@@ -189,6 +189,15 @@ public class OrderServiceImpl implements OrderService {
 //                .toList();
 //    }
 
+    @Override
+    public Order getOrderEntityById(int orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
+        }
+        return order;
+    }
+
     // Helper method to convert Entity to DTO
     private GetOrderResponse mapToDto(Order order) {
         return GetOrderResponse.builder()

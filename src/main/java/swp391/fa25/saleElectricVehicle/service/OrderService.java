@@ -1,5 +1,6 @@
 package swp391.fa25.saleElectricVehicle.service;
 
+import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
@@ -16,6 +17,7 @@ public interface OrderService {
     List<GetOrderResponse> getAllOrders();
 //    OrderDto updateOrder(int orderId, OrderDto orderDto);
     void deleteOrder(int orderId);
+    Order getOrderEntityById(int orderId);
 
     // Business operations
 //    OrderDto updateOrderStatus(int orderId, OrderStatus status);

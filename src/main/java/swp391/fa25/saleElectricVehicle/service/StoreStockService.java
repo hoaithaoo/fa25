@@ -13,4 +13,6 @@ public interface StoreStockService {
     StoreStockDto updatePriceOfStore(int stockId, BigDecimal price);
     StoreStockDto updateQuantity(int stockId, int quantity);
     void deleteStoreStock(int stockId);
+    StoreStock getStoreStockEntityById(int storeStockId);
+
 }
