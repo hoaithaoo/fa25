@@ -110,6 +110,13 @@ public class StoreStockServiceImpl implements StoreStockService {
         storeStockRepository.delete(storeStock);
     }
 
+    @Override
+    public StoreStock getStoreStockEntityById(int stockId) {
+        return storeStockRepository.findById(stockId)
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_STOCK_NOT_FOUND));
+    }
+
+
     private StoreStockDto mapToDto(StoreStock storeStock) {
         return StoreStockDto.builder()
                 .stockId(storeStock.getStockId())
