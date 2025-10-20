@@ -21,10 +21,11 @@ public interface UserService {
     List<GetUserResponse> getUserByName(String name);
     List<GetUserResponse> getAllUsers();
     User getCurrentUserEntity();
+    User getUserByEmail(String email);
 //    UserDto updateOwnProfile(int userId, UserDto userDto);
     UpdateUserProfileResponse updateUserProfile(int userId, UpdateUserProfileRequest updateUserProfileRequest);
     void deleteUser(int userId);
 
-    LoginResponse login(LoginRequest loginRequest);
-    IntrospectResponse introspect(IntrospectRequest introspectRequest);
+//    LoginResponse login(LoginRequest loginRequest);
+//    IntrospectResponse introspect(IntrospectRequest introspectRequest);
 }

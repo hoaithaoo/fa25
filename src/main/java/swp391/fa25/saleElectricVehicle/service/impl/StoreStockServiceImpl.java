@@ -32,7 +32,7 @@ public class StoreStockServiceImpl implements StoreStockService {
 
     @Override
     public StoreStockDto createStoreStock(StoreStockDto request) {
-        Store store = storeService.getStoreEntityByName(request.getStoreName());
+        Store store = storeService.getStoreEntityById(request.getStoreId());
         Model model = modelService.getModelEntityById(request.getModelId());
         Color color = colorService.getColorEntityById(request.getColorId());
         ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
@@ -58,14 +58,24 @@ public class StoreStockServiceImpl implements StoreStockService {
         return storeStocks.stream().map(this::mapToDto).toList();
     }
 
-//    @Override
-//    public StoreStockDto getStoreStockByStoreIdAndModelIdAndColorId(int storeId, int modelId, int colorId) {
-//        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_Model_ModelIdAndModelColor_Color_ColorId(storeId, modelId, colorId);
-//        if (storeStock == null) {
-//            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
-//        }
-//        return mapToDto(storeStock);
-//    }
+    @Override
+    public StoreStock getStoreStockEntityById(int stockId) {
+        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+        return storeStock;
+    }
+
+    @Override
+    public StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelId, int colorId) {
+        ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(modelId, colorId);
+        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(storeId, modelColor.getModelColorId());
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+        return storeStock;
+    }
 
     // update giá bán của cửa hàng
     @Override
@@ -109,13 +119,6 @@ public class StoreStockServiceImpl implements StoreStockService {
         }
         storeStockRepository.delete(storeStock);
     }
-
-    @Override
-    public StoreStock getStoreStockEntityById(int stockId) {
-        return storeStockRepository.findById(stockId)
-                .orElseThrow(() -> new AppException(ErrorCode.STORE_STOCK_NOT_FOUND));
-    }
-
 
     private StoreStockDto mapToDto(StoreStock storeStock) {
         return StoreStockDto.builder()

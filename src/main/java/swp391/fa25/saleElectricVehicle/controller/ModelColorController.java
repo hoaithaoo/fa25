@@ -21,7 +21,7 @@ public class ModelColorController {
     @PostMapping
     public ResponseEntity<ApiResponse<ModelColorDto>> createModelColor(@RequestBody CreateModelColorRequest request) {
         ModelColorDto createdModelColor = modelColorService.createModelColor(request);
-        ApiResponse<ModelColorDto> response = ApiResponse.<ModelColorDto>builder()
+        ApiResponse<ModelColorDto> response = ApiResponse.<ModelColorDto>   builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Model color created successfully")
                 .data(createdModelColor)

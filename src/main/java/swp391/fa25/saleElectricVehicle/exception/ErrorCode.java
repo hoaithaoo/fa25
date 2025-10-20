@@ -37,7 +37,7 @@ public enum ErrorCode {
     INSUFFICIENT_STOCK(1025, "Kho hàng không đủ", HttpStatus.BAD_REQUEST),
     ROLE_CANNOT_ASSIGN_STORE(1026, "Admin và EVM Staff không được gán store", HttpStatus.BAD_REQUEST),
     STORE_STOCK_EXISTED(1027, "Kho hàng đã tồn tại", HttpStatus.BAD_REQUEST),
-//    UNAUTHORIZED_DELETE_ADMIN(1028, "Cannot delete Admin role", HttpStatus.FORBIDDEN),
+    COLOR_CODE_EXISTED(1028, "Mã màu đã tồn tại", HttpStatus.FORBIDDEN),
     INVALID_CREATE_STORE_MANUFACTURER(1029, "EVM Staff does not have store", HttpStatus.FORBIDDEN),
     UNAUTHORIZED_UPDATE_STORE_MANUFACTURER(1030, "Cannot update store of EVM Staff", HttpStatus.FORBIDDEN),
     INVALID_NUMBER(1031, "The value of this field must be greater than 0", HttpStatus.BAD_REQUEST),
@@ -52,7 +52,6 @@ public enum ErrorCode {
     FEEDBACK_DETAIL_NOT_FOUND(1040, "Chi tiết phản hồi không tồn tại", HttpStatus.NOT_FOUND),
     TEST_DRIVE_CONFIG_NOT_FOUND(1041, "Cấu hình lái thử không tồn tại", HttpStatus.NOT_FOUND),
     INVENTORY_TRANSACTION_NOT_FOUND(1042, "Giao dịch tồn kho không tồn tại", HttpStatus.NOT_FOUND)
-
 
     ;
 

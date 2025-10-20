@@ -41,6 +41,7 @@ public class ModelColorServiceImpl implements ModelColorService {
         ModelColor newModelColor = modelColorRepository.save(ModelColor.builder()
                 .model(model)
                 .color(color)
+                .imagePath(request.getImagePath())
                 .build());
 
         return mapToDto(newModelColor);
@@ -99,6 +100,10 @@ public class ModelColorServiceImpl implements ModelColorService {
         existingModelColor.setModel(model);
         existingModelColor.setColor(color);
 
+        if (modelColorDto.getImagePath() != null && !modelColorDto.getImagePath().trim().isEmpty()) {
+            existingModelColor.setImagePath(modelColorDto.getImagePath());
+        }
+
 //        // Check model mới bằng TÊN
 //        if (modelColorDto.getModelName() != null && !modelColorDto.getModelName().trim().isEmpty()) {
 //            Model model = modelRepository.findByModelName(modelColorDto.getModelName()); // ← Cần check ModelRepository có method này không
@@ -156,6 +161,8 @@ public class ModelColorServiceImpl implements ModelColorService {
                 .modelName(modelColor.getModel().getModelName())
                 .colorId(modelColor.getColor().getColorId())
                 .colorName(modelColor.getColor().getColorName())
+                .colorCode(modelColor.getColor().getColorCode())
+                .imagePath(modelColor.getImagePath())
                 .build();
     }
 }

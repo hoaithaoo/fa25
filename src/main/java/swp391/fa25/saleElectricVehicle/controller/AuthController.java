@@ -14,6 +14,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.RefreshTokenRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.LoginResponse;
 import swp391.fa25.saleElectricVehicle.service.AuthTokenService;
+import swp391.fa25.saleElectricVehicle.service.LoginService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 @RestController
@@ -21,14 +22,14 @@ import swp391.fa25.saleElectricVehicle.service.UserService;
 public class AuthController {
 
     @Autowired
-    UserService userService;
+    LoginService loginService;
 
     @Autowired
     AuthTokenService authTokenService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login (@RequestBody LoginRequest loginRequest) {
-        LoginResponse loginResponse = userService.login(loginRequest);
+        LoginResponse loginResponse = loginService.login(loginRequest);
 
         ApiResponse<LoginResponse> response = ApiResponse.<LoginResponse>builder()
                 .code(HttpStatus.OK.value())

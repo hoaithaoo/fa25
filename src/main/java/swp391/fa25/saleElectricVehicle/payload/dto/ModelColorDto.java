@@ -12,4 +12,6 @@ public class ModelColorDto {
     private String modelName;
     private int colorId;
     private String colorName;
+    private String colorCode;
+    private String imagePath;
 }

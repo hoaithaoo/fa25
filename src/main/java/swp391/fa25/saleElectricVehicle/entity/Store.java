@@ -46,6 +46,9 @@ public class Store {
     @Column(nullable = false)
     private LocalDateTime contractEndDate;
 
+    @Column
+    private String imagePath;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -58,8 +61,13 @@ public class Store {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private java.util.List<Appointment> appointments = new java.util.ArrayList<>();
 
-    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL)
+//    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL)
+//    private TestDriveConfig testDriveConfig;
+
+    //Sửa lại để test delete bên TestDriveConfig
+    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private TestDriveConfig testDriveConfig;
+
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Promotion> promotions = new java.util.ArrayList<>();

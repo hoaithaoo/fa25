@@ -32,7 +32,7 @@ public class TestDriveConfigController {
 
     @GetMapping("/{configId}")
     public ResponseEntity<ApiResponse<TestDriveConfigDto>> getTestDriveConfigById(
-            @PathVariable int configId) {
+            @PathVariable Integer configId) {
         TestDriveConfigDto dto = testDriveConfigService.getTestDriveConfigById(configId);
         ApiResponse<TestDriveConfigDto> response = ApiResponse.<TestDriveConfigDto>builder()
                 .code(HttpStatus.OK.value())
@@ -53,21 +53,9 @@ public class TestDriveConfigController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/store/{storeId}")
-    public ResponseEntity<ApiResponse<TestDriveConfigDto>> getTestDriveConfigByStore(
-            @PathVariable int storeId) {
-        TestDriveConfigDto dto = testDriveConfigService.getTestDriveConfigByStore(storeId);
-        ApiResponse<TestDriveConfigDto> response = ApiResponse.<TestDriveConfigDto>builder()
-                .code(HttpStatus.OK.value())
-                .message("Test drive config by store fetched successfully")
-                .data(dto)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
     @PutMapping("/update/{configId}")
     public ResponseEntity<ApiResponse<TestDriveConfigDto>> updateTestDriveConfig(
-            @PathVariable int configId,
+            @PathVariable Integer configId,
             @Valid @RequestBody TestDriveConfigDto dto) {
         TestDriveConfigDto updated = testDriveConfigService.updateTestDriveConfig(configId, dto);
         ApiResponse<TestDriveConfigDto> response = ApiResponse.<TestDriveConfigDto>builder()
@@ -79,7 +67,7 @@ public class TestDriveConfigController {
     }
 
     @DeleteMapping("/delete/{configId}")
-    public ResponseEntity<ApiResponse<Void>> deleteTestDriveConfig(@PathVariable int configId) {
+    public ResponseEntity<ApiResponse<Void>> deleteTestDriveConfig(@PathVariable Integer configId) {
         testDriveConfigService.deleteTestDriveConfig(configId);
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .code(HttpStatus.NO_CONTENT.value())

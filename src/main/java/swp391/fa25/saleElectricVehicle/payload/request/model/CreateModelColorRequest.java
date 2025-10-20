@@ -9,4 +9,5 @@ import lombok.*;
 public class CreateModelColorRequest {
     private int modelId;
     private int colorId;
+    private String imagePath;
 }
