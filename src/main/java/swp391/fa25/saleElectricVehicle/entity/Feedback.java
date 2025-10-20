@@ -17,20 +17,24 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int feedbackId;
 
+    // ✅ THÊM MỚI: Lưu tên khách hàng
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    private String customerName;
+
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(nullable = false)
     private FeedbackStatus status;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String createBy;
 
     @Column
     private LocalDateTime resolveAt;
 
-    @Column
+    @Column(columnDefinition = "nvarchar(255)")
     private String resolveBy;
 
     public enum FeedbackStatus {
@@ -41,7 +45,7 @@ public class Feedback {
     }
 
     @OneToOne
-    @JoinColumn(name = "ordeId")
+    @JoinColumn(name = "order_id") // ✅ SỬA: "ordeId" → "order_id" (đúng naming convention)
     private Order order;
 
     @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true)
