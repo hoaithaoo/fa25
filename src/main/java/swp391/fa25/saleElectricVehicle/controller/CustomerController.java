@@ -1,10 +1,12 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
+import swp391.fa25.saleElectricVehicle.payload.request.customer.CreateCustomerRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.CustomerService;
 
@@ -18,8 +20,9 @@ public class CustomerController {
     private CustomerService customerService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<CustomerDto>> createCustomer(@RequestBody CustomerDto customerDto) {
-        CustomerDto createdCustomer = customerService.createCustomer(customerDto);
+    public ResponseEntity<ApiResponse<CustomerDto>> createCustomer(
+            @Valid @RequestBody CreateCustomerRequest request) { // ✅ Đổi từ CustomerDto → CreateCustomerRequest
+        CustomerDto createdCustomer = customerService.createCustomer(request);
         ApiResponse<CustomerDto> response = ApiResponse.<CustomerDto>builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Customer created successfully")

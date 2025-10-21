@@ -6,6 +6,7 @@ import swp391.fa25.saleElectricVehicle.entity.Customer;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
+import swp391.fa25.saleElectricVehicle.payload.request.customer.CreateCustomerRequest;
 import swp391.fa25.saleElectricVehicle.repository.CustomerRepository;
 import swp391.fa25.saleElectricVehicle.service.CustomerService;
 
@@ -19,26 +20,28 @@ public class CustomerServiceImpl implements CustomerService {
     CustomerRepository customerRepository;
 
     @Override
-    public CustomerDto createCustomer(CustomerDto customerDto) {
-        if (customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
+    public CustomerDto createCustomer(CreateCustomerRequest request) { // ✅ Đổi từ CustomerDto → CreateCustomerRequest
+        // ✅ request.getPhone() hoạt động vì có @Getter
+        if (customerRepository.findCustomerByPhone(request.getPhone()) != null) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        if (customerRepository.existsCustomerByEmail(customerDto.getEmail())) {
+        // ✅ request.getEmail() hoạt động vì có @Getter
+        if (customerRepository.existsCustomerByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
         Customer newCustomer = Customer.builder()
-                .fullName(customerDto.getFullName())
-                .address(customerDto.getAddress())
-                .email(customerDto.getEmail())
-                .phone(customerDto.getPhone())
+                .fullName(request.getFullName())
+                .address(request.getAddress())
+                .email(request.getEmail())
+                .phone(request.getPhone())
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        customerRepository.save(newCustomer);
+        Customer saved = customerRepository.save(newCustomer);
 
-        return mapToDto(newCustomer);
+        return mapToDto(saved); // ✅ customerId sẽ tự động có sau khi save
     }
 
     @Override
