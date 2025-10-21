@@ -203,21 +203,24 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        if (updateUserProfileRequest.getEmail() != null && !updateUserProfileRequest.getEmail().trim().isEmpty()) {
-            if (!user.getEmail().equals(updateUserProfileRequest.getEmail()) && userRepository.existsByEmail(updateUserProfileRequest.getEmail())) {
-                throw new AppException(ErrorCode.USER_EXISTED);
-            }
-            user.setEmail(updateUserProfileRequest.getEmail());
+        if (updateUserProfileRequest.getEmail() != null
+                && !updateUserProfileRequest.getEmail().trim().isEmpty()
+                && !user.getEmail().equals(updateUserProfileRequest.getEmail())
+                && userRepository.existsByEmail(updateUserProfileRequest.getEmail())) {
+            throw new AppException(ErrorCode.USER_EXISTED);
         }
+        user.setEmail(updateUserProfileRequest.getEmail());
 
-        if (updateUserProfileRequest.getPhone() != null && !updateUserProfileRequest.getPhone().trim().isEmpty()) {
-            if (!user.getPhone().equals(updateUserProfileRequest.getPhone()) && userRepository.existsByPhone(updateUserProfileRequest.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_EXISTED);
-            }
-            user.setPhone(updateUserProfileRequest.getPhone());
+        if (updateUserProfileRequest.getPhone() != null
+                && !updateUserProfileRequest.getPhone().trim().isEmpty()
+                && !user.getPhone().equals(updateUserProfileRequest.getPhone())
+                && userRepository.existsByPhone(updateUserProfileRequest.getPhone())) {
+            throw new AppException(ErrorCode.PHONE_EXISTED);
         }
+        user.setPhone(updateUserProfileRequest.getPhone());
 
-        if (updateUserProfileRequest.getRoleId() != 0) {
+        if (updateUserProfileRequest.getRoleId() != 0
+                && updateUserProfileRequest.getRoleId() != user.getRole().getRoleId()) {
             Role role = roleService.getRoleEntityById(updateUserProfileRequest.getRoleId());
             user.setRole(role);
             if (role.getRoleName().equalsIgnoreCase("Quản trị viên") || role.getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
@@ -225,7 +228,8 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        if (updateUserProfileRequest.getStoreId() != 0) {
+        if (updateUserProfileRequest.getStoreId() != 0
+        && (user.getStore() == null || updateUserProfileRequest.getStoreId() != user.getStore().getStoreId())) {
             if (!user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên")
                     && !user.getRole().getRoleName().equalsIgnoreCase("Nhân viên hãng xe")) {
                 Store store = storeService.getStoreEntityById(updateUserProfileRequest.getStoreId());
@@ -236,11 +240,14 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        if (updateUserProfileRequest.getFullName() != null && !updateUserProfileRequest.getFullName().trim().isEmpty()) {
+        if (updateUserProfileRequest.getFullName() != null
+                && !updateUserProfileRequest.getFullName().trim().isEmpty()
+                && !updateUserProfileRequest.getFullName().equals(user.getFullName())) {
             user.setFullName(updateUserProfileRequest.getFullName());
         }
 
-        if (updateUserProfileRequest.getStatus() != null) {
+        if (updateUserProfileRequest.getStatus() != null
+                && updateUserProfileRequest.getStatus() != user.getStatus()) {
             user.setStatus(updateUserProfileRequest.getStatus());
         }
 
