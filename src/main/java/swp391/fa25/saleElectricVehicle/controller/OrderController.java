@@ -83,13 +83,10 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    // BUSINESS - Update order status
-//    @PutMapping("/{orderId}/status/{status}")
+    // BUSINESS - Confirm order (update status)
+//    @PutMapping("/{orderId}/confirm")
 //    public ResponseEntity<ApiResponse<OrderDto>> updateOrderStatus(
-//            @PathVariable int orderId,
-//            @PathVariable String status) {
-//
-//        OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
+//            @PathVariable int orderId) {
 //        OrderDto updatedOrder = orderService.updateOrderStatus(orderId, orderStatus);
 //
 //        ApiResponse<OrderDto> response = ApiResponse.<OrderDto>builder()

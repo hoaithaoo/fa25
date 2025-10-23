@@ -10,7 +10,8 @@ public interface StoreStockService {
     StoreStockDto createStoreStock(StoreStockDto createStoreStock);
     List<StoreStockDto> getAllStoreStock();
     StoreStock getStoreStockEntityById(int stockId);
-    StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelId, int colorId);
+    StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelColorId);
+    StoreStock getStoreStockByStoreIdAndModelColorIdWithLock(int storeId, int modelColorId);
     StoreStockDto updatePriceOfStore(int stockId, BigDecimal price);
     StoreStockDto updateQuantity(int stockId, int quantity);
     void deleteStoreStock(int stockId);

@@ -68,9 +68,17 @@ public class StoreStockServiceImpl implements StoreStockService {
     }
 
     @Override
-    public StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelId, int colorId) {
-        ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(modelId, colorId);
-        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(storeId, modelColor.getModelColorId());
+    public StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelColorId) {
+        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(storeId, modelColorId);
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+        return storeStock;
+    }
+
+    @Override
+    public StoreStock getStoreStockByStoreIdAndModelColorIdWithLock(int storeId, int modelColorId) {
+        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorIdWithLock(storeId, modelColorId);
         if (storeStock == null) {
             throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
         }
