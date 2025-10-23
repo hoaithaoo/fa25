@@ -1,5 +1,6 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Customer;
@@ -9,9 +10,9 @@ import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.service.CustomerService;
@@ -54,9 +55,13 @@ public class OrderServiceImpl implements OrderService {
                 .customer(customer)
                 .user(staff)
                 .build());
+        String orderCode = "ORD-" + String.format("%06d", savedOrder.getOrderId());
+        savedOrder.setOrderCode(orderCode);
+        savedOrder = orderRepository.save(savedOrder);
 
         return CreateOrderResponse.builder()
                 .orderId(savedOrder.getOrderId())
+                .orderCode(orderCode)
                 .totalPrice(savedOrder.getTotalPrice())
                 .totalTaxPrice(savedOrder.getTotalTaxPrice())
                 .totalPromotionAmount(savedOrder.getTotalPromotionAmount())
@@ -116,6 +121,13 @@ public class OrderServiceImpl implements OrderService {
 //        Order savedOrder = orderRepository.save(order);
 //        return mapToDto(savedOrder);
 //    }
+
+    @Override
+    @Transactional
+    public void updateAfterDetailChange(Order order) {
+        order.setStatus(OrderStatus.PENDING);
+        orderRepository.save(order);
+    }
 
     @Override
     public void deleteOrder(int orderId) {
@@ -202,6 +214,25 @@ public class OrderServiceImpl implements OrderService {
     private GetOrderResponse mapToDto(Order order) {
         return GetOrderResponse.builder()
                 .orderId(order.getOrderId())
+                .orderCode(order.getOrderCode())
+                .getOrderDetailsResponses(order.getOrderDetails().stream()
+                        .map(od -> GetOrderDetailsResponse.builder()
+                                .orderDetailId(od.getId())
+                                .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
+                                .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
+                                .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
+                                .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
+                                .unitPrice(od.getUnitPrice())
+                                .quantity(od.getQuantity())
+                                .vatAmount(od.getVatAmount())
+                                .licensePlateFee(od.getLicensePlateFee())
+                                .registrationFee(od.getRegistrationFee())
+                                .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : null)
+                                .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
+                                .discountAmount(od.getDiscountAmount())
+                                .totalPrice(od.getTotalPrice())
+                                .build())
+                        .toList())
                 .totalPrice(order.getTotalPrice())
                 .totalTaxPrice(order.getTotalTaxPrice())
                 .totalPromotionAmount(order.getTotalPromotionAmount())

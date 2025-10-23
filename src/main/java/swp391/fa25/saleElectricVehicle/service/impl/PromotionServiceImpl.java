@@ -82,6 +82,15 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     @Override
+    public Promotion getPromotionEntityById(int promotionId) {
+        Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
+        if (promotion == null) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+        return promotion;
+    }
+
+    @Override
     public PromotionDto updatePromotion(int promotionId, PromotionDto promotionDto) {
         Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
         if (promotion == null) {
