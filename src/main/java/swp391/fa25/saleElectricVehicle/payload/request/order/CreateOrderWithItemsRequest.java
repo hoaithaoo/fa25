@@ -9,10 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateOrderDetailsRequest {
+public class CreateOrderWithItemsRequest {
     private int orderId;
-    private int modelId;
-    private int colorId;
-    private int quantity;
-    private Integer promotionId;
+    List<CreateOrderDetailsRequest> orderDetails;
 }

@@ -1,5 +1,6 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Customer;
@@ -9,7 +10,6 @@ import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
@@ -54,9 +54,13 @@ public class OrderServiceImpl implements OrderService {
                 .customer(customer)
                 .user(staff)
                 .build());
+        String orderCode = "ORD-" + String.format("%06d", savedOrder.getOrderId());
+        savedOrder.setOrderCode(orderCode);
+        savedOrder = orderRepository.save(savedOrder);
 
         return CreateOrderResponse.builder()
                 .orderId(savedOrder.getOrderId())
+                .orderCode(orderCode)
                 .totalPrice(savedOrder.getTotalPrice())
                 .totalTaxPrice(savedOrder.getTotalTaxPrice())
                 .totalPromotionAmount(savedOrder.getTotalPromotionAmount())
@@ -116,6 +120,13 @@ public class OrderServiceImpl implements OrderService {
 //        Order savedOrder = orderRepository.save(order);
 //        return mapToDto(savedOrder);
 //    }
+
+    @Override
+    @Transactional
+    public void updateAfterDetailChange(Order order) {
+//        order.setStatus(OrderStatus.PENDING);
+        orderRepository.save(order);
+    }
 
     @Override
     public void deleteOrder(int orderId) {

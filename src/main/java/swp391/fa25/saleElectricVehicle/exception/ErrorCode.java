@@ -51,8 +51,8 @@ public enum ErrorCode {
     FEEDBACK_NOT_FOUND(1039, "Phản hồi không tồn tại", HttpStatus.NOT_FOUND),
     FEEDBACK_DETAIL_NOT_FOUND(1040, "Chi tiết phản hồi không tồn tại", HttpStatus.NOT_FOUND),
     TEST_DRIVE_CONFIG_NOT_FOUND(1041, "Cấu hình lái thử không tồn tại", HttpStatus.NOT_FOUND),
-    INVENTORY_TRANSACTION_NOT_FOUND(1042, "Giao dịch tồn kho không tồn tại", HttpStatus.NOT_FOUND)
-
+    INVENTORY_TRANSACTION_NOT_FOUND(1042, "Giao dịch tồn kho không tồn tại", HttpStatus.NOT_FOUND),
+    ORDER_NOT_EDITABLE(1043, "Đơn hàng không thể chỉnh sửa", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

@@ -2,6 +2,8 @@ package swp391.fa25.saleElectricVehicle.payload.response.order;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.*;
 
@@ -12,6 +14,9 @@ import lombok.*;
 @Builder
 public class GetOrderResponse {
     private int orderId;
+
+    private List<GetOrderDetailsResponse> createOrderWithItemsResponse;
+
     private BigDecimal totalPrice;
     private BigDecimal totalTaxPrice;
     private BigDecimal totalPromotionAmount;

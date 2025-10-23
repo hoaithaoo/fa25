@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
         ApiResponse<?> errorResponse = ApiResponse.builder()
                 .code(errorCode.getCode()) // Lấy mã lỗi nội bộ (1002, 1003,...)
                 .message(errorCode.getMessage())
-                .data(null)
+//                .data(appException.getValidationData())
                 .build();
 
         // Trả về ResponseEntity với HTTP Status code (ví dụ: 400 Bad Request)

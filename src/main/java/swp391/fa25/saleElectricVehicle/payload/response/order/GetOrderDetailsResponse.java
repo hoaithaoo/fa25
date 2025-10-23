@@ -1,17 +1,15 @@
 package swp391.fa25.saleElectricVehicle.payload.response.order;
 
 import lombok.*;
-import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderDetailsRequest;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateOrderDetailsResponse {
+public class GetOrderDetailsResponse {
     private int orderDetailId;
 
     private int modelId;
@@ -30,6 +28,6 @@ public class CreateOrderDetailsResponse {
     private Integer promotionId;
     private String promotionName;
     private BigDecimal discountAmount;
-    
+
     private BigDecimal totalPrice;
 }
