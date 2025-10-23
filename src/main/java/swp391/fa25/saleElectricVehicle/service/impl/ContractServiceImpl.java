@@ -10,6 +10,7 @@ import swp391.fa25.saleElectricVehicle.payload.dto.ContractDto;
 import swp391.fa25.saleElectricVehicle.repository.ContractRepository;
 import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
+import swp391.fa25.saleElectricVehicle.service.OrderService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class ContractServiceImpl implements ContractService {
     private ContractRepository contractRepository;
 
     @Autowired
-    private OrderRepository orderRepository;
+    private OrderService orderService;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -35,8 +36,7 @@ public class ContractServiceImpl implements ContractService {
         }
 
         // Validate Order exists
-        Order order = orderRepository.findById(contractDto.getOrderId())
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
+        Order order = orderService.getOrderEntityById(contractDto.getOrderId());
 
         // Validate depositPrice and remainPrice
         if (contractDto.getDepositPrice() != null && contractDto.getDepositPrice().compareTo(BigDecimal.ZERO) < 0) {
