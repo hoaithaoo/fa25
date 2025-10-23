@@ -1,7 +1,9 @@
 package swp391.fa25.saleElectricVehicle.exception;
 
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class AppException extends RuntimeException {
     private ErrorCode errorCode;
 //    private Object validationData; // Có thể là DTO hoặc List<DTO> (error)
@@ -12,7 +14,7 @@ public class AppException extends RuntimeException {
     }
 
     public AppException(ErrorCode errorCode, String message) {
-        super(message);
+        super(errorCode.getMessage() + message);
         this.errorCode = errorCode;
     }
 
@@ -22,11 +24,7 @@ public class AppException extends RuntimeException {
 //        this.validationData = validationData;
 //    }
 
-    public ErrorCode getErrorCode() {
-        return errorCode;
-    }
-
-//    public Object getValidationData() {
+    //    public Object getValidationData() {
 //        return validationData;
 //    }
 }

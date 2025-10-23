@@ -22,12 +22,36 @@ public class GlobalExceptionHandler {
         // Lấy ErrorCode từ AppException
         ErrorCode errorCode = appException.getErrorCode();
 
+//        if (errorCode == null) {
+//            // Nếu không có ErrorCode, trả về lỗi chung
+//            ApiResponse<?> genericErrorResponse = ApiResponse.builder()
+//                    .code(1000) // Mã lỗi chung
+//                    .message("Đã xảy ra lỗi không xác định.")
+//                    .build();
+//            return ResponseEntity
+//                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(genericErrorResponse);
+//        }
+//        ApiResponse<?> errorResponse = null;
+//        if (appException.getMessage() == null) {
+//            errorResponse = ApiResponse.builder()
+//                    .code(errorCode.getCode()) // Lấy mã lỗi nội bộ (1002, 1003,...)
+//                    .message(errorCode.getMessage())
+//                    .build();
+//        } else {
+//            // Xây dựng đối tượng ApiResponse lỗi
+//            errorResponse = ApiResponse.builder()
+//                    .code(errorCode.getCode()) // Lấy mã lỗi nội bộ (1002, 1003,...)
+//                    .message(errorCode.getMessage() + appException.getMessage()) // Kết hợp thông điệp chung và cụ thể
+//                    .build();
+//        }
+
         // Xây dựng đối tượng ApiResponse lỗi
-        ApiResponse<?> errorResponse = ApiResponse.builder()
-                .code(errorCode.getCode()) // Lấy mã lỗi nội bộ (1002, 1003,...)
-                .message(errorCode.getMessage())
-//                .data(appException.getValidationData())
-                .build();
+           ApiResponse<?> errorResponse = ApiResponse.builder()
+                    .code(errorCode.getCode()) // Lấy mã lỗi nội bộ (1002, 1003,...)
+//                    .message(errorCode.getMessage() + appException.getMessage()) // Kết hợp thông điệp chung và cụ thể
+                   .message(appException.getMessage())
+                   .build();
 
         // Trả về ResponseEntity với HTTP Status code (ví dụ: 400 Bad Request)
         return ResponseEntity

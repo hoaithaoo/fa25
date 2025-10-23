@@ -32,7 +32,7 @@ public class OrderDetailController {
                 orderDetailService.validateStockAvailability(request);
         ApiResponse<StockValidationResponse> response = ApiResponse.<StockValidationResponse>builder()
                 .code(HttpStatus.CREATED.value())
-                .message("Order detail created successfully")
+                .message("Order detail added successfully")
                 .data(validation)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

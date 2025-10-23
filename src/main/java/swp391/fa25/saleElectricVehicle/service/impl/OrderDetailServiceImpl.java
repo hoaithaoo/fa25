@@ -55,7 +55,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Autowired
     private UserService userService;
 
-    private final double VAT_AMOUNT_RATE = 10/100; // 10%
+    private final double VAT_AMOUNT_RATE = (double) 10 /100; // 10%
     private final BigDecimal LICENSE_PLATE_AMOUNT_20M = BigDecimal.valueOf(20000000); // 20 millions VND
     private final BigDecimal LICENSE_PLATE_AMOUNT_200K = BigDecimal.valueOf(200000); // 20 thousands VND
     private final BigDecimal REGISTRATION_FEE_AMOUNT = BigDecimal.valueOf(1500000); // 1.5 millions VND
@@ -156,16 +156,17 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
             // Validate stock availability again
             validateStockAvailability(stock, itemReq.getQuantity());
+            // Calculate total order price before tax and discounts
             totalOrderPrice = totalOrderPrice.add(
                     stock.getPriceOfStore().multiply(BigDecimal.valueOf(itemReq.getQuantity()))
             );
 
             // Calculate VAT amount
-            BigDecimal vatAmount = stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE));
+            BigDecimal vatAmount = stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             // Check province for license plate fee
-            BigDecimal licensePlateFee = LICENSE_PLATE_AMOUNT_200K; // Default 200K
+            BigDecimal licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
             if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh") || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
-                licensePlateFee = (LICENSE_PLATE_AMOUNT_20M);
+                licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             }
             totalTax = totalTax.add(vatAmount).add(licensePlateFee).add(REGISTRATION_FEE_AMOUNT);
 
@@ -174,7 +175,6 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             BigDecimal discountAmount = BigDecimal.ZERO;
             if (itemReq.getPromotionId() > 0) {
                 promotion = promotionService.getPromotionEntityById(itemReq.getPromotionId());
-                if (itemReq.getPromotionId() > 0) {
                     // Giả sử promotion là giảm giá theo phần trăm
                     if (promotion.getPromotionType().toString().equals("PERCENTAGE")) {
                         discountAmount = stock.getPriceOfStore()
@@ -183,7 +183,6 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     } else if (promotion.getPromotionType().toString().equals("FIXED_AMOUNT")) {
                         discountAmount = promotion.getAmount().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
                     }
-                }
             }
 
             totalPromotions = totalPromotions.add(discountAmount);
@@ -197,6 +196,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     REGISTRATION_FEE_AMOUNT,
                     discountAmount
             );
+            // calculate final amount
             finalAmount = finalAmount.add(price);
 
             // Create OrderDetail
@@ -207,7 +207,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     .licensePlateFee(licensePlateFee)
                     .registrationFee(REGISTRATION_FEE_AMOUNT)
                     .discountAmount(discountAmount)
-                    .totalPrice(price)
+                    .totalPrice(price) // price after tax and discount
                     .createdAt(LocalDateTime.now())
                     .order(order)
                     .storeStock(stock)
@@ -228,8 +228,6 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         order.setTotalPromotionAmount(totalPromotions);
         order.setTotalPayment(finalAmount);
         orderService.updateAfterDetailChange(order);
-
-
 
         return CreateOrderWithItemsResponse.builder()
                 .orderDetailsResponses(
@@ -259,22 +257,23 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public GetOrderDetailsResponse getOrderDetailById(int id) {
         OrderDetail orderDetail = orderDetailRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
-        return GetOrderDetailsResponse.builder()
-                .orderDetailId(orderDetail.getId())
-                .modelId(orderDetail.getStoreStock().getModelColor().getModel().getModelId())
-                .modelName(orderDetail.getStoreStock().getModelColor().getModel().getModelName())
-                .colorId(orderDetail.getStoreStock().getModelColor().getColor().getColorId())
-                .colorName(orderDetail.getStoreStock().getModelColor().getColor().getColorName())
-                .unitPrice(orderDetail.getUnitPrice())
-                .quantity(orderDetail.getQuantity())
-                .vatAmount(orderDetail.getVatAmount())
-                .licensePlateFee(orderDetail.getLicensePlateFee())
-                .registrationFee(orderDetail.getRegistrationFee())
-                .promotionId(orderDetail.getPromotion() != null ? orderDetail.getPromotion().getPromotionId() : 0)
-                .promotionName(orderDetail.getPromotion() != null ? orderDetail.getPromotion().getPromotionName() : null)
-                .discountAmount(orderDetail.getDiscountAmount())
-                .totalPrice(orderDetail.getTotalPrice())
-                .build();
+//        return GetOrderDetailsResponse.builder()
+//                .orderDetailId(orderDetail.getId())
+//                .modelId(orderDetail.getStoreStock().getModelColor().getModel().getModelId())
+//                .modelName(orderDetail.getStoreStock().getModelColor().getModel().getModelName())
+//                .colorId(orderDetail.getStoreStock().getModelColor().getColor().getColorId())
+//                .colorName(orderDetail.getStoreStock().getModelColor().getColor().getColorName())
+//                .unitPrice(orderDetail.getUnitPrice())
+//                .quantity(orderDetail.getQuantity())
+//                .vatAmount(orderDetail.getVatAmount())
+//                .licensePlateFee(orderDetail.getLicensePlateFee())
+//                .registrationFee(orderDetail.getRegistrationFee())
+//                .promotionId(orderDetail.getPromotion() != null ? orderDetail.getPromotion().getPromotionId() : 0)
+//                .promotionName(orderDetail.getPromotion() != null ? orderDetail.getPromotion().getPromotionName() : null)
+//                .discountAmount(orderDetail.getDiscountAmount())
+//                .totalPrice(orderDetail.getTotalPrice())
+//                .build();
+        return mapToDto(orderDetail);
     }
 
 //    @Override
@@ -393,7 +392,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
             // Throw exception với thông tin chi tiết
             throw new AppException(ErrorCode.INSUFFICIENT_STOCK, String.format(
-                    "Sản phẩm %s không đủ hàng. Còn %d, yêu cầu %d",
+                    ". Sản phẩm %s không đủ hàng. Còn %d, yêu cầu %d",
                     stock.getModelColor().getModel().getModelName(),
                     stock.getQuantity(),
                     requestedQuantity));
@@ -404,80 +403,98 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 //    // =============== CALCULATION ===============
 //
     @Override
-    public BigDecimal calculateTotalPrice(BigDecimal unitPrice, int quantity,
+    public BigDecimal calculateTotalPrice(BigDecimal priceOfStore, int quantity,
                                           BigDecimal vatAmount, BigDecimal licensePlateFee,
                                           BigDecimal registrationFee, BigDecimal discountAmount) {
-        BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
-        BigDecimal fees = licensePlateFee.add(registrationFee);
-        BigDecimal beforeDiscount = subtotal.add(vatAmount).add(fees);
-        return beforeDiscount.subtract(discountAmount);
+        return priceOfStore
+                .multiply(BigDecimal.valueOf(quantity))
+                .add(vatAmount)
+                .add(licensePlateFee)
+                .add(registrationFee)
+                .subtract(discountAmount);
     }
 //
 //    // =============== HELPER METHODS ===============
 //
-    private OrderDetailDto mapToDto(OrderDetail entity) {
-        OrderDetailDto dto = OrderDetailDto.builder()
-                .id(entity.getId())
-                .unitPrice(entity.getUnitPrice())
-                .quantity(entity.getQuantity())
-                .vatAmount(entity.getVatAmount())
-                .licensePlateFee(entity.getLicensePlateFee())
-                .registrationFee(entity.getRegistrationFee())
-                .discountAmount(entity.getDiscountAmount())
-                .totalPrice(entity.getTotalPrice())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .orderId(entity.getOrder().getOrderId())
-                .storeStockId(entity.getStoreStock().getStockId())
-                .promotionId(entity.getPromotion() != null ? entity.getPromotion().getPromotionId() : 0)
+    private GetOrderDetailsResponse mapToDto(OrderDetail od) {
+        return GetOrderDetailsResponse.builder()
+                .orderDetailId(od.getId())
+                .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
+                .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
+                .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
+                .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
+                .unitPrice(od.getUnitPrice())
+                .quantity(od.getQuantity())
+                .vatAmount(od.getVatAmount())
+                .licensePlateFee(od.getLicensePlateFee())
+                .registrationFee(od.getRegistrationFee())
+                .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : null)
+                .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
+                .discountAmount(od.getDiscountAmount())
+                .totalPrice(od.getTotalPrice())
                 .build();
-
-        // ✅ Set display fields safely - KHÔNG CÓ BRAND:
-        if (entity.getStoreStock() != null && entity.getStoreStock().getModelColor() != null) {
-            ModelColor modelColor = entity.getStoreStock().getModelColor();
-
-            if (modelColor.getModel() != null) {
-                Model model = modelColor.getModel();
-                dto.setModelName(model.getModelName()); // ✅ CÓ
-                // ❌ LOẠI BỎ: dto.setBrandName(...) - KHÔNG CÓ BRAND!
-            }
-
-            if (modelColor.getColor() != null) {
-                dto.setColorName(modelColor.getColor().getColorName());
-            }
-
-            dto.setModelPrice(entity.getStoreStock().getPriceOfStore());
-            dto.setAvailableStock(entity.getStoreStock().getQuantity());
-        }
-
-        // Set order info safely
-        if (entity.getOrder() != null && entity.getOrder().getStatus() != null) {
-            dto.setOrderStatus(entity.getOrder().getStatus().toString());
-
-            if (entity.getOrder().getCustomer() != null) {
-                dto.setCustomerName(entity.getOrder().getCustomer().getFullName());
-                dto.setCustomerPhone(entity.getOrder().getCustomer().getPhone());
-            }
-        }
-
-        // Set promotion info safely
-        if (entity.getPromotion() != null) {
-            dto.setPromotionName(entity.getPromotion().getPromotionName());
-            dto.setPromotionType(entity.getPromotion().getPromotionType().toString());
-        }
-
-        // Set calculated fields
-        dto.setSubtotal(entity.getUnitPrice().multiply(BigDecimal.valueOf(entity.getQuantity())));
-        dto.setTotalFees(entity.getLicensePlateFee().add(entity.getRegistrationFee()));
-        dto.setTotalTax(entity.getVatAmount());
-        dto.setPriceBeforeDiscount(dto.getSubtotal().add(dto.getTotalFees()).add(dto.getTotalTax()));
-        dto.setFinalAmount(entity.getTotalPrice());
-
-        // Set display text
-        String modelName = dto.getModelName() != null ? dto.getModelName() : "Unknown Model";
-        String colorName = dto.getColorName() != null ? dto.getColorName() : "Unknown Color";
-        dto.setDisplayText(String.format("%s - %s (Qty: %d)", modelName, colorName, dto.getQuantity()));
-
-        return dto;
+//        OrderDetailDto dto = OrderDetailDto.builder()
+//                .id(entity.getId())
+//                .unitPrice(entity.getUnitPrice())
+//                .quantity(entity.getQuantity())
+//                .vatAmount(entity.getVatAmount())
+//                .licensePlateFee(entity.getLicensePlateFee())
+//                .registrationFee(entity.getRegistrationFee())
+//                .discountAmount(entity.getDiscountAmount())
+//                .totalPrice(entity.getTotalPrice())
+//                .createdAt(entity.getCreatedAt())
+//                .updatedAt(entity.getUpdatedAt())
+//                .orderId(entity.getOrder().getOrderId())
+//                .storeStockId(entity.getStoreStock().getStockId())
+//                .promotionId(entity.getPromotion() != null ? entity.getPromotion().getPromotionId() : 0)
+//                .build();
+//
+//        // ✅ Set display fields safely - KHÔNG CÓ BRAND:
+//        if (entity.getStoreStock() != null && entity.getStoreStock().getModelColor() != null) {
+//            ModelColor modelColor = entity.getStoreStock().getModelColor();
+//
+//            if (modelColor.getModel() != null) {
+//                Model model = modelColor.getModel();
+//                dto.setModelName(model.getModelName()); // ✅ CÓ
+//                // ❌ LOẠI BỎ: dto.setBrandName(...) - KHÔNG CÓ BRAND!
+//            }
+//
+//            if (modelColor.getColor() != null) {
+//                dto.setColorName(modelColor.getColor().getColorName());
+//            }
+//
+//            dto.setModelPrice(entity.getStoreStock().getPriceOfStore());
+//            dto.setAvailableStock(entity.getStoreStock().getQuantity());
+//        }
+//
+//        // Set order info safely
+//        if (entity.getOrder() != null && entity.getOrder().getStatus() != null) {
+//            dto.setOrderStatus(entity.getOrder().getStatus().toString());
+//
+//            if (entity.getOrder().getCustomer() != null) {
+//                dto.setCustomerName(entity.getOrder().getCustomer().getFullName());
+//                dto.setCustomerPhone(entity.getOrder().getCustomer().getPhone());
+//            }
+//        }
+//
+//        // Set promotion info safely
+//        if (entity.getPromotion() != null) {
+//            dto.setPromotionName(entity.getPromotion().getPromotionName());
+//            dto.setPromotionType(entity.getPromotion().getPromotionType().toString());
+//        }
+//
+//        // Set calculated fields
+//        dto.setSubtotal(entity.getUnitPrice().multiply(BigDecimal.valueOf(entity.getQuantity())));
+//        dto.setTotalFees(entity.getLicensePlateFee().add(entity.getRegistrationFee()));
+//        dto.setTotalTax(entity.getVatAmount());
+//        dto.setPriceBeforeDiscount(dto.getSubtotal().add(dto.getTotalFees()).add(dto.getTotalTax()));
+//        dto.setFinalAmount(entity.getTotalPrice());
+//
+//        // Set display text
+//        String modelName = dto.getModelName() != null ? dto.getModelName() : "Unknown Model";
+//        String colorName = dto.getColorName() != null ? dto.getColorName() : "Unknown Color";
+//        dto.setDisplayText(String.format("%s - %s (Qty: %d)", modelName, colorName, dto.getQuantity()));
+//
+//        return dto;
     }
 }

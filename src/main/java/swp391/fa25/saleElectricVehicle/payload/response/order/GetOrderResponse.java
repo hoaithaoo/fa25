@@ -14,8 +14,9 @@ import lombok.*;
 @Builder
 public class GetOrderResponse {
     private int orderId;
+    private String orderCode;
 
-    private List<GetOrderDetailsResponse> createOrderWithItemsResponse;
+    private List<GetOrderDetailsResponse> getOrderDetailsResponses;
 
     private BigDecimal totalPrice;
     private BigDecimal totalTaxPrice;

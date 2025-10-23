@@ -22,6 +22,7 @@ public class CreateOrderDetailsResponse {
 
     private BigDecimal unitPrice;
     private int quantity;
+    private BigDecimal totalPrice;
 
     private BigDecimal vatAmount;
     private BigDecimal licensePlateFee;
@@ -30,6 +31,5 @@ public class CreateOrderDetailsResponse {
     private Integer promotionId;
     private String promotionName;
     private BigDecimal discountAmount;
-    
-    private BigDecimal totalPrice;
+
 }
