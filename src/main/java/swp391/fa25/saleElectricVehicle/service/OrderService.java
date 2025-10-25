@@ -1,10 +1,13 @@
 package swp391.fa25.saleElectricVehicle.service;
 
 import swp391.fa25.saleElectricVehicle.entity.Order;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface OrderService {
@@ -19,10 +22,10 @@ public interface OrderService {
 
     // Business operations
 //    OrderDto updateOrderStatus(int orderId, OrderStatus status);
-//    List<OrderDto> getOrdersByCustomerId(int customerId);
-//    List<OrderDto> getOrdersByStaffId(int staffId);
-//    List<OrderDto> getOrdersByStatus(OrderStatus status);
-//    List<OrderDto> getOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+    List<GetOrderResponse> getOrdersByCustomerId(int customerId);
+    List<GetOrderResponse> getOrdersByStaffId(int staffId);
+    List<GetOrderResponse> getOrdersByStatus(String status);
+    List<GetOrderResponse> getOrdersByDateRange(LocalDate startDate, LocalDate endDate);
 //    List<OrderDto> searchOrdersByCustomerPhone(String phone);
 //
 //    // Analytics
