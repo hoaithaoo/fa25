@@ -257,22 +257,6 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public GetOrderDetailsResponse getOrderDetailById(int id) {
         OrderDetail orderDetail = orderDetailRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
-//        return GetOrderDetailsResponse.builder()
-//                .orderDetailId(orderDetail.getId())
-//                .modelId(orderDetail.getStoreStock().getModelColor().getModel().getModelId())
-//                .modelName(orderDetail.getStoreStock().getModelColor().getModel().getModelName())
-//                .colorId(orderDetail.getStoreStock().getModelColor().getColor().getColorId())
-//                .colorName(orderDetail.getStoreStock().getModelColor().getColor().getColorName())
-//                .unitPrice(orderDetail.getUnitPrice())
-//                .quantity(orderDetail.getQuantity())
-//                .vatAmount(orderDetail.getVatAmount())
-//                .licensePlateFee(orderDetail.getLicensePlateFee())
-//                .registrationFee(orderDetail.getRegistrationFee())
-//                .promotionId(orderDetail.getPromotion() != null ? orderDetail.getPromotion().getPromotionId() : 0)
-//                .promotionName(orderDetail.getPromotion() != null ? orderDetail.getPromotion().getPromotionName() : null)
-//                .discountAmount(orderDetail.getDiscountAmount())
-//                .totalPrice(orderDetail.getTotalPrice())
-//                .build();
         return mapToDto(orderDetail);
     }
 

@@ -21,6 +21,7 @@ import swp391.fa25.saleElectricVehicle.service.StoreService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -151,35 +152,38 @@ public class OrderServiceImpl implements OrderService {
 //        return mapToDto(savedOrder);
 //    }
 //
-//    @Override
-//    public List<OrderDto> getOrdersByCustomerId(int customerId) {
-//        return orderRepository.findByCustomer_CustomerId(customerId)
-//                .stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
-//    @Override
-//    public List<OrderDto> getOrdersByStaffId(int staffId) {
-//        return orderRepository.findByUser_UserId(staffId).stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
-//    @Override
-//    public List<OrderDto> getOrdersByStatus(OrderStatus status) {
-//        return orderRepository.findByStatus(status).stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
-//    @Override
-//    public List<OrderDto> getOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-//        return orderRepository.findByOrderDateBetween(startDate, endDate).stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
+    @Override
+    public List<GetOrderResponse> getOrdersByCustomerId(int customerId) {
+        return orderRepository.findByCustomer_CustomerId(customerId)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    @Override
+    public List<GetOrderResponse> getOrdersByStaffId(int staffId) {
+        return orderRepository.findByUser_UserId(staffId).stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    @Override
+    public List<GetOrderResponse> getOrdersByStatus(String status) {
+        return orderRepository.findByStatus(OrderStatus.valueOf(status.toUpperCase())).stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    @Override
+    public List<GetOrderResponse> getOrdersByDateRange(LocalDate startDate, LocalDate endDate) {
+        // Convert LocalDate to LocalDateTime for the full day range
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+        return orderRepository.findByOrderDateBetween(startDateTime, endDateTime).stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
 //    @Override
 //    public List<OrderDto> searchOrdersByCustomerPhone(String phone) {
 //        return orderRepository.findByCustomerPhone(phone).stream()
