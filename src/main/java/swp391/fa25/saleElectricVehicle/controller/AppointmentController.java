@@ -12,7 +12,7 @@ import swp391.fa25.saleElectricVehicle.service.AppointmentService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/appointments")
+@RequestMapping("/appointments")
 public class AppointmentController {
 
     @Autowired

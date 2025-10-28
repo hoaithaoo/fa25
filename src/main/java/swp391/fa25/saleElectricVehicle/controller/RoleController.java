@@ -11,7 +11,7 @@ import swp391.fa25.saleElectricVehicle.service.RoleService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/roles")
+@RequestMapping("/roles")
 public class RoleController {
 
     @Autowired

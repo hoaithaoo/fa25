@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/inventory-transactions")
+@RequestMapping("/inventory-transactions")
 public class InventoryTransactionController {
 
     @Autowired

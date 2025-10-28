@@ -12,7 +12,7 @@ import swp391.fa25.saleElectricVehicle.service.ContractService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/contracts")
+@RequestMapping("/contracts")
 public class ContractController {
 
     @Autowired

@@ -12,7 +12,7 @@ import swp391.fa25.saleElectricVehicle.service.ModelColorService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/model-colors")
+@RequestMapping("/model-colors")
 public class ModelColorController {
 
     @Autowired

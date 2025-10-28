@@ -18,7 +18,7 @@ import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/order-details")
+@RequestMapping("/order-details")
 public class OrderDetailController {
 
     @Autowired

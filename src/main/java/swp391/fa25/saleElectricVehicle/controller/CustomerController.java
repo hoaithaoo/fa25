@@ -13,7 +13,7 @@ import swp391.fa25.saleElectricVehicle.service.CustomerService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/customers")
+@RequestMapping("/customers")
 public class CustomerController {
 
     @Autowired

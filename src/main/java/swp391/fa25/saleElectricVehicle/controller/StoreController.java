@@ -11,7 +11,7 @@ import swp391.fa25.saleElectricVehicle.service.StoreService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/stores")
+@RequestMapping("/stores")
 public class StoreController {
 
     @Autowired

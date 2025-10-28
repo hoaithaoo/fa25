@@ -11,7 +11,7 @@ import swp391.fa25.saleElectricVehicle.service.PromotionService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/promotions")
+@RequestMapping("/promotions")
 public class PromotionController {
 
     @Autowired
