@@ -19,7 +19,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int orderId;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String orderCode;
 
     @Column(precision = 15, scale = 2, nullable = false)
@@ -45,7 +45,7 @@ public class Order {
     private LocalDateTime updatedAt;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "contract_id", nullable = false)
+    @JoinColumn(name = "contract_id")
     private Contract contract;
 
     @ManyToOne

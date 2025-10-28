@@ -1,5 +1,6 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Customer;
@@ -9,9 +10,9 @@ import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.service.CustomerService;
@@ -20,6 +21,7 @@ import swp391.fa25.saleElectricVehicle.service.StoreService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -54,9 +56,13 @@ public class OrderServiceImpl implements OrderService {
                 .customer(customer)
                 .user(staff)
                 .build());
+        String orderCode = "ORD-" + String.format("%06d", savedOrder.getOrderId());
+        savedOrder.setOrderCode(orderCode);
+        savedOrder = orderRepository.save(savedOrder);
 
         return CreateOrderResponse.builder()
                 .orderId(savedOrder.getOrderId())
+                .orderCode(orderCode)
                 .totalPrice(savedOrder.getTotalPrice())
                 .totalTaxPrice(savedOrder.getTotalTaxPrice())
                 .totalPromotionAmount(savedOrder.getTotalPromotionAmount())
@@ -118,6 +124,13 @@ public class OrderServiceImpl implements OrderService {
 //    }
 
     @Override
+    @Transactional
+    public void updateAfterDetailChange(Order order) {
+        order.setStatus(OrderStatus.PENDING);
+        orderRepository.save(order);
+    }
+
+    @Override
     public void deleteOrder(int orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
@@ -139,35 +152,38 @@ public class OrderServiceImpl implements OrderService {
 //        return mapToDto(savedOrder);
 //    }
 //
-//    @Override
-//    public List<OrderDto> getOrdersByCustomerId(int customerId) {
-//        return orderRepository.findByCustomer_CustomerId(customerId)
-//                .stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
-//    @Override
-//    public List<OrderDto> getOrdersByStaffId(int staffId) {
-//        return orderRepository.findByUser_UserId(staffId).stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
-//    @Override
-//    public List<OrderDto> getOrdersByStatus(OrderStatus status) {
-//        return orderRepository.findByStatus(status).stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
-//    @Override
-//    public List<OrderDto> getOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-//        return orderRepository.findByOrderDateBetween(startDate, endDate).stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
+    @Override
+    public List<GetOrderResponse> getOrdersByCustomerId(int customerId) {
+        return orderRepository.findByCustomer_CustomerId(customerId)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    @Override
+    public List<GetOrderResponse> getOrdersByStaffId(int staffId) {
+        return orderRepository.findByUser_UserId(staffId).stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    @Override
+    public List<GetOrderResponse> getOrdersByStatus(String status) {
+        return orderRepository.findByStatus(OrderStatus.valueOf(status.toUpperCase())).stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    @Override
+    public List<GetOrderResponse> getOrdersByDateRange(LocalDate startDate, LocalDate endDate) {
+        // Convert LocalDate to LocalDateTime for the full day range
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+        return orderRepository.findByOrderDateBetween(startDateTime, endDateTime).stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
 //    @Override
 //    public List<OrderDto> searchOrdersByCustomerPhone(String phone) {
 //        return orderRepository.findByCustomerPhone(phone).stream()
@@ -202,6 +218,25 @@ public class OrderServiceImpl implements OrderService {
     private GetOrderResponse mapToDto(Order order) {
         return GetOrderResponse.builder()
                 .orderId(order.getOrderId())
+                .orderCode(order.getOrderCode())
+                .getOrderDetailsResponses(order.getOrderDetails().stream()
+                        .map(od -> GetOrderDetailsResponse.builder()
+                                .orderDetailId(od.getId())
+                                .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
+                                .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
+                                .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
+                                .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
+                                .unitPrice(od.getUnitPrice())
+                                .quantity(od.getQuantity())
+                                .vatAmount(od.getVatAmount())
+                                .licensePlateFee(od.getLicensePlateFee())
+                                .registrationFee(od.getRegistrationFee())
+                                .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : null)
+                                .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
+                                .discountAmount(od.getDiscountAmount())
+                                .totalPrice(od.getTotalPrice())
+                                .build())
+                        .toList())
                 .totalPrice(order.getTotalPrice())
                 .totalTaxPrice(order.getTotalTaxPrice())
                 .totalPromotionAmount(order.getTotalPromotionAmount())

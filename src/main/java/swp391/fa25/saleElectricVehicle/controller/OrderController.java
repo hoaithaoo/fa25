@@ -1,6 +1,7 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,8 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderRespons
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -83,13 +86,10 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    // BUSINESS - Update order status
-//    @PutMapping("/{orderId}/status/{status}")
+    // BUSINESS - Confirm order (update status)
+//    @PutMapping("/{orderId}/confirm")
 //    public ResponseEntity<ApiResponse<OrderDto>> updateOrderStatus(
-//            @PathVariable int orderId,
-//            @PathVariable String status) {
-//
-//        OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
+//            @PathVariable int orderId) {
 //        OrderDto updatedOrder = orderService.updateOrderStatus(orderId, orderStatus);
 //
 //        ApiResponse<OrderDto> response = ApiResponse.<OrderDto>builder()
@@ -100,42 +100,41 @@ public class OrderController {
 //        return ResponseEntity.ok(response);
 //    }
 //
-//    // BUSINESS - Get orders by customer
-//    @GetMapping("/customer/{customerId}")
-//    public ResponseEntity<ApiResponse<List<OrderDto>>> getOrdersByCustomer(@PathVariable int customerId) {
-//        List<OrderDto> orders = orderService.getOrdersByCustomerId(customerId);
-//        ApiResponse<List<OrderDto>> response = ApiResponse.<List<OrderDto>>builder()
-//                .code(HttpStatus.OK.value())
-//                .message("Customer orders retrieved successfully")
-//                .data(orders)
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    // BUSINESS - Get orders by staff
-//    @GetMapping("/staff/{staffId}")
-//    public ResponseEntity<ApiResponse<List<OrderDto>>> getOrdersByStaff(@PathVariable int staffId) {
-//        List<OrderDto> orders = orderService.getOrdersByStaffId(staffId);
-//        ApiResponse<List<OrderDto>> response = ApiResponse.<List<OrderDto>>builder()
-//                .code(HttpStatus.OK.value())
-//                .message("Staff orders retrieved successfully")
-//                .data(orders)
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
-//
-//    // BUSINESS - Get orders by status
-//    @GetMapping("/status/{status}")
-//    public ResponseEntity<ApiResponse<List<OrderDto>>> getOrdersByStatus(@PathVariable String status) {
-//        OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
-//        List<OrderDto> orders = orderService.getOrdersByStatus(orderStatus);
-//        ApiResponse<List<OrderDto>> response = ApiResponse.<List<OrderDto>>builder()
-//                .code(HttpStatus.OK.value())
-//                .message("Orders by status retrieved successfully")
-//                .data(orders)
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
+    // BUSINESS - Get orders by customer
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByCustomer(@PathVariable int customerId) {
+        List<GetOrderResponse> orders = orderService.getOrdersByCustomerId(customerId);
+        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Customer orders retrieved successfully")
+                .data(orders)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    // BUSINESS - Get orders by staff
+    @GetMapping("/staff/{staffId}")
+    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByStaff(@PathVariable int staffId) {
+        List<GetOrderResponse> orders = orderService.getOrdersByStaffId(staffId);
+        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Staff orders retrieved successfully")
+                .data(orders)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    // BUSINESS - Get orders by status
+    @GetMapping("/status/{status}")
+    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByStatus(@PathVariable String status) {
+        List<GetOrderResponse> orders = orderService.getOrdersByStatus(status);
+        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Orders by status retrieved successfully")
+                .data(orders)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 //
 //    // BUSINESS - Search by customer phone
 //    @GetMapping("/search/phone/{phone}")
@@ -149,20 +148,20 @@ public class OrderController {
 //        return ResponseEntity.ok(response);
 //    }
 //
-//    // BUSINESS - Get orders by date range
-//    @GetMapping("/date-range")
-//    public ResponseEntity<ApiResponse<List<OrderDto>>> getOrdersByDateRange(
-//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-//
-//        List<OrderDto> orders = orderService.getOrdersByDateRange(startDate, endDate);
-//        ApiResponse<List<OrderDto>> response = ApiResponse.<List<OrderDto>>builder()
-//                .code(HttpStatus.OK.value())
-//                .message("Orders by date range retrieved successfully")
-//                .data(orders)
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
+    // BUSINESS - Get orders by date range
+    @GetMapping("/date-range")
+    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByDateRange(
+            @RequestParam @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate endDate) {
+
+        List<GetOrderResponse> orders = orderService.getOrdersByDateRange(startDate, endDate);
+        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Orders by date range retrieved successfully")
+                .data(orders)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 //
 //    // ANALYTICS - Get recent orders
 //    @GetMapping("/recent")
