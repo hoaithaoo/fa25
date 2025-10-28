@@ -8,7 +8,7 @@ jobs:
     runs-on: [self-hosted]
 
     env:
-      CONTAINER_NAME: beSWP
+      CONTAINER_NAME: myappCommandContainer
     steps:
       - uses: actions/checkout@v3
 
@@ -40,9 +40,9 @@ jobs:
   
       - name: Run New Docker Container
         run: |
-          echo ":: Running new container - beSWP"
+          echo ":: Running new container - myappCommandContainer"
           docker run -d -p 8080:8080 \
-            --name beSWP \
+            --name myappCommandContainer \
             myapp:latest
 
            
