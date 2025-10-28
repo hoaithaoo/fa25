@@ -3,15 +3,12 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 jobs:
   build_and_deploy:
-    runs-on: [self-hosted, fa25]
+    runs-on: [self-hosted]
 
     env:
-      CONTAINER_NAME: myappCommandContainer
+      CONTAINER_NAME: beSWP
     steps:
       - uses: actions/checkout@v3
 
@@ -43,9 +40,9 @@ jobs:
   
       - name: Run New Docker Container
         run: |
-          echo ":: Running new container - myappCommandContainer"
-          docker run -d -p 8888:8080 \
-            --name myappCommandContainer \
+          echo ":: Running new container - beSWP"
+          docker run -d -p 8080:8080 \
+            --name beSWP \
             myapp:latest
 
            
