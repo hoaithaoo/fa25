@@ -1,0 +1,205 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    background: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 20px;
+}
+
+.company-info {
+    flex: 1;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 5px;
+}
+
+.company-details {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #333;
+}
+
+.title {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.title h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.title p {
+    font-size: 12px;
+    font-style: italic;
+    color: #666;
+}
+
+.section {
+    margin-bottom: 25px;
+}
+
+.section-title {
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.info-label {
+    min-width: 120px;
+    font-weight: 500;
+}
+
+.info-value {
+    flex: 1;
+    border-bottom: 1px dotted #999;
+    padding-left: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+}
+
+table th, table td {
+    border: 1px solid #333;
+    padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background: #f0f0f0;
+    font-weight: bold;
+    text-align: center;
+}
+
+.vehicle-details {
+    list-style: none;
+    padding-left: 15px;
+}
+
+.vehicle-details li {
+    margin: 5px 0;
+    font-size: 12px;
+}
+
+.vehicle-details li:before {
+    content: "- ";
+    margin-right: 5px;
+}
+
+.price-total {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.note {
+    font-style: italic;
+    font-size: 12px;
+    margin-top: 5px;
+    color: #666;
+}
+
+.article {
+    margin: 20px 0;
+}
+
+.article-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.article-content {
+    font-size: 13px;
+    line-height: 1.8;
+    text-align: justify;
+}
+
+.article-content ul {
+    margin: 10px 0;
+    padding-left: 25px;
+}
+
+.article-content li {
+    margin: 5px 0;
+}
+
+.signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    text-align: center;
+}
+
+.signature-box {
+    flex: 1;
+    padding: 20px;
+}
+
+.signature-box h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.signature-box .subtitle {
+    font-size: 12px;
+    font-style: italic;
+    margin-bottom: 80px;
+}
+
+.stamp {
+    position: relative;
+    margin: 20px auto;
+}
+
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    .container {
+        box-shadow: none;
+        padding: 20px;
+    }
+}

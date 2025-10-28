@@ -33,6 +33,9 @@ public class Customer {
     @Pattern(regexp = "^0\\d{9}$", message = "Phone không hợp lệ")
     private String phone;
 
+    @Column(nullable = false, unique = true)
+    private String identificationNumber;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 

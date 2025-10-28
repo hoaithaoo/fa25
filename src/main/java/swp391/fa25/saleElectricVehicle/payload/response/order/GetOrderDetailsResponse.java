@@ -21,7 +21,7 @@ public class GetOrderDetailsResponse {
     private BigDecimal unitPrice;
     private int quantity;
 
-    private BigDecimal vatAmount;
+//    private BigDecimal vatAmount;
     private BigDecimal licensePlateFee;
     private BigDecimal registrationFee;
 

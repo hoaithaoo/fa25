@@ -3,13 +3,12 @@ package swp391.fa25.saleElectricVehicle.service.impl;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import swp391.fa25.saleElectricVehicle.entity.Customer;
-import swp391.fa25.saleElectricVehicle.entity.Order;
-import swp391.fa25.saleElectricVehicle.entity.Store;
-import swp391.fa25.saleElectricVehicle.entity.User;
+import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
+import swp391.fa25.saleElectricVehicle.payload.dto.OrderDetailsDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
@@ -88,6 +87,56 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderDto getOrderDtoById(int orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
+        }
+
+        List<OrderDetail> list = order.getOrderDetails();
+        int count = 0;
+        BigDecimal totalUnitPrice = BigDecimal.ZERO;
+        BigDecimal totalTaxPrice = BigDecimal.ZERO;
+        BigDecimal totalDiscount = BigDecimal.ZERO;
+        for (OrderDetail detail : list) {
+            count += detail.getQuantity(); // đếm tổng số lượng xe trong đơn hàng
+            totalUnitPrice = totalUnitPrice.add(detail.getUnitPrice());
+            totalTaxPrice = totalTaxPrice.add(detail.getLicensePlateFee().add(detail.getRegistrationFee()));
+            totalDiscount = totalDiscount.add(detail.getDiscountAmount());
+        }
+
+        return OrderDto.builder()
+                .orderId(order.getOrderId())
+                .orderCode(order.getOrderCode())
+                .orderDetailsList(order.getOrderDetails().stream()
+                        .map(od -> OrderDetailsDto.builder()
+                                .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
+                                .modelYear(od.getStoreStock().getModelColor().getModel().getModelYear())
+                                .seatingCapacity(od.getStoreStock().getModelColor().getModel().getSeatingCapacity())
+                                .bodyType(od.getStoreStock().getModelColor().getModel().getBodyType().name())
+                                .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
+                                .quantity(od.getQuantity())
+                                .unitPrice(od.getUnitPrice())
+                                .discount(od.getDiscountAmount())
+                                .totalTax(od.getLicensePlateFee().add(od.getRegistrationFee())) // biển số và đăng ký
+                                .totalPrice(od.getTotalPrice())
+                                .build())
+                        .toList())
+                .totalQuantity(count)
+                .totalUnitPrice(totalUnitPrice)
+                .totalTaxPrice(totalTaxPrice)
+                .totalDiscount(totalDiscount)
+                .customerId(order.getCustomer().getCustomerId())
+                .customerName(order.getCustomer().getFullName())
+                .staffId(order.getUser().getUserId())
+                .staffName(order.getUser().getFullName())
+                .storeId(order.getUser().getStore().getStoreId())
+                .storeName(order.getUser().getStore().getStoreName())
+                .storeAddress(order.getUser().getStore().getAddress())
+                .build();
+    }
+
+    @Override
     public List<GetOrderResponse> getAllOrders() {
         return orderRepository.findAll().stream()
                 .map(this::mapToDto)
@@ -125,8 +174,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void updateAfterDetailChange(Order order) {
-        order.setStatus(OrderStatus.PENDING);
+    public void updateOrder(Order order) {
         orderRepository.save(order);
     }
 
@@ -228,7 +276,7 @@ public class OrderServiceImpl implements OrderService {
                                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
                                 .unitPrice(od.getUnitPrice())
                                 .quantity(od.getQuantity())
-                                .vatAmount(od.getVatAmount())
+//                                .vatAmount(od.getVatAmount())
                                 .licensePlateFee(od.getLicensePlateFee())
                                 .registrationFee(od.getRegistrationFee())
                                 .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : null)

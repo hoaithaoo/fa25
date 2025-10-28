@@ -45,8 +45,8 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     BigDecimal getTotalAmountByOrder(@Param("orderId") int orderId);
 
     // Electric Vehicle specific analytics
-    @Query("SELECT SUM(od.vatAmount) FROM OrderDetail od WHERE od.order.orderId = :orderId")
-    BigDecimal getTotalVATByOrder(@Param("orderId") int orderId);
+//    @Query("SELECT SUM(od.vatAmount) FROM OrderDetail od WHERE od.order.orderId = :orderId")
+//    BigDecimal getTotalVATByOrder(@Param("orderId") int orderId);
 
     @Query("SELECT SUM(od.licensePlateFee) FROM OrderDetail od WHERE od.order.orderId = :orderId")
     BigDecimal getTotalLicenseFeeByOrder(@Param("orderId") int orderId);

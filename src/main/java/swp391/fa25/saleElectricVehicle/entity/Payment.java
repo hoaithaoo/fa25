@@ -19,7 +19,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int paymentId;
 
-    @Column(columnDefinition = "DECIMAL(12,2)")
+    @Column(columnDefinition = "DECIMAL(15,0)")
     private BigDecimal remainPrice;
 
     public enum PaymentStatus {
@@ -33,7 +33,7 @@ public class Payment {
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String paymentMethod;
 
-    @Column(columnDefinition = "DECIMAL(12,2)", nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal amount;
 
     @Column(nullable = false)

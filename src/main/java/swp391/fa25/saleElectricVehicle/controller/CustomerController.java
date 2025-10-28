@@ -21,7 +21,7 @@ public class CustomerController {
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<CustomerDto>> createCustomer(
-            @Valid @RequestBody CreateCustomerRequest request) { // ✅ Đổi từ CustomerDto → CreateCustomerRequest
+            @Valid @RequestBody CustomerDto request) {
         CustomerDto createdCustomer = customerService.createCustomer(request);
         ApiResponse<CustomerDto> response = ApiResponse.<CustomerDto>builder()
                 .code(HttpStatus.CREATED.value())

@@ -7,7 +7,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.customer.CreateCustomerRe
 import java.util.List;
 
 public interface CustomerService {
-    CustomerDto createCustomer(CreateCustomerRequest request); // ✅ Đổi từ CustomerDto → CreateCustomerRequest
+    CustomerDto createCustomer(CustomerDto request); // ✅ Đổi từ CustomerDto → CreateCustomerRequest
     CustomerDto getCustomerById(int customerId);
     Customer getCustomerEntityById(int customerId);
     CustomerDto getCustomerByPhone(String phone);
