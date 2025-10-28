@@ -9,6 +9,7 @@ jobs:
 
     env:
       CONTAINER_NAME: myappCommandContainer
+      DOCKER_BUILDKIT: 1
     steps:
       - uses: actions/checkout@v3
 
