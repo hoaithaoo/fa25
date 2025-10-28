@@ -22,16 +22,16 @@ public class Order {
     @Column(unique = true)
     private String orderCode;
 
-    @Column(precision = 15, scale = 2, nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal totalPrice;
 
-    @Column(precision = 15, scale = 2, nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal totalTaxPrice;
 
-    @Column(precision = 15, scale = 2)
+    @Column(columnDefinition = "DECIMAL(15,0)")
     private BigDecimal totalPromotionAmount;
 
-    @Column(precision = 15, scale = 2, nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal totalPayment;
 
     @Enumerated(EnumType.STRING)

@@ -18,7 +18,7 @@ public class OrderDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal unitPrice;
 
     @Column(nullable = false)
@@ -27,16 +27,16 @@ public class OrderDetail {
 //    @Column(nullable = false)
 //    private BigDecimal vatAmount;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal licensePlateFee;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal registrationFee;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal discountAmount;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal totalPrice;
 
     @Column(nullable = false)

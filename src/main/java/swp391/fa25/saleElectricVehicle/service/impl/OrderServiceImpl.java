@@ -112,6 +112,8 @@ public class OrderServiceImpl implements OrderService {
                         .map(od -> OrderDetailsDto.builder()
                                 .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
                                 .modelYear(od.getStoreStock().getModelColor().getModel().getModelYear())
+                                .seatingCapacity(od.getStoreStock().getModelColor().getModel().getSeatingCapacity())
+                                .bodyType(od.getStoreStock().getModelColor().getModel().getBodyType().name())
                                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
                                 .quantity(od.getQuantity())
                                 .unitPrice(od.getUnitPrice())

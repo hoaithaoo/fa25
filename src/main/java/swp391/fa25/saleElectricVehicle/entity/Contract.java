@@ -35,13 +35,13 @@ public class Contract {
     @Enumerated(EnumType.STRING)
     private ContractStatus status;
 
-    @Column(columnDefinition = "DECIMAL(12,2)")
+    @Column(columnDefinition = "DECIMAL(15,0)")
     private BigDecimal depositPrice;
 
-    @Column(columnDefinition = "DECIMAL(12,2)", nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal totalPayment;
 
-    @Column( columnDefinition = "DECIMAL(12,2)")
+    @Column(columnDefinition = "DECIMAL(15,0)")
     private BigDecimal remainPrice;
 
     @Column(columnDefinition = "NVARCHAR(1000)")

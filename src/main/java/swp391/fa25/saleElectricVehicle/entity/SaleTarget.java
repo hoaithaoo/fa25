@@ -23,10 +23,10 @@ public class SaleTarget {
     @Column(nullable = false)
     private int month;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal targetAmount;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal achievedAmount;
 
     @Enumerated(EnumType.STRING)

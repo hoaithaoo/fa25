@@ -53,7 +53,7 @@ public class ContractController {
     }
 
     @GetMapping("/api/contracts/{id}")
-    public ResponseEntity<Map<String, Object>> getContractById(@PathVariable int id) {
+    public ResponseEntity<String> getContractById(@PathVariable int id) {
         // Lấy thông tin hợp đồng
         ContractDto contract = contractService.getContractById(id);
         OrderDto order = orderService.getOrderDtoById(contract.getOrderId());
@@ -73,8 +73,6 @@ public class ContractController {
                 .status(HttpStatus.CREATED)
                 .contentType(MediaType.TEXT_HTML)
                 .body(htmlContent);
-
-        return ResponseEntity.ok(response);
     }
 
 

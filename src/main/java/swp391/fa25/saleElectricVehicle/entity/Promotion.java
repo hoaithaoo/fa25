@@ -30,7 +30,7 @@ public class Promotion {
     @Column
     private PromotionType promotionType;
 
-    @Column
+    @Column(columnDefinition = "DECIMAL(15,0)")
     private BigDecimal amount;
 
     @Column(nullable = false)

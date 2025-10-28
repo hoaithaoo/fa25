@@ -17,7 +17,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int transactionId;
 
-    @Column(columnDefinition = "DECIMAL(12,2)", nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal amount;
 
     @Column(nullable = false)

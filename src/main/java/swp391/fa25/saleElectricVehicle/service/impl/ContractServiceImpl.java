@@ -26,6 +26,8 @@ import java.util.List;
 @Service
 public class ContractServiceImpl implements ContractService {
 
+    private final BigDecimal DEPOSIT_PERCENTAGE = BigDecimal.valueOf(0.2); // 20% deposit
+
     @Autowired
     private ContractRepository contractRepository;
 
@@ -50,7 +52,10 @@ public class ContractServiceImpl implements ContractService {
         Contract contract = Contract.builder()
                 .contractDate(LocalDateTime.now().toLocalDate())
                 .status(ContractStatus.DRAFT)
+                .depositPrice(order.getTotalPayment().multiply(DEPOSIT_PERCENTAGE))
                 .totalPayment(order.getTotalPayment())
+                .remainPrice(order.getTotalPayment()
+                        .subtract(order.getTotalPayment().multiply(DEPOSIT_PERCENTAGE)))
                 .uploadedBy(staff.getFullName())
                 .createdAt(LocalDateTime.now())
                 .order(order)
@@ -236,6 +241,7 @@ public class ContractServiceImpl implements ContractService {
     private ContractDto mapToDto(Contract contract) {
         return ContractDto.builder()
                 .contractId(contract.getContractId())
+                .contractCode(contract.getContractCode())
                 .contractDate(contract.getContractDate())
 //                .contractFileUrl(contract.getContractFileUrl())
                 .status(contract.getStatus().name())

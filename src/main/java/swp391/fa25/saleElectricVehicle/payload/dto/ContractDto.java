@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Builder
 public class ContractDto {
     private int contractId;
-    private int contractCode;
+    private String contractCode;
     private LocalDate contractDate;
     private String status;
     private BigDecimal depositPrice;
