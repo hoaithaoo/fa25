@@ -9,11 +9,12 @@ jobs:
 
     env:
       CONTAINER_NAME: myappCommandContainer
-      DOCKER_BUILDKIT: 1
     steps:
       - uses: actions/checkout@v3
 
       - name: Build Docker Image
+        env:
+          DOCKER_BUILDKIT: 1
         run: |
           echo "Building Docker image..."
           docker build -t myapp:latest -f ./Dockerfile .
