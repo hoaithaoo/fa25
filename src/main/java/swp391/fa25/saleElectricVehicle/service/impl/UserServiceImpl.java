@@ -204,20 +204,25 @@ public class UserServiceImpl implements UserService {
         }
 
         if (updateUserProfileRequest.getEmail() != null
-                && !updateUserProfileRequest.getEmail().trim().isEmpty()
-                && !user.getEmail().equals(updateUserProfileRequest.getEmail())
-                && userRepository.existsByEmail(updateUserProfileRequest.getEmail())) {
-            throw new AppException(ErrorCode.USER_EXISTED);
+                && !updateUserProfileRequest.getEmail().trim().isEmpty()) {
+            if (!user.getEmail().equals(updateUserProfileRequest.getEmail())
+                    && userRepository.existsByEmail(updateUserProfileRequest.getEmail())) {
+                throw new AppException(ErrorCode.USER_EXISTED);
+            } else {
+                user.setEmail(updateUserProfileRequest.getEmail());
+            }
         }
-        user.setEmail(updateUserProfileRequest.getEmail());
 
         if (updateUserProfileRequest.getPhone() != null
-                && !updateUserProfileRequest.getPhone().trim().isEmpty()
-                && !user.getPhone().equals(updateUserProfileRequest.getPhone())
-                && userRepository.existsByPhone(updateUserProfileRequest.getPhone())) {
-            throw new AppException(ErrorCode.PHONE_EXISTED);
+                && !updateUserProfileRequest.getPhone().trim().isEmpty()) {
+            if (!user.getPhone().equals(updateUserProfileRequest.getPhone())
+                    && userRepository.existsByPhone(updateUserProfileRequest.getPhone())) {
+                throw new AppException(ErrorCode.PHONE_EXISTED);
+            } else {
+                user.setPhone(updateUserProfileRequest.getPhone());
+            }
         }
-        user.setPhone(updateUserProfileRequest.getPhone());
+
 
         if (updateUserProfileRequest.getRoleId() != 0
                 && updateUserProfileRequest.getRoleId() != user.getRole().getRoleId()) {
