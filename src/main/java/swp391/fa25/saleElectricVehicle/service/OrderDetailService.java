@@ -28,10 +28,10 @@ public interface OrderDetailService {
 //    OrderDetailDto updateQuantity(int id, int quantity);
 //
 //    // =============== VALIDATION ===============
-////    boolean validateStockAvailability(int storeStockId, int requestedQuantity);
+//    boolean validateStockAvailability(int storeStockId, int requestedQuantity);
 //
 //    // =============== CALCULATION ===============
-    BigDecimal calculateTotalPrice(BigDecimal unitPrice, int quantity,
-                                   BigDecimal vatAmount, BigDecimal licensePlateFee,
-                                   BigDecimal registrationFee, BigDecimal discountAmount);
+//    BigDecimal calculateTotalPrice(BigDecimal unitPrice, int quantity,
+//                                   BigDecimal vatAmount, BigDecimal licensePlateFee,
+//                                   BigDecimal registrationFee, BigDecimal discountAmount);
 }

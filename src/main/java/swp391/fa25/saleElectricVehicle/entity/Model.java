@@ -47,7 +47,7 @@ public class Model {
     @Column(nullable = false)
     private int seatingCapacity;
 
-    @Column(columnDefinition = "DECIMAL(10,2)", nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,2)", nullable = false)
     private BigDecimal price;
 
     @Column(nullable = false)

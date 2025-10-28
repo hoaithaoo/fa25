@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hợp Đồng Mua Bán Xe</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="company-info">
+            <div class="logo">ELECTRA</div>
+            <div class="company-details">
+                <strong th:text="${order.storeName}"></strong><br>
+                Địa chỉ: <span style="text-decoration: underline;" th:text="${order.storeAddress}"></span><br>
+                <strong>ĐT:</strong> ..................... - <strong>MST:</strong> ..................... <br>
+            </div>
+        </div>
+    </div>
+
+    <div class="title">
+        <h1>HỢP ĐỒNG MUA BÁN XE</h1>
+        <p>Số: ............../HD/XD - BMVLVL<br>
+            ......, ngày ... tháng ... năm 20...<br>
+            Chúng tôi gồm có bên:</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">BÊN BÁN (BÊN A):</div>
+        <div class="info-row">
+            <span class="info-label">Tên:</span>
+            <span class="info-value"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">MSDN:</span>
+            <span class="info-value"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Địa chỉ:</span>
+            <span class="info-value"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Đại diện:</span>
+            <span class="info-value"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Điện thoại:</span>
+            <span class="info-value"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Tài khoản:</span>
+            <span class="info-value"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Mở tại:</span>
+            <span class="info-value"></span>
+            <span class="info-label" style="margin-left: 20px;">Chức vụ:</span>
+            <span class="info-value"></span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">BÊN MUA (BÊN B):</div>
+        <div class="info-row">
+            <span class="info-label">Họ và tên:</span>
+            <span class="info-value" th:text="${customer.fullName}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Ngày sinh:</span>
+            <span class="info-value"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">CMND/CCCD:</span>
+            <span class="info-value" th:text="${customer.identificationNumber}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Địa chỉ hiện tại:</span>
+            <span class="info-value" th:text="${customer.address}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Số điện thoại:</span>
+            <span class="info-value" th:text="${customer.phone}"></span>
+        </div>
+        <p style="font-size: 13px; margin-top: 10px; line-height: 1.6;">
+            Sau khi bàn bạc thỏa thuận, hai bên cùng nhau thống nhất ký kết hợp đồng mua bán xe ô tô điện với các điều khoản như sau:
+        </p>
+    </div>
+
+    <div class="article">
+        <div class="article-title">ĐIỀU 1. ĐỐI TƯỢNG HỢP ĐỒNG</div>
+        <table>
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Mô tả hàng hóa</th>
+                <th>SL</th>
+                <th>Đơn giá<br>(Đã gồm VAT)</th>
+                <th>Khuyến mãi (nếu có)</th>
+                <th>Phí dịch vụ (nếu có)</th>
+                <th>Thành tiền<br>(Đã gồm VAT)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="dto, counter : ${order.orderDetailsList}">
+                <td style="text-align: center;" th:text="${counter.count}">STT</td>
+                <td>
+                    <strong> <span>Mẫu xe: </span> <span th:text="${dto.modelName}"></span> </strong>
+                    <ul class="vehicle-details">
+                        <li> <span>Kiểu dáng xe: </span> <span th:text="${dto.bodyType}"></span> </li>
+                        <li> <span>Số chỗ ngồi: </span> <span th:text="${dto.seatingCapacity}"></span> </li>
+                        <li> <span>Năm sản xuất: </span> <span th:text="${dto.modelYear}"></span> </li>
+                        <li> <span>Màu sơn: </span> <span th:text="${dto.colorName}"></span> </li>
+                    </ul>
+                </td>
+                <td style="text-align: center;" th:text="${dto.quantity}">Số lượng</td>
+                <td style="text-align: right;" th:text="${dto.unitPrice}">Đơn giá</td>
+                <td style="text-align: right;" th:text="${dto.discount}">Khuyến mãi</td>
+                <td style="text-align: right;" th:text="${dto.totalTax}">Phí dịch vụ</td>
+                <td style="text-align: right;" th:text="${dto.totalPrice}">Tổng tiền</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="price-total">Tổng Giá trị Hợp đồng</td>
+                <td style="text-align: center;" th:text="${order.totalQuantity}">Tổng SL</td>
+                <td style="text-align: right;" th:text="${order.totalUnitPrice}">Tổng đơn giá</td>
+                <td style="text-align: right;" th:text="${order.totalDiscount}">Tổng khuyến mãi</td>
+                <td style="text-align: right;" th:text="${order.totalTaxPrice}">Tổng dịch vụ</td>
+                <td style="text-align: right;" th:text="${contract.totalPayment}">Tổng thanh toán</td>
+            </tr>
+            </tbody>
+        </table>
+        <p class="note">Bằng chữ: .......................... -/-.</p>
+    </div>
+
+    <div class="article">
+        <div class="article-title">ĐIỀU 2. ĐẶT CỌC VÀ THANH TOÁN</div>
+        <div class="article-content">
+            <p>Bên B thực hiện thanh toán giá trị hợp đồng cho Bên A theo các đợt như sau:</p>
+            <ul>
+                <li><strong>Đặt Cọc: </strong>Trong thời hạn 02 (hai) ngày làm việc kể từ ngày hai bên ký hợp đồng,
+                    Bên B sẽ đặt cọc cho Bên A ngay khi ký hợp đồng với số tiền là <span th:text="${contract.depositPrice}">...</span>
+                    . Khoản đặt cọc này được coi là khoản thanh toán lần I.
+                    Bên B không thể đòi lại số tiền đặt cọc, trừ trường hợp bên B thanh toán hết hợp đồng.</li>
+                <li><strong>Thanh Toán: </strong>Bên B thanh toán số tiền còn lại (05 ngày làm việc kể từ khi Bên A gửi
+                    thông báo sẵn sàng giao xe, Bên B thanh toán cho Bên A giá trị hợp đồng còn lại tương đương với số tiền
+                    là <span th:text="${contract.remainPrice}">...</span>-).</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="article">
+        <div class="article-content">
+            <ul>
+                <li>Thời hạn giao xe: ....................;</li>
+                <li>Địa điểm giao xe: Tại trụ sở của bên A;</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="article">
+        <div class="article-title">ĐIỀU 4. BẢN ĐIỀU KHOẢN VÀ ĐIỀU KIỆN CHUNG</div>
+        <div class="article-content">
+            <p>Bản Điều khoản và Điều kiện chung là một phần không thể tách rời của hợp đồng này, có giá trị dẫn chiếu,
+                ràng buộc lên toàn bộ nội dung của hợp đồng.</p>
+            <p style="font-style: italic; margin-top: 10px;">Hợp đồng này có hiệu lực từ ngày ký, được lập thành 02 (hai) bản,
+                có giá trị pháp lý như nhau, mỗi bên giữ 1 (một) bản làm cơ sở thực hiện.</p>
+        </div>
+    </div>
+
+    <div class="signatures">
+        <div class="signature-box">
+            <h3>ĐẠI DIỆN BÊN BÁN</h3>
+            <p class="subtitle">(Ký, ghi rõ họ tên và đóng dấu)</p>
+        </div>
+        <div class="signature-box">
+            <h3>ĐẠI DIỆN BÊN MUA</h3>
+            <p class="subtitle">(Ký và ghi rõ họ tên)</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: -50px; font-size: 11px;">
+        <p>1</p>
+    </div>
+</div>
+</body>
+</html>

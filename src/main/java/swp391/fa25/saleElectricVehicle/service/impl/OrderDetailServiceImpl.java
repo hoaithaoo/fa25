@@ -156,19 +156,23 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
             // Validate stock availability again
             validateStockAvailability(stock, itemReq.getQuantity());
-            // Calculate total order price before tax and discounts
-            totalOrderPrice = totalOrderPrice.add(
-                    stock.getPriceOfStore().multiply(BigDecimal.valueOf(itemReq.getQuantity()))
-            );
+
+            BigDecimal unitPriceAfterVat = stock.getPriceOfStore()
+                    .add(stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)));
+            // Calculate total order price before service price and discounts
+            totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
 
             // Calculate VAT amount
-            BigDecimal vatAmount = stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+//            BigDecimal vatAmount = stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+
             // Check province for license plate fee
             BigDecimal licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
             if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh") || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
                 licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             }
-            totalTax = totalTax.add(vatAmount).add(licensePlateFee).add(REGISTRATION_FEE_AMOUNT);
+            BigDecimal registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+//            totalTax = totalTax.add(vatAmount).add(licensePlateFee).add(REGISTRATION_FEE_AMOUNT);
+            totalTax = totalTax.add(licensePlateFee).add(registrationFee);
 
             // Calculate discount amount
             Promotion promotion = null;
@@ -188,12 +192,13 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             totalPromotions = totalPromotions.add(discountAmount);
 
             // Calculate total price
+            // tính vat ở trong hàm calculateTotalPrice
             price = calculateTotalPrice(
                     stock.getPriceOfStore(),
                     itemReq.getQuantity(),
-                    vatAmount,
+//                    vatAmount,
                     licensePlateFee,
-                    REGISTRATION_FEE_AMOUNT,
+                    registrationFee,
                     discountAmount
             );
             // calculate final amount
@@ -201,11 +206,12 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
             // Create OrderDetail
             OrderDetail orderDetail = OrderDetail.builder()
-                    .unitPrice(stock.getPriceOfStore())
+                    // set đơn giá là giá tại cửa hàng đã bao gồm VAT
+                    .unitPrice(unitPriceAfterVat)
                     .quantity(itemReq.getQuantity())
-                    .vatAmount(vatAmount)
-                    .licensePlateFee(licensePlateFee)
-                    .registrationFee(REGISTRATION_FEE_AMOUNT)
+//                    .vatAmount(vatAmount)
+                    .licensePlateFee(licensePlateFee) // phí biển số theo số lượng
+                    .registrationFee(registrationFee)
                     .discountAmount(discountAmount)
                     .totalPrice(price) // price after tax and discount
                     .createdAt(LocalDateTime.now())
@@ -227,7 +233,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         order.setTotalTaxPrice(totalTax);
         order.setTotalPromotionAmount(totalPromotions);
         order.setTotalPayment(finalAmount);
-        orderService.updateAfterDetailChange(order);
+        order.setStatus(OrderStatus.CONFIRMED);
+        orderService.updateOrder(order);
 
         return CreateOrderWithItemsResponse.builder()
                 .orderDetailsResponses(
@@ -239,7 +246,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
                                 .unitPrice(od.getUnitPrice())
                                 .quantity(od.getQuantity())
-                                .vatAmount(od.getVatAmount())
+//                                .vatAmount(od.getVatAmount())
                                 .licensePlateFee(od.getLicensePlateFee())
                                 .registrationFee(od.getRegistrationFee())
                                 .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
@@ -386,13 +393,14 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     //
 //    // =============== CALCULATION ===============
 //
-    @Override
-    public BigDecimal calculateTotalPrice(BigDecimal priceOfStore, int quantity,
-                                          BigDecimal vatAmount, BigDecimal licensePlateFee,
+//    @Override
+    private BigDecimal calculateTotalPrice(BigDecimal priceOfStore, int quantity,
+//                                          BigDecimal vatAmount,
+                                          BigDecimal licensePlateFee,
                                           BigDecimal registrationFee, BigDecimal discountAmount) {
-        return priceOfStore
+        return priceOfStore.add(priceOfStore.multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)))
                 .multiply(BigDecimal.valueOf(quantity))
-                .add(vatAmount)
+//                .add(vatAmount)
                 .add(licensePlateFee)
                 .add(registrationFee)
                 .subtract(discountAmount);
@@ -409,7 +417,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
                 .unitPrice(od.getUnitPrice())
                 .quantity(od.getQuantity())
-                .vatAmount(od.getVatAmount())
+//                .vatAmount(od.getVatAmount())
                 .licensePlateFee(od.getLicensePlateFee())
                 .registrationFee(od.getRegistrationFee())
                 .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : null)

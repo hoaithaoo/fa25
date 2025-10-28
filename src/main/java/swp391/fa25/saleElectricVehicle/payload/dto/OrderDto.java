@@ -1,9 +1,6 @@
 package swp391.fa25.saleElectricVehicle.payload.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import swp391.fa25.saleElectricVehicle.entity.Order;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,32 +12,23 @@ import java.util.List;
 @Builder
 public class OrderDto {
     private int orderId;
-    private BigDecimal totalPrice;
+    private String orderCode;
+
+    private List<OrderDetailsDto> orderDetailsList;
+
+    private int totalQuantity;
+    private BigDecimal totalUnitPrice; // đã gồm VAT
+    private BigDecimal totalDiscount;
     private BigDecimal totalTaxPrice;
-    private BigDecimal totalPromotionAmount;
-    private BigDecimal totalPayment;
-    private OrderStatus status;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime orderDate;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updatedAt;
-
-    // Foreign keys
+    // lấy id để trả về customer để đưa vào hợp đồng
     private int customerId;
-    private String customerName;  // For display
-    private String customerPhone; // For display
+    private String customerName;
 
     private int staffId;
-    private String staffName;     // For display
+    private String staffName;
 
-    private int contractId;       // If needed
-
-    // Order details (optional, có thể separate endpoint)
-    private List<OrderDetailDto> orderDetails;
-
-    // Calculated fields
-    private int totalItems;       // Tổng số items
-    private String statusDisplay; // For frontend display
+    private int storeId;
+    private String storeName;
+    private String storeAddress;
 }

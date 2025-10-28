@@ -24,8 +24,8 @@ public class OrderDetail {
     @Column(nullable = false)
     private int quantity;
 
-    @Column(nullable = false)
-    private BigDecimal vatAmount;
+//    @Column(nullable = false)
+//    private BigDecimal vatAmount;
 
     @Column(nullable = false)
     private BigDecimal licensePlateFee;

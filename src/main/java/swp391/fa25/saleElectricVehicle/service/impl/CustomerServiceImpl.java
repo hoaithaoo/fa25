@@ -33,6 +33,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .address(customerDto.getAddress())
                 .email(customerDto.getEmail())
                 .phone(customerDto.getPhone())
+                .identificationNumber(customerDto.getIdentificationNumber())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -147,6 +148,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .address(customer.getAddress())
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
+                .identificationNumber(customer.getIdentificationNumber())
                 .build();
     }
 }

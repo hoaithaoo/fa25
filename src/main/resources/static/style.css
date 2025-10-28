@@ -1,0 +1,406 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    background: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 20px;
+}
+
+.company-info {
+    flex: 1;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 5px;
+}
+
+.company-details {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #333;
+}
+
+.title {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.title h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.title p {
+    font-size: 12px;
+    font-style: italic;
+    color: #666;
+}
+
+.section {
+    margin-bottom: 25px;
+}
+
+.section-title {
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.info-label {
+    min-width: 120px;
+    font-weight: 500;
+}
+
+.info-value {
+    flex: 1;
+    border-bottom: 1px dotted #999;
+    padding-left: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+}
+
+table th, table td {
+    border: 1px solid #333;
+    padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background: #f0f0f0;
+    font-weight: bold;
+    text-align: center;
+}
+
+.vehicle-details {
+    list-style: none;
+    padding-left: 15px;
+}
+
+.vehicle-details li {
+    margin: 5px 0;
+    font-size: 12px;
+}
+
+.vehicle-details li:before {
+    content: "- ";
+    margin-right: 5px;
+}
+
+.price-total {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.note {
+    font-style: italic;
+    font-size: 12px;
+    margin-top: 5px;
+    color: #666;
+}
+
+.article {
+    margin: 20px 0;
+}
+
+.article-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.article-content {
+    font-size: 13px;
+    line-height: 1.8;
+    text-align: justify;
+}
+
+.article-content ul {
+    margin: 10px 0;
+    padding-left: 25px;
+}
+
+.article-content li {
+    margin: 5px 0;
+}
+
+.signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    text-align: center;
+}
+
+.signature-box {
+    flex: 1;
+    padding: 20px;
+}
+
+.signature-box h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.signature-box .subtitle {
+    font-size: 12px;
+    font-style: italic;
+    margin-bottom: 80px;
+}
+
+.stamp {
+    position: relative;
+    margin: 20px auto;
+}
+
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    .container {
+        box-shadow: none;
+        padding: 20px;
+    }
+}
+
+
+
+/** {*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+/*body {*/
+/*    font-family: 'Times New Roman', serif;*/
+/*    line-height: 1.8;*/
+/*    padding: 40px;*/
+/*    background: white;*/
+/*    color: #000;*/
+/*}*/
+
+/*.container {*/
+/*    max-width: 800px;*/
+/*    margin: 0 auto;*/
+/*    background: white;*/
+/*    border: 1px solid #000;*/
+/*    padding: 40px;*/
+/*}*/
+
+/*.header {*/
+/*    text-align: center;*/
+/*    margin-bottom: 30px;*/
+/*    padding-bottom: 20px;*/
+/*    border-bottom: 2px solid #000;*/
+/*}*/
+
+/*h1 {*/
+/*    font-size: 20px;*/
+/*    margin-bottom: 15px;*/
+/*    text-transform: uppercase;*/
+/*    font-weight: bold;*/
+/*}*/
+
+/*.contract-number {*/
+/*    font-size: 13px;*/
+/*    font-style: italic;*/
+/*}*/
+
+/*.date-location {*/
+/*    text-align: right;*/
+/*    font-style: italic;*/
+/*    margin: 20px 0 30px 0;*/
+/*}*/
+
+/*.section {*/
+/*    margin-bottom: 25px;*/
+/*}*/
+
+/*.section-title {*/
+/*    font-size: 14px;*/
+/*    font-weight: bold;*/
+/*    margin-bottom: 12px;*/
+/*    text-transform: uppercase;*/
+/*}*/
+
+/*.party-info {*/
+/*    padding: 15px;*/
+/*    border: 1px solid #000;*/
+/*    margin-bottom: 20px;*/
+/*}*/
+
+/*.info-row {*/
+/*    margin-bottom: 8px;*/
+/*    display: flex;*/
+/*}*/
+
+/*.info-label {*/
+/*    font-weight: bold;*/
+/*    min-width: 160px;*/
+/*}*/
+
+/*.info-value {*/
+/*    flex: 1;*/
+/*    border-bottom: 1px dotted #000;*/
+/*}*/
+
+/*.article {*/
+/*    margin-bottom: 20px;*/
+/*    text-align: justify;*/
+/*}*/
+
+/*.article-title {*/
+/*    font-weight: bold;*/
+/*    margin-bottom: 8px;*/
+/*    font-size: 13px;*/
+/*}*/
+
+/*.article-content {*/
+/*    margin-left: 15px;*/
+/*    font-size: 13px;*/
+/*}*/
+
+/*.vehicle-table {*/
+/*    width: 100%;*/
+/*    border-collapse: collapse;*/
+/*    margin: 15px 0;*/
+/*}*/
+
+/*.vehicle-table td {*/
+/*    border: 1px solid #000;*/
+/*    padding: 8px;*/
+/*}*/
+
+/*.vehicle-table .label {*/
+/*    font-weight: bold;*/
+/*    width: 40%;*/
+/*}*/
+
+/*.price-section {*/
+/*    text-align: center;*/
+/*    padding: 15px;*/
+/*    border: 2px solid #000;*/
+/*    margin: 20px 0;*/
+/*}*/
+
+/*.price-label {*/
+/*    font-size: 13px;*/
+/*    margin-bottom: 8px;*/
+/*    font-weight: bold;*/
+/*}*/
+
+/*.price-amount {*/
+/*    font-size: 18px;*/
+/*    font-weight: bold;*/
+/*    margin: 10px 0;*/
+/*}*/
+
+/*ul {*/
+/*    margin-left: 40px;*/
+/*    margin-top: 8px;*/
+/*}*/
+
+/*li {*/
+/*    margin-bottom: 6px;*/
+/*    font-size: 13px;*/
+/*}*/
+
+/*.signature-section {*/
+/*    display: grid;*/
+/*    grid-template-columns: 1fr 1fr;*/
+/*    gap: 40px;*/
+/*    margin-top: 50px;*/
+/*    page-break-inside: avoid;*/
+/*}*/
+
+/*.signature-box {*/
+/*    text-align: center;*/
+/*}*/
+
+/*.signature-title {*/
+/*    font-weight: bold;*/
+/*    margin-bottom: 80px;*/
+/*    text-transform: uppercase;*/
+/*    font-size: 13px;*/
+/*}*/
+
+/*.signature-line {*/
+/*    border-top: 1px solid #000;*/
+/*    padding-top: 8px;*/
+/*    font-size: 12px;*/
+/*    font-style: italic;*/
+/*}*/
+
+/*.print-btn {*/
+/*    background: #000;*/
+/*    color: white;*/
+/*    border: none;*/
+/*    padding: 10px 25px;*/
+/*    font-size: 14px;*/
+/*    cursor: pointer;*/
+/*    display: block;*/
+/*    margin: 20px auto 0;*/
+/*    font-family: Arial, sans-serif;*/
+/*}*/
+
+/*.print-btn:hover {*/
+/*    background: #333;*/
+/*}*/
+
+/*@media print {*/
+/*    body {*/
+/*        padding: 0;*/
+/*    }*/
+/*    .container {*/
+/*        border: none;*/
+/*        padding: 20px;*/
+/*    }*/
+/*    .print-btn {*/
+/*        display: none;*/
+/*    }*/
+/*}*/
+
+/*@page {*/
+/*    margin: 2cm;*/
+/*}*/

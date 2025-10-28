@@ -24,7 +24,7 @@ public class CreateOrderDetailsResponse {
     private int quantity;
     private BigDecimal totalPrice;
 
-    private BigDecimal vatAmount;
+//    private BigDecimal vatAmount;
     private BigDecimal licensePlateFee;
     private BigDecimal registrationFee;
 

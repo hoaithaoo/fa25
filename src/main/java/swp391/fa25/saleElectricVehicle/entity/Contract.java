@@ -2,9 +2,11 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,22 +22,18 @@ public class Contract {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int contractId;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String contractCode;
 
     @Column(nullable = false)
     private LocalDate contractDate;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String contractFileUrl;
-
-    public enum ContractStatus {
-        DRAFT, PENDING, COMPLETED, CANCELLED, EXPIRED
-    }
 
     @Column
     @Enumerated(EnumType.STRING)
-    private ContractStatus status = ContractStatus.DRAFT;
+    private ContractStatus status;
 
     @Column(columnDefinition = "DECIMAL(12,2)")
     private BigDecimal depositPrice;
@@ -53,10 +51,10 @@ public class Contract {
     private String uploadedBy;
 
     @Column(nullable = false)
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     @Column
-    private String updatedAt;
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payment> payments = new ArrayList<>();
