@@ -14,10 +14,11 @@ jobs:
 
       - name: Build Docker Image
         env:
-          DOCKER_BUILDKIT: 1
+            DOCKER_BUILDKIT: 1
         run: |
-          echo "Building Docker image..."
-          docker build -t myapp:latest -f ./Dockerfile .
+            echo "Building Docker image..."
+            docker build -t myapp:latest -f ./Dockerfile .
+
 
       - name: Stop and Remove Existing Container if Any
         run: |
