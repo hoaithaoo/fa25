@@ -53,6 +53,7 @@ public enum ErrorCode {
     TEST_DRIVE_CONFIG_NOT_FOUND(1041, "Cấu hình lái thử không tồn tại", HttpStatus.NOT_FOUND),
     INVENTORY_TRANSACTION_NOT_FOUND(1042, "Giao dịch tồn kho không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_NOT_EDITABLE(1043, "Đơn hàng không thể chỉnh sửa", HttpStatus.BAD_REQUEST),
+    IDENTIFICATION_NUMBER_EXISTED(1044, "Số CMND/CCCD đã tồn tại", HttpStatus.BAD_REQUEST)
     ;
 
     private final int code;

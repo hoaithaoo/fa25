@@ -33,6 +33,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .address(customerDto.getAddress())
                 .email(customerDto.getEmail())
                 .phone(customerDto.getPhone())
+                .identificationNumber(customerDto.getIdentificationNumber())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -112,6 +113,16 @@ public class CustomerServiceImpl implements CustomerService {
                 customerRepository.existsCustomerByEmail(customerDto.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
+
+        if(customerDto.getIdentificationNumber() != null && !customerDto.getIdentificationNumber().trim().isEmpty()) {
+            if (!customer.getIdentificationNumber().equals(customerDto.getIdentificationNumber())
+                    && customerRepository.existsCustomerByIdentificationNumber(customerDto.getIdentificationNumber())) {
+                throw new AppException(ErrorCode.IDENTIFICATION_NUMBER_EXISTED);
+
+            }
+            customer.setIdentificationNumber(customerDto.getIdentificationNumber());
+        }
+
         if (customerDto.getEmail() != null && !customerDto.getEmail().trim().isEmpty()) {
             customer.setEmail(customerDto.getEmail());
         }
