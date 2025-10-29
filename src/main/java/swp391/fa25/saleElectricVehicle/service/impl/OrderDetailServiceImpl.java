@@ -110,6 +110,114 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
 // =============== CRUD OPERATIONS ===============
+
+    @Override
+    public CreateOrderWithItemsResponse createQuote(CreateOrderWithItemsRequest request) {
+        // Validate dependencies
+        Order order = orderService.getOrderEntityById(request.getOrderId());
+
+        if (order.getStatus() != OrderStatus.DRAFT) {
+            throw new AppException(ErrorCode.ORDER_NOT_EDITABLE);
+        }
+
+        List<OrderDetail> orderDetails = order.getOrderDetails();
+        BigDecimal price = BigDecimal.ZERO;
+        BigDecimal totalOrderPrice = BigDecimal.ZERO;
+        BigDecimal totalTax = BigDecimal.ZERO;
+        BigDecimal totalPromotions = BigDecimal.ZERO;
+        BigDecimal finalAmount = BigDecimal.ZERO;
+
+        for (int i = 0; i < request.getOrderDetails().size(); i++) {
+            // lấy từng item trong request
+            CreateOrderDetailsRequest itemReq = request.getOrderDetails().get(i);
+
+            // Get model
+            Model model = modelService.getModelEntityById(itemReq.getModelId());
+
+            // Get color
+            Color color = colorService.getColorEntityById(itemReq.getColorId());
+
+            // Get modelColor
+            ModelColor modelColor = modelColorService
+                    .getModelColorEntityByModelIdAndColorId(
+                            model.getModelId(),
+                            color.getColorId()
+                    );
+
+            User staff = userService.getCurrentUserEntity();
+            Store store = storeService.getCurrentStoreEntity(staff.getUserId());
+
+            StoreStock stock = storeStockService.getStoreStockByStoreIdAndModelColorId(
+                    store.getStoreId(),
+                    modelColor.getModelColorId()
+            );
+
+            // đơn giá đã tính cả VAT
+            BigDecimal unitPriceAfterVat = stock.getPriceOfStore()
+                    .add(stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)));
+            // tổng tiền xe chưa tính phí dịch vụ và khuyến mãi
+            totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+
+            // Check province for license plate fee
+            BigDecimal licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
+            if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh") || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
+                licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+            }
+            BigDecimal registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+            totalTax = totalTax.add(licensePlateFee).add(registrationFee);
+
+            // Calculate discount amount
+            Promotion promotion = null;
+            BigDecimal discountAmount = BigDecimal.ZERO;
+            if (itemReq.getPromotionId() > 0) {
+                promotion = promotionService.getPromotionEntityById(itemReq.getPromotionId());
+                // Giả sử promotion là giảm giá theo phần trăm
+                if (promotion.getPromotionType().toString().equals("PERCENTAGE")) {
+                    discountAmount = stock.getPriceOfStore()
+                            .multiply(BigDecimal.valueOf(itemReq.getQuantity()))
+                            .multiply(promotion.getAmount().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+                } else if (promotion.getPromotionType().toString().equals("FIXED_AMOUNT")) {
+                    discountAmount = promotion.getAmount().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                }
+            }
+
+            totalPromotions = totalPromotions.add(discountAmount);
+
+            // Calculate total price
+            // tính vat ở trong hàm calculateTotalPrice
+            price = calculateTotalPrice(
+                    stock.getPriceOfStore(),
+                    itemReq.getQuantity(),
+                    licensePlateFee,
+                    registrationFee,
+                    discountAmount
+            );
+            // calculate final amount
+            finalAmount = finalAmount.add(price);
+        }
+
+        return CreateOrderWithItemsResponse.builder()
+                .orderDetailsResponses(
+                        orderDetails.stream().map(od -> CreateOrderDetailsResponse.builder()
+                                        .orderDetailId(od.getId())
+                                        .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
+                                        .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
+                                        .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
+                                        .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
+                                        .unitPrice(od.getUnitPrice())
+                                        .quantity(od.getQuantity())
+                                        .licensePlateFee(od.getLicensePlateFee())
+                                        .registrationFee(od.getRegistrationFee())
+                                        .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
+                                        .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
+                                        .discountAmount(od.getDiscountAmount())
+                                        .totalPrice(od.getTotalPrice())
+                                        .build()
+                        ).toList()
+                )
+                .build();
+    }
+
     @Transactional
     @Override
     public CreateOrderWithItemsResponse createOrderDetail(CreateOrderWithItemsRequest request) {

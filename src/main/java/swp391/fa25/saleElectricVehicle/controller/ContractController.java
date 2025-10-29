@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
@@ -16,6 +17,7 @@ import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
+import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
 import swp391.fa25.saleElectricVehicle.service.CustomerService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
@@ -40,6 +42,10 @@ public class ContractController {
     @Autowired
     SpringTemplateEngine templateEngine;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    // Tạo hợp đồng nháp
     @PostMapping("/contracts")
     public ResponseEntity<Map<String, Object>> createContract(@RequestBody CreateContractRequest request) {
         ContractDto created = contractService.createDraftContract(request);
@@ -52,6 +58,7 @@ public class ContractController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // Xem hợp đồng dưới dạng HTML
     @GetMapping("/api/contracts/{id}")
     public ResponseEntity<String> getContractById(@PathVariable int id) {
         // Lấy thông tin hợp đồng
@@ -73,6 +80,22 @@ public class ContractController {
                 .status(HttpStatus.CREATED)
                 .contentType(MediaType.TEXT_HTML)
                 .body(htmlContent);
+    }
+
+    // Upload hợp đồng đã ký
+    @PostMapping("/{contractId}/upload-signed")
+    public ResponseEntity<ApiResponse<String>> uploadSignedContract(
+            @PathVariable int contractId,
+            @RequestParam("file") MultipartFile file) {
+        contractService.getContractById(contractId);
+        String fileUrl = cloudinaryService.uploadFile(file, "contracts");
+        contractService.addFileUrlContract(contractId, fileUrl);
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("File uploaded successfully")
+                .data(fileUrl)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
 

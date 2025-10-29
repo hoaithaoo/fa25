@@ -16,6 +16,7 @@ public interface OrderDetailService {
     StockValidationResponse validateStockAvailability(StockValidationRequest request);
 
 //    // =============== CRUD OPERATIONS ===============
+    CreateOrderWithItemsResponse createQuote(CreateOrderWithItemsRequest request);
     CreateOrderWithItemsResponse createOrderDetail(CreateOrderWithItemsRequest request);
     GetOrderDetailsResponse getOrderDetailById(int id);
 //    OrderDetailDto getOrderDetailById(int id);

@@ -10,6 +10,7 @@ public interface ContractService {
     ContractDto createDraftContract(CreateContractRequest request);
 //    ContractDto updateContract(int id, ContractDto contractDto);
     ContractDto getContractById(int id);
+    ContractDto addFileUrlContract(int id, String fileUrl);
 //    ContractDto getContractByFileUrl(String fileUrl);
 //    List<ContractDto> getAllContracts();
 //    List<ContractDto> getContractsByStatus(Contract.ContractStatus status);
