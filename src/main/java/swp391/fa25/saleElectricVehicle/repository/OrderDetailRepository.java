@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import swp391.fa25.saleElectricVehicle.entity.OrderDetail;
+import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

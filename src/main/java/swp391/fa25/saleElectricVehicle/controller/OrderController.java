@@ -5,11 +5,16 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderWithItemsRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse;
+import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 
 import java.time.LocalDate;
@@ -23,11 +28,38 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private OrderDetailService orderDetailService;
+
     // CREATE
+    @PostMapping("/create/quote")
+    public ResponseEntity<ApiResponse<GetQuoteResponse>> createQuote(@RequestBody CreateOrderWithItemsRequest request) {
+        GetQuoteResponse createdOrder = orderDetailService.createQuote(request);
+        ApiResponse<GetQuoteResponse> response = ApiResponse.<GetQuoteResponse>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("Quote created successfully")
+                .data(createdOrder)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // CREATE DRAFT ORDER
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(@RequestBody CreateOrderRequest request) {
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> createDraftOrder(@RequestBody CreateOrderRequest request) {
         CreateOrderResponse createdOrder = orderService.createOrder(request);
         ApiResponse<CreateOrderResponse> response = ApiResponse.<CreateOrderResponse>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("Order created successfully")
+                .data(createdOrder)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // CREATE ORDER
+    @PostMapping("/{orderId}/confirm")
+    public ResponseEntity<ApiResponse<GetOrderResponse>> confirmOrder(@PathVariable int orderId) {
+        GetOrderResponse createdOrder = orderService.confirmOrder(orderId);
+        ApiResponse<GetOrderResponse> response = ApiResponse.<GetOrderResponse>builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Order created successfully")
                 .data(createdOrder)
@@ -134,6 +166,17 @@ public class OrderController {
                 .data(orders)
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("{orderId}/order-details")
+    public ResponseEntity<ApiResponse<List<GetOrderDetailsResponse>>> getOrderDetails(@PathVariable int orderId) {
+        List<GetOrderDetailsResponse> list = orderDetailService.getOrderDetailsByOrderId(orderId);
+        ApiResponse<List<GetOrderDetailsResponse>> response = ApiResponse.<List<GetOrderDetailsResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Get order details successfully")
+                .data(list)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 //
 //    // BUSINESS - Search by customer phone

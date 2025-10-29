@@ -7,6 +7,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.stock.StockValidationRequ
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderWithItemsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.stock.StockValidationResponse;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ public interface OrderDetailService {
     StockValidationResponse validateStockAvailability(StockValidationRequest request);
 
 //    // =============== CRUD OPERATIONS ===============
+    GetQuoteResponse createQuote(CreateOrderWithItemsRequest request);
     CreateOrderWithItemsResponse createOrderDetail(CreateOrderWithItemsRequest request);
     GetOrderDetailsResponse getOrderDetailById(int id);
 //    OrderDetailDto getOrderDetailById(int id);
@@ -24,7 +26,7 @@ public interface OrderDetailService {
 //    void deleteOrderDetail(int id);
 //
 //    // =============== BUSINESS OPERATIONS ===============
-//    List<OrderDetailDto> getOrderDetailsByOrderId(int orderId);
+    List<GetOrderDetailsResponse> getOrderDetailsByOrderId(int orderId);
 //    OrderDetailDto updateQuantity(int id, int quantity);
 //
 //    // =============== VALIDATION ===============
