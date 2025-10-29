@@ -2,18 +2,23 @@ package swp391.fa25.saleElectricVehicle.service;
 
 import swp391.fa25.saleElectricVehicle.entity.Feedback;
 import swp391.fa25.saleElectricVehicle.payload.dto.FeedbackDto;
+import swp391.fa25.saleElectricVehicle.payload.request.feedback.CreateFeedbackRequest; // ✅ THÊM MỚI
+import swp391.fa25.saleElectricVehicle.payload.request.feedback.UpdateFeedbackRequest; // ✅ THÊM MỚI
 
 import java.util.List;
 
 public interface FeedbackService {
-    FeedbackDto createFeedback(FeedbackDto dto);
+    // ✅ THAY ĐỔI: Dùng CreateFeedbackRequest
+    FeedbackDto createFeedback(CreateFeedbackRequest request);
+
     FeedbackDto getFeedbackById(int feedbackId);
     List<FeedbackDto> getAllFeedbacks();
     List<FeedbackDto> getFeedbacksByStatus(String status);
     List<FeedbackDto> getFeedbacksByOrder(int orderId);
-    FeedbackDto updateFeedback(int feedbackId, FeedbackDto dto);
+
+    // ✅ THAY ĐỔI: Dùng UpdateFeedbackRequest
+    FeedbackDto updateFeedback(int feedbackId, UpdateFeedbackRequest request);
+
     void deleteFeedback(int feedbackId);
-    Feedback getFeedbackEntityById(int feedbackId); // Thêm dòng này
-
+    Feedback getFeedbackEntityById(int feedbackId);
 }
-

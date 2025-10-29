@@ -1,5 +1,8 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/contracts")
+@RequestMapping("/contracts")
 public class ContractController {
 
     @Autowired
@@ -83,10 +86,15 @@ public class ContractController {
     }
 
     // Upload hợp đồng đã ký
-    @PostMapping("/{contractId}/upload-signed")
+    @PostMapping(
+            value = "/{contractId}/upload-signed",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<ApiResponse<String>> uploadSignedContract(
             @PathVariable int contractId,
-            @RequestParam("file") MultipartFile file) {
+            @Parameter(description = "File hợp đồng đã ký", required = true,
+                    content = @Content(schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("file") MultipartFile file) {
         contractService.getContractById(contractId);
         String fileUrl = cloudinaryService.uploadFile(file, "contracts");
         contractService.addFileUrlContract(contractId, fileUrl);

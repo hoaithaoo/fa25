@@ -12,7 +12,7 @@ import swp391.fa25.saleElectricVehicle.service.FeedbackDetailService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/feedback-details")
+@RequestMapping("/feedback-details")
 public class FeedbackDetailController {
 
     @Autowired

@@ -6,22 +6,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.payload.dto.FeedbackDto;
+import swp391.fa25.saleElectricVehicle.payload.request.feedback.CreateFeedbackRequest; // ✅ THÊM MỚI
+import swp391.fa25.saleElectricVehicle.payload.request.feedback.UpdateFeedbackRequest; // ✅ THÊM MỚI
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.FeedbackService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/feedbacks")
+@RequestMapping("/feedbacks")
 public class FeedbackController {
 
     @Autowired
     private FeedbackService feedbackService;
 
+    // ✅ THAY ĐỔI: Dùng CreateFeedbackRequest thay vì FeedbackDto
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<FeedbackDto>> createFeedback(
-            @Valid @RequestBody FeedbackDto dto) {
-        FeedbackDto created = feedbackService.createFeedback(dto);
+            @Valid @RequestBody CreateFeedbackRequest request) { // ✅ Đổi từ FeedbackDto → CreateFeedbackRequest
+        FeedbackDto created = feedbackService.createFeedback(request);
         ApiResponse<FeedbackDto> response = ApiResponse.<FeedbackDto>builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Feedback created successfully")
@@ -77,11 +80,12 @@ public class FeedbackController {
         return ResponseEntity.ok(response);
     }
 
+    // ✅ THAY ĐỔI: Dùng UpdateFeedbackRequest thay vì FeedbackDto
     @PutMapping("/update/{feedbackId}")
     public ResponseEntity<ApiResponse<FeedbackDto>> updateFeedback(
             @PathVariable int feedbackId,
-            @Valid @RequestBody FeedbackDto dto) {
-        FeedbackDto updated = feedbackService.updateFeedback(feedbackId, dto);
+            @Valid @RequestBody UpdateFeedbackRequest request) { // ✅ Đổi từ FeedbackDto → UpdateFeedbackRequest
+        FeedbackDto updated = feedbackService.updateFeedback(feedbackId, request);
         ApiResponse<FeedbackDto> response = ApiResponse.<FeedbackDto>builder()
                 .code(HttpStatus.OK.value())
                 .message("Feedback updated successfully")

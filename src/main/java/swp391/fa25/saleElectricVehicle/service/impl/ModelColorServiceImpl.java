@@ -94,7 +94,7 @@ public class ModelColorServiceImpl implements ModelColorService {
         Color color = colorService.getColorEntityById(modelColorDto.getColorId());
 
         ModelColor updateModelColor = modelColorRepository.findByModel_ModelIdAndColor_ColorId(model.getModelId(), color.getColorId());
-        if (updateModelColor != null) {
+        if (updateModelColor != null && updateModelColor.getModelColorId() != id) {
             throw new AppException(ErrorCode.MODEL_COLOR_EXISTED);
         }
         existingModelColor.setModel(model);

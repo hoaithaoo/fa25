@@ -1,12 +1,15 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder; // ✅ THÊM MỚI
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Feedback;
 import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.FeedbackDto;
+import swp391.fa25.saleElectricVehicle.payload.request.feedback.CreateFeedbackRequest; // ✅ THÊM MỚI
+import swp391.fa25.saleElectricVehicle.payload.request.feedback.UpdateFeedbackRequest; // ✅ THÊM MỚI
 import swp391.fa25.saleElectricVehicle.repository.FeedbackRepository;
 import swp391.fa25.saleElectricVehicle.service.FeedbackService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
@@ -24,15 +27,27 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Autowired
     private OrderService orderService;
 
+    // ✅ THAY ĐỔI: Dùng CreateFeedbackRequest thay vì FeedbackDto
     @Override
-    public FeedbackDto createFeedback(FeedbackDto dto) {
-        Order order = orderService.getOrderEntityById(dto.getOrderId());
+    public FeedbackDto createFeedback(CreateFeedbackRequest request) {
+        // ✅ Validate orderId có tồn tại không
+        Order order = orderService.getOrderEntityById(request.getOrderId());
 
+        // ✅ Lấy user đang login (từ JWT token)
+        String currentUser = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+
+        // ✅ Tạo Feedback với giá trị tự động
         Feedback feedback = Feedback.builder()
-                .status(Feedback.FeedbackStatus.valueOf(dto.getStatus()))
-                .createdAt(LocalDateTime.now())
-                .createBy(dto.getCreateBy())
                 .order(order)
+                .customerName(request.getCustomerName()) // ✅ Lưu tên khách hàng
+                .status(request.getStatus() != null
+                        ? Feedback.FeedbackStatus.valueOf(request.getStatus())
+                        : Feedback.FeedbackStatus.PENDING) // ✅ Default PENDING
+                .createdAt(LocalDateTime.now()) // ✅ Tự động gán thời gian tạo
+                .createBy(currentUser) // ✅ Tự động lấy từ JWT
+                .resolveAt(null) // ✅ Mặc định null
+                .resolveBy(null) // ✅ Mặc định null
                 .build();
 
         Feedback saved = feedbackRepository.save(feedback);
@@ -68,22 +83,26 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .collect(Collectors.toList());
     }
 
+    // ✅ THAY ĐỔI: Dùng UpdateFeedbackRequest thay vì FeedbackDto
     @Override
-    public FeedbackDto updateFeedback(int feedbackId, FeedbackDto dto) {
+    public FeedbackDto updateFeedback(int feedbackId, UpdateFeedbackRequest request) {
         Feedback feedback = feedbackRepository.findById(feedbackId)
                 .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
 
-        if (dto.getStatus() != null) {
-            feedback.setStatus(Feedback.FeedbackStatus.valueOf(dto.getStatus()));
+        // ✅ Update status nếu có
+        if (request.getStatus() != null) {
+            feedback.setStatus(Feedback.FeedbackStatus.valueOf(request.getStatus()));
+
+            // ✅ Nếu status = "RESOLVED" → tự động gán resolveAt và resolveBy
+            if ("RESOLVED".equals(request.getStatus())) {
+                feedback.setResolveAt(LocalDateTime.now());
+                feedback.setResolveBy(SecurityContextHolder.getContext()
+                        .getAuthentication().getName());
+            }
         }
-        if (dto.getResolveAt() != null) {
-            feedback.setResolveAt(dto.getResolveAt());
-        }
-        if (dto.getResolveBy() != null) {
-            feedback.setResolveBy(dto.getResolveBy());
-        }
-        feedbackRepository.save(feedback);
-        return mapToDto(feedback);
+
+        Feedback updated = feedbackRepository.save(feedback);
+        return mapToDto(updated);
     }
 
     @Override
@@ -99,10 +118,11 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
     }
 
-
+    // ✅ THÊM customerName vào mapping
     private FeedbackDto mapToDto(Feedback feedback) {
         return FeedbackDto.builder()
                 .feedbackId(feedback.getFeedbackId())
+                .customerName(feedback.getCustomerName()) // ✅ THÊM MỚI
                 .status(feedback.getStatus().name())
                 .createdAt(feedback.getCreatedAt())
                 .createBy(feedback.getCreateBy())

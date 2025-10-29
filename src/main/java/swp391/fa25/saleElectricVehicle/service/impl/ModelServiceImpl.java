@@ -119,6 +119,7 @@ public class ModelServiceImpl implements ModelService {
         }
         if (modelDto.getModelName() != null
                 && !modelDto.getModelName().trim().isEmpty()
+                && !modelDto.getModelName().equals(existingModel.getModelName())
                 && modelRepository.existsModelByModelName(modelDto.getModelName())) {
             throw new AppException(ErrorCode.MODEL_EXISTED);
         }
@@ -165,11 +166,15 @@ public class ModelServiceImpl implements ModelService {
         existingModel.setPrice(modelDto.getPrice());
 
         // body type phải được dropdown
-        if (modelDto.getBodyType() != null && modelDto.getBodyType().name().trim().isEmpty()) {
+        if (modelDto.getBodyType() != null
+                && modelDto.getBodyType().name().trim().isEmpty()
+                && !modelDto.getBodyType().equals(existingModel.getBodyType())) {
             existingModel.setBodyType(modelDto.getBodyType());
         }
 
-        if (modelDto.getDescription() != null && modelDto.getDescription().trim().isEmpty()) {
+        if (modelDto.getDescription() != null
+                && modelDto.getDescription().trim().isEmpty()
+                && !modelDto.getDescription().equals(existingModel.getDescription())) {
             existingModel.setDescription(modelDto.getDescription());
         }
 

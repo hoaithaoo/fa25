@@ -94,19 +94,35 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
 //        if (customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
-        if (!customer.getPhone().equals(customerDto.getPhone()) &&
-                customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
-            throw new AppException(ErrorCode.USER_EXISTED);
+        if (customerDto.getPhone() != null
+                && !customerDto.getPhone().trim().isEmpty()) {
+            if (!customer.getPhone().equals(customerDto.getPhone())
+                    && customerRepository.findCustomerByPhone(customerDto.getPhone()) != null) {
+                throw new AppException(ErrorCode.USER_EXISTED);
+            }
+            customer.setPhone(customerDto.getPhone());
         }
 
 //        if (customerRepository.existsCustomerByEmail(customerDto.getEmail())) {
 //            throw new AppException(ErrorCode.EMAIL_EXISTED);
 //        }
         // ✅ SỬA LẠI:
-        if (!customer.getEmail().equals(customerDto.getEmail()) &&
+        if (customerDto.getEmail() != null
+                && !customerDto.getEmail().trim().isEmpty()
+                && !customer.getEmail().equals(customerDto.getEmail()) &&
                 customerRepository.existsCustomerByEmail(customerDto.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
+
+        if(customerDto.getIdentificationNumber() != null && !customerDto.getIdentificationNumber().trim().isEmpty()) {
+            if (!customer.getIdentificationNumber().equals(customerDto.getIdentificationNumber())
+                    && customerRepository.existsCustomerByIdentificationNumber(customerDto.getIdentificationNumber())) {
+                throw new AppException(ErrorCode.IDENTIFICATION_NUMBER_EXISTED);
+
+            }
+            customer.setIdentificationNumber(customerDto.getIdentificationNumber());
+        }
+
         if (customerDto.getEmail() != null && !customerDto.getEmail().trim().isEmpty()) {
             customer.setEmail(customerDto.getEmail());
         }

@@ -179,6 +179,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public GetOrderResponse confirmOrder(int orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
+        }
+        order.setStatus(OrderStatus.CONFIRMED);
+        updateOrder(order);
+        return mapToDto(order);
+    }
+
+    @Override
     public void deleteOrder(int orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {

@@ -2,12 +2,13 @@ package swp391.fa25.saleElectricVehicle.service;
 
 import swp391.fa25.saleElectricVehicle.entity.Customer;
 import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
+import swp391.fa25.saleElectricVehicle.payload.request.customer.CreateCustomerRequest;
 
 import java.util.List;
 
 public interface CustomerService {
-    CustomerDto createCustomer(CustomerDto customerDto);
-    CustomerDto getCustomerById(int customerId);        // ← THÊM dòng này
+    CustomerDto createCustomer(CustomerDto request); // ✅ Đổi từ CustomerDto → CreateCustomerRequest
+    CustomerDto getCustomerById(int customerId);
     Customer getCustomerEntityById(int customerId);
     CustomerDto getCustomerByPhone(String phone);
     List<CustomerDto> getAllCustomers();
@@ -15,3 +16,5 @@ public interface CustomerService {
     CustomerDto updateCustomer(int customerId, CustomerDto customerDto);
     void deleteCustomer(int customerId);
 }
+
+

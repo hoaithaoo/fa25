@@ -8,13 +8,11 @@ import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDetailDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderDetailsRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderWithItemsRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.stock.StockValidationRequest;
-import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderDetailsResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderWithItemsResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.*;
 import swp391.fa25.saleElectricVehicle.payload.response.stock.StockValidationResponse;
 import swp391.fa25.saleElectricVehicle.repository.*;
 import swp391.fa25.saleElectricVehicle.service.*;
@@ -111,8 +109,9 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
 // =============== CRUD OPERATIONS ===============
 
+    // xem xét nên chuyển qua order service không
     @Override
-    public CreateOrderWithItemsResponse createQuote(CreateOrderWithItemsRequest request) {
+    public GetQuoteResponse createQuote(CreateOrderWithItemsRequest request) {
         // Validate dependencies
         Order order = orderService.getOrderEntityById(request.getOrderId());
 
@@ -128,7 +127,6 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         BigDecimal finalAmount = BigDecimal.ZERO;
 
         for (int i = 0; i < request.getOrderDetails().size(); i++) {
-            // lấy từng item trong request
             CreateOrderDetailsRequest itemReq = request.getOrderDetails().get(i);
 
             // Get model
@@ -152,15 +150,16 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     modelColor.getModelColorId()
             );
 
-            // đơn giá đã tính cả VAT
+            // đơn giá bao gồm cả VAT
             BigDecimal unitPriceAfterVat = stock.getPriceOfStore()
                     .add(stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)));
-            // tổng tiền xe chưa tính phí dịch vụ và khuyến mãi
+            // tổng tiền xe (đã gồm vat)
             totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
 
             // Check province for license plate fee
             BigDecimal licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
-            if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh") || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
+            if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh")
+                    || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
                 licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             }
             BigDecimal registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
@@ -181,6 +180,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 }
             }
 
+            // tổng tiền khuyến mãi
             totalPromotions = totalPromotions.add(discountAmount);
 
             // Calculate total price
@@ -188,33 +188,65 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             price = calculateTotalPrice(
                     stock.getPriceOfStore(),
                     itemReq.getQuantity(),
+//                    vatAmount,
                     licensePlateFee,
                     registrationFee,
                     discountAmount
             );
             // calculate final amount
             finalAmount = finalAmount.add(price);
+
+            // Create OrderDetail
+            OrderDetail orderDetail = OrderDetail.builder()
+                    // set đơn giá là giá tại cửa hàng đã bao gồm VAT
+                    .unitPrice(unitPriceAfterVat)
+                    .quantity(itemReq.getQuantity())
+                    .licensePlateFee(licensePlateFee) // phí biển số theo số lượng
+                    .registrationFee(registrationFee)
+                    .discountAmount(discountAmount)
+                    .totalPrice(price) // tiền một model sau phí dịch vụ và khuyến mãi
+                    .createdAt(LocalDateTime.now())
+                    .order(order)
+                    .storeStock(stock)
+                    .promotion(promotion)
+                    .build();
+
+            // Save OrderDetail
+            OrderDetail saved = orderDetailRepository.save(orderDetail);
+            orderDetails.add(saved);
         }
 
-        return CreateOrderWithItemsResponse.builder()
-                .orderDetailsResponses(
-                        orderDetails.stream().map(od -> CreateOrderDetailsResponse.builder()
-                                        .orderDetailId(od.getId())
-                                        .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
-                                        .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
-                                        .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
-                                        .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
-                                        .unitPrice(od.getUnitPrice())
-                                        .quantity(od.getQuantity())
-                                        .licensePlateFee(od.getLicensePlateFee())
-                                        .registrationFee(od.getRegistrationFee())
-                                        .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
-                                        .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
-                                        .discountAmount(od.getDiscountAmount())
-                                        .totalPrice(od.getTotalPrice())
-                                        .build()
-                        ).toList()
-                )
+        order.setTotalPrice(totalOrderPrice);
+        order.setTotalTaxPrice(totalTax);
+        order.setTotalPromotionAmount(totalPromotions);
+        order.setTotalPayment(finalAmount);
+        orderService.updateOrder(order);
+
+        return GetQuoteResponse.builder()
+                .orderId(order.getOrderId())
+                .orderCode(order.getOrderCode())
+                .getOrderDetailsResponses(
+                        orderDetails.stream().map(od -> GetOrderDetailsResponse.builder()
+                                .orderDetailId(od.getId())
+                                .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
+                                .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
+                                .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
+                                .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
+                                .unitPrice(od.getUnitPrice())
+                                .quantity(od.getQuantity())
+                                .licensePlateFee(od.getLicensePlateFee())
+                                .registrationFee(od.getRegistrationFee())
+                                .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
+                                .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
+                                .discountAmount(od.getDiscountAmount())
+                                .totalPrice(od.getTotalPrice())
+                                .build()
+                ).toList())
+                .totalPrice(order.getTotalPrice())
+                .totalTaxPrice(order.getTotalTaxPrice())
+                .totalPromotionAmount(order.getTotalPromotionAmount())
+                .totalPayment(order.getTotalPayment())
+                .status(order.getStatus().name())
                 .build();
     }
 
@@ -437,13 +469,12 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 //    }
 //
 //    // =============== BUSINESS OPERATIONS ===============
-//
-//    @Override
-//    public List<OrderDetailDto> getOrderDetailsByOrderId(int orderId) {
-//        return orderDetailRepository.findByOrder_OrderId(orderId).stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
+
+    @Override
+    public List<GetOrderDetailsResponse> getOrderDetailsByOrderId(int orderId) {
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrder_OrderId(orderId);
+        return orderDetails.stream().map(this::mapToDto).toList();
+    }
 //
 //    @Override
 //    public OrderDetailDto updateQuantity(int id, int quantity) {

@@ -3,12 +3,9 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 jobs:
   build_and_deploy:
-    runs-on: [self-hosted, fa25]
+    runs-on: [self-hosted]
 
     env:
       CONTAINER_NAME: myappCommandContainer
@@ -16,9 +13,12 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Build Docker Image
+        env:
+            DOCKER_BUILDKIT: 1
         run: |
-          echo "Building Docker image..."
-          docker build -t myapp:latest -f ./Dockerfile .
+            echo "Building Docker image..."
+            docker build -t myapp:latest -f ./Dockerfile .
+
 
       - name: Stop and Remove Existing Container if Any
         run: |
@@ -44,7 +44,7 @@ jobs:
       - name: Run New Docker Container
         run: |
           echo ":: Running new container - myappCommandContainer"
-          docker run -d -p 8888:8080 \
+          docker run -d -p 8080:8080 \
             --name myappCommandContainer \
             myapp:latest
 

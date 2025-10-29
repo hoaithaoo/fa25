@@ -12,7 +12,7 @@ import swp391.fa25.saleElectricVehicle.service.TestDriveConfigService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/test-drive-configs")
+@RequestMapping("/test-drive-configs")
 public class TestDriveConfigController {
 
     @Autowired

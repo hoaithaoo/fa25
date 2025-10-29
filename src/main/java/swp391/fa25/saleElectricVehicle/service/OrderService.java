@@ -19,6 +19,7 @@ public interface OrderService {
     List<GetOrderResponse> getAllOrders();
 //    GetOrderResponse updateOrder(int orderId, OrderDto orderDto);
     void updateOrder(Order order);
+    GetOrderResponse confirmOrder(int orderId);
     void deleteOrder(int orderId);
     Order getOrderEntityById(int orderId);
 

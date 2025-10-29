@@ -18,7 +18,7 @@ import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/order-details")
+@RequestMapping("/order-details")
 public class OrderDetailController {
 
     @Autowired
@@ -35,18 +35,6 @@ public class OrderDetailController {
                 .code(HttpStatus.CREATED.value())
                 .message("Order detail added successfully")
                 .data(validation)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    // CREATE
-    @PostMapping("/create/quote")
-    public ResponseEntity<ApiResponse<CreateOrderWithItemsResponse>> createQuote(@RequestBody CreateOrderWithItemsRequest request) {
-        CreateOrderWithItemsResponse created = orderDetailService.createQuote(request);
-        ApiResponse<CreateOrderWithItemsResponse> response = ApiResponse.<CreateOrderWithItemsResponse>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("Quote created successfully")
-                .data(created)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

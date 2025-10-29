@@ -18,7 +18,7 @@ import swp391.fa25.saleElectricVehicle.service.LoginService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired

@@ -109,14 +109,17 @@ public class ColorServiceImpl implements ColorService {
 //            throw new AppException(ErrorCode.COLOR_EXISTED);
 //        }
         // ✅ Sửa lại
-        if (!color.getColorName().equals(colorDto.getColorName()) &&
-                colorRepository.existsColorByColorName(colorDto.getColorName())) {
+        if (!color.getColorName().equals(colorDto.getColorName())
+                && colorDto.getColorName() != null
+                && !colorDto.getColorName().trim().isEmpty()
+                && colorRepository.existsColorByColorName(colorDto.getColorName())) {
             throw new AppException(ErrorCode.COLOR_EXISTED);
         }
         color.setColorName(colorDto.getColorName());
 
         if (colorDto.getColorCode() != null
                 && !colorDto.getColorCode().trim().isEmpty()
+                && !color.getColorCode().equals(colorDto.getColorCode())
                 && colorRepository.existsByColorCode(colorDto.getColorCode())) {
             throw new AppException(ErrorCode.COLOR_CODE_EXISTED);
         }

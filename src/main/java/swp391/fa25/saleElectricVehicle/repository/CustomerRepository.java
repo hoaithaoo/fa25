@@ -11,6 +11,7 @@ import java.util.List;
 public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     Customer findCustomerByPhone(String phone);
     boolean existsCustomerByEmail(String email);
+    boolean existsCustomerByIdentificationNumber(String identificationNumber);
 
     @Query("SELECT c FROM Customer c JOIN c.orders o JOIN o.user u WHERE u.userId = :staffId GROUP BY c")
     List<Customer> findCustomersByStaffId(int staffId);

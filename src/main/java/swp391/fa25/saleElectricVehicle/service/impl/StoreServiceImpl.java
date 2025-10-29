@@ -99,48 +99,63 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
-        if (!store.getStoreName().equals(storeDto.getStoreName()) &&
+        if (storeDto.getStoreName() != null
+                && !storeDto.getStoreName().trim().isEmpty()
+                && !store.getStoreName().equals(storeDto.getStoreName()) &&
                 storeRepository.existsByStoreName(storeDto.getStoreName())) {
             throw new AppException(ErrorCode.STORE_EXISTED);
         }
 
+
+        if (storeDto.getContractStartDate() != null
+                && !storeDto.getContractStartDate().isEqual(store.getContractStartDate())) {
+            store.setContractStartDate(storeDto.getContractStartDate());
+        }
+
         // ✅ Cần check null trước
-        if (storeDto.getContractStartDate() != null && storeDto.getContractEndDate() != null) {
+        if (storeDto.getContractEndDate() != null
+                && !storeDto.getContractEndDate().isEqual(store.getContractEndDate())) {
             if (storeDto.getContractEndDate().isBefore(storeDto.getContractStartDate())) {
                 throw new AppException(ErrorCode.INVALID_END_DATE);
             }
             if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
                 throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
             }
-            store.setContractStartDate(storeDto.getContractStartDate());
             store.setContractEndDate(storeDto.getContractEndDate());
         }
 
-        if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
-            throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
-        }
-
-        if (storeDto.getStoreName() != null && !storeDto.getStoreName().trim().isEmpty()) {
+        if (storeDto.getStoreName() != null
+                && !storeDto.getStoreName().trim().isEmpty()
+                && !store.getStoreName().equals(storeDto.getStoreName())) {
             store.setStoreName(storeDto.getStoreName());
         }
 
-        if (storeDto.getAddress() != null && !storeDto.getAddress().trim().isEmpty()) {
+        if (storeDto.getAddress() != null
+                && !storeDto.getAddress().trim().isEmpty()
+                && !store.getAddress().equals(storeDto.getAddress())) {
             store.setAddress(storeDto.getAddress());
         }
 
-        if (storeDto.getProvinceName() != null && !storeDto.getProvinceName().trim().isEmpty()) {
+        if (storeDto.getProvinceName() != null
+                && !storeDto.getProvinceName().trim().isEmpty()
+                && !store.getProvinceName().equals(storeDto.getProvinceName())) {
             store.setProvinceName(storeDto.getProvinceName());
         }
 
-        if (storeDto.getOwnerName() != null && !storeDto.getOwnerName().trim().isEmpty()) {
+        if (storeDto.getOwnerName() != null
+                && !storeDto.getOwnerName().trim().isEmpty()
+                && !store.getOwnerName().equals(storeDto.getOwnerName())) {
             store.setOwnerName(storeDto.getOwnerName());
         }
 
-        if (storeDto.getStatus() != null) {
+        if (storeDto.getStatus() != null
+                && store.getStatus() != storeDto.getStatus()) {
             store.setStatus(storeDto.getStatus());
         }
 
-        if (storeDto.getImagePath() != null && !storeDto.getImagePath().trim().isEmpty()) {
+        if (storeDto.getImagePath() != null
+                && !storeDto.getImagePath().trim().isEmpty()
+                && !store.getImagePath().equals(storeDto.getImagePath())) {
             store.setImagePath(storeDto.getImagePath());
         }
 

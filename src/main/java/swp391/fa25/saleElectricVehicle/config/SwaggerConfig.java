@@ -5,6 +5,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server; // <-- add this
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,6 +25,9 @@ public class SwaggerConfig {
                                         .name("Bearer Authentication")
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
-                                        .bearerFormat("JWT")));
+                                        .bearerFormat("JWT")))
+                // <-- set server url to https
+//                .addServersItem(new Server().url("https://tiembanhvuive.io.vn/api"))
+                ;
     }
 }
