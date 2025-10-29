@@ -27,7 +27,7 @@ public class SwaggerConfig {
                                         .scheme("bearer")
                                         .bearerFormat("JWT")))
                 // <-- set server url to https
-                .addServersItem(new Server().url("https://tiembanhvuive.io.vn/api"))
+//                .addServersItem(new Server().url("https://tiembanhvuive.io.vn/api"))
                 ;
     }
 }

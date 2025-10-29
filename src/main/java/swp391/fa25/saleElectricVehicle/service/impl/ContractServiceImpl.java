@@ -12,16 +12,12 @@ import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.ContractDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
 import swp391.fa25.saleElectricVehicle.repository.ContractRepository;
-import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
-import swp391.fa25.saleElectricVehicle.service.PdfGeneratorService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Service
 public class ContractServiceImpl implements ContractService {
@@ -132,7 +128,29 @@ public class ContractServiceImpl implements ContractService {
         return mapToDto(contract);
     }
 
-//    @Override
+    @Override
+    public ContractDto addFileUrlContract(int id, String fileUrl) {
+        Contract contract = contractRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        // Validate contractFileUrl unique
+        if (contractRepository.existsByContractFileUrl(fileUrl)) {
+            throw new AppException(ErrorCode.CONTRACT_FILE_URL_EXISTED);
+        }
+
+        contract.setContractFileUrl(fileUrl);
+        contract.setStatus(ContractStatus.SIGNED); // Đã ký
+        contract.setUpdatedAt(LocalDateTime.now());
+
+        Order order = contract.getOrder();
+        order.setStatus(OrderStatus.CONFIRMED); // Hoàn tất
+        orderService.updateOrder(order);
+
+        contractRepository.save(contract);
+        return mapToDto(contract);
+    }
+
+    //    @Override
 //    public ContractDto getContractByFileUrl(String fileUrl) {
 //        Contract contract = contractRepository.findByContractFileUrl(fileUrl);
 //        if (contract == null) {

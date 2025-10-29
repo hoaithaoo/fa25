@@ -1,11 +1,15 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
@@ -16,6 +20,7 @@ import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
+import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
 import swp391.fa25.saleElectricVehicle.service.CustomerService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
@@ -40,6 +45,10 @@ public class ContractController {
     @Autowired
     SpringTemplateEngine templateEngine;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    // Tạo hợp đồng nháp
     @PostMapping("/contracts")
     public ResponseEntity<Map<String, Object>> createContract(@RequestBody CreateContractRequest request) {
         ContractDto created = contractService.createDraftContract(request);
@@ -52,6 +61,7 @@ public class ContractController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // Xem hợp đồng dưới dạng HTML
     @GetMapping("/api/contracts/{id}")
     public ResponseEntity<String> getContractById(@PathVariable int id) {
         // Lấy thông tin hợp đồng
@@ -73,6 +83,27 @@ public class ContractController {
                 .status(HttpStatus.CREATED)
                 .contentType(MediaType.TEXT_HTML)
                 .body(htmlContent);
+    }
+
+    // Upload hợp đồng đã ký
+    @PostMapping(
+            value = "/{contractId}/upload-signed",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ApiResponse<String>> uploadSignedContract(
+            @PathVariable int contractId,
+            @Parameter(description = "File hợp đồng đã ký", required = true,
+                    content = @Content(schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("file") MultipartFile file) {
+        contractService.getContractById(contractId);
+        String fileUrl = cloudinaryService.uploadFile(file, "contracts");
+        contractService.addFileUrlContract(contractId, fileUrl);
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("File uploaded successfully")
+                .data(fileUrl)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
 

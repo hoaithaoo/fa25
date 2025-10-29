@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Integer> {
-//    boolean existsByContractFileUrl(String contractFileUrl);
+    boolean existsByContractFileUrl(String contractFileUrl);
 //    Contract findByContractFileUrl(String contractFileUrl);
 //    List<Contract> findByStatus(Contract.ContractStatus status);
 //    Contract findByOrder_OrderId(int orderId); // Tìm contract theo orderId
