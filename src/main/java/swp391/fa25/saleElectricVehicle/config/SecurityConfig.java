@@ -9,8 +9,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import swp391.fa25.saleElectricVehicle.jwt.CustomAuthenticationEntryPoint;
 import swp391.fa25.saleElectricVehicle.jwt.CustomJwtDecoder;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -65,5 +70,25 @@ public class SecurityConfig {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
         return converter;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        // 🔹 Cho phép domain frontend của bạn
+        config.setAllowedOrigins(List.of(
+                "https://swp-391-frontend.vercel.app", // domain thật của bạn
+                "http://localhost:5173"             // thêm dòng này nếu test local
+        ));
+        // 🔹 Cho phép các phương thức HTTP
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // 🔹 Cho phép tất cả header
+        config.setAllowedHeaders(List.of("*"));
+        // 🔹 Nếu bạn dùng cookie hoặc JWT trong header Authorization
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

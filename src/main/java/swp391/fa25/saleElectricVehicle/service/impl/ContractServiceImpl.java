@@ -143,7 +143,7 @@ public class ContractServiceImpl implements ContractService {
         contract.setUpdatedAt(LocalDateTime.now());
 
         Order order = contract.getOrder();
-        order.setStatus(OrderStatus.CONFIRMED); // Hoàn tất
+        order.setStatus(OrderStatus.COMPLETED); // Hoàn tất
         orderService.updateOrder(order);
 
         contractRepository.save(contract);

@@ -189,11 +189,16 @@ public class OrderServiceImpl implements OrderService {
         return mapToDto(order);
     }
 
+    // không xóa được đơn hàng đã hoàn thành hoặc đã giao
     @Override
     public void deleteOrder(int orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
+        }
+        if (order.getStatus() == OrderStatus.COMPLETED
+                || order.getStatus() == OrderStatus.DELIVERED) {
+            throw new AppException(ErrorCode.ORDER_NOT_EDITABLE);
         }
         orderRepository.delete(order);
     }
