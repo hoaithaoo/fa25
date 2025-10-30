@@ -62,7 +62,7 @@ public class ContractController {
     }
 
     // Xem hợp đồng dưới dạng HTML
-    @GetMapping("/api/contracts/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<String> getContractById(@PathVariable int id) {
         // Lấy thông tin hợp đồng
         ContractDto contract = contractService.getContractById(id);

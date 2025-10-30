@@ -15,6 +15,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import swp391.fa25.saleElectricVehicle.jwt.CustomAuthenticationEntryPoint;
 import swp391.fa25.saleElectricVehicle.jwt.CustomJwtDecoder;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -35,7 +36,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/users/**",
-            "/api/auth/**"
+            "/auth/**"
     };
 
     @Bean
@@ -78,7 +79,8 @@ public class SecurityConfig {
         // 🔹 Cho phép domain frontend của bạn
         config.setAllowedOrigins(List.of(
                 "https://swp-391-frontend.vercel.app", // domain thật của bạn
-                "http://localhost:5173"             // thêm dòng này nếu test local
+                "http://localhost:5173",             // thêm dòng này nếu test local
+                "http://localhost:8080"
         ));
         // 🔹 Cho phép các phương thức HTTP
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -91,4 +93,26 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList(
+//                "http://localhost:5173",
+//                "http://localhost:8080"
+////                "http://160.191.175.172:5173",
+////                "https://tixclick.site",
+////                "http://192.168.1.15:19006",
+////                "http://160.191.175.172:8080",
+////                "https://pay.payos.vn/"
+//        ));
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+//        configuration.setAllowedHeaders(Arrays.asList("*"));
+//        configuration.setAllowCredentials(true);
+//        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 }
