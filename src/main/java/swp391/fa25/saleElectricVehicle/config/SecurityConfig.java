@@ -100,15 +100,12 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://swp-391-frontend.vercel.app",
                 "http://localhost:5173",
-                "http://localhost:8080"
-//                "http://160.191.175.172:5173",
-//                "https://tixclick.site",
-//                "http://192.168.1.15:19006",
-//                "http://160.191.175.172:8080",
-//                "https://pay.payos.vn/"
+                "http://localhost:8080",
+                "https://tiembanhvuive.io.vn"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+//        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
