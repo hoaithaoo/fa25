@@ -38,7 +38,7 @@ public class Model {
     @Column(columnDefinition = "DECIMAL(5,2)", nullable = false)
     private BigDecimal powerHp;
 
-    @Column(columnDefinition = "DECIMAL(5,2)", nullable = false)
+    @Column(columnDefinition = "DECIMAL(6,2)", nullable = false)
     private BigDecimal torqueNm;
 
     @Column(columnDefinition = "DECIMAL(5,2)", nullable = false)

@@ -79,8 +79,8 @@ public class SecurityConfig {
         // 🔹 Cho phép domain frontend của bạn
         config.setAllowedOrigins(List.of(
                 "https://swp-391-frontend.vercel.app", // domain thật của bạn
-                "http://localhost:5173",             // thêm dòng này nếu test local
-                "http://localhost:8080"
+                "http://localhost:5173"             // thêm dòng này nếu test local
+//                "http://localhost:8080"
         ));
         // 🔹 Cho phép các phương thức HTTP
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

@@ -15,7 +15,7 @@ import swp391.fa25.saleElectricVehicle.repository.CustomerRepository;
 import swp391.fa25.saleElectricVehicle.repository.ModelRepository;
 import swp391.fa25.saleElectricVehicle.repository.StoreRepository;
 import swp391.fa25.saleElectricVehicle.repository.UserRepository;
-import swp391.fa25.saleElectricVehicle.service.AppointmentService;
+import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,16 +27,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     private AppointmentRepository appointmentRepository;
 
     @Autowired
-    private ModelRepository modelRepository;
+    private ModelService modelService;
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private CustomerService customerService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
-    private StoreRepository storeRepository;
+    private StoreService storeService;
 
     @Override
     public AppointmentDto createAppointment(AppointmentDto appointmentDto) {
@@ -54,20 +54,16 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         // Validate Model exists
-        Model model = modelRepository.findById(appointmentDto.getModelId())
-                .orElseThrow(() -> new AppException(ErrorCode.MODEL_NOT_FOUND));
+        Model model = modelService.getModelEntityById(appointmentDto.getModelId());
 
         // Validate Customer exists
-        Customer customer = customerRepository.findById(appointmentDto.getCustomerId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        Customer customer = customerService.getCustomerEntityById(appointmentDto.getCustomerId());
 
         // Validate Staff (User) exists
-        User staff = userRepository.findById(appointmentDto.getStaffId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        User staff = userService.getUserEntityById(appointmentDto.getStaffId());
 
         // Validate Store exists
-        Store store = storeRepository.findById(appointmentDto.getStoreId())
-                .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_EXIST));
+        Store store = storeService.getStoreEntityById(appointmentDto.getStoreId());
 
         // Set default status if not provided
         Appointment.AppointmentStatus status;
@@ -105,22 +101,19 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointments.stream().map(this::mapToDto).toList();
     }
 
-    @Override
-    public List<AppointmentDto> getAppointmentsByCustomerId(int customerId) {
-        // Validate customer exists
-        if (!customerRepository.existsById(customerId)) {
-            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        @Override
+        public List<AppointmentDto> getAppointmentsByCustomerId(int customerId) {
+            // Validate customer exists
+                customerService.getCustomerEntityById(customerId);
+
+            List<Appointment> appointments = appointmentRepository.findByCustomer_CustomerId(customerId);
+            return appointments.stream().map(this::mapToDto).toList();
         }
-        List<Appointment> appointments = appointmentRepository.findByCustomer_CustomerId(customerId);
-        return appointments.stream().map(this::mapToDto).toList();
-    }
 
     @Override
     public List<AppointmentDto> getAppointmentsByStaffId(int staffId) {
         // Validate staff exists
-        if (!userRepository.existsById(staffId)) {
-            throw new AppException(ErrorCode.USER_NOT_EXIST);
-        }
+        userService.getUserEntityById(staffId);
         List<Appointment> appointments = appointmentRepository.findByUser_UserId(staffId);
         return appointments.stream().map(this::mapToDto).toList();
     }
@@ -128,9 +121,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentDto> getAppointmentsByStoreId(int storeId) {
         // Validate store exists
-        if (!storeRepository.existsById(storeId)) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST);
-        }
+        storeService.getStoreEntityById(storeId);
         List<Appointment> appointments = appointmentRepository.findByStore_StoreId(storeId);
         return appointments.stream().map(this::mapToDto).toList();
     }
@@ -138,9 +129,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentDto> getAppointmentsByModelId(int modelId) {
         // Validate model exists
-        if (!modelRepository.existsById(modelId)) {
-            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
-        }
+        modelService.getModelEntityById(modelId);
         List<Appointment> appointments = appointmentRepository.findByModel_ModelId(modelId);
         return appointments.stream().map(this::mapToDto).toList();
     }
@@ -189,24 +178,21 @@ public class AppointmentServiceImpl implements AppointmentService {
         // Update model if provided
         if (appointmentDto.getModelId() > 0
                 && appointmentDto.getModelId() != existingAppointment.getModel().getModelId()) {
-            Model model = modelRepository.findById(appointmentDto.getModelId())
-                    .orElseThrow(() -> new AppException(ErrorCode.MODEL_NOT_FOUND));
+            Model model = modelService.getModelEntityById(appointmentDto.getModelId());
             existingAppointment.setModel(model);
         }
 
         // Update customer if provided
         if (appointmentDto.getCustomerId() > 0
                 && appointmentDto.getCustomerId() != existingAppointment.getCustomer().getCustomerId()) {
-            Customer customer = customerRepository.findById(appointmentDto.getCustomerId())
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+            Customer customer = customerService.getCustomerEntityById(appointmentDto.getCustomerId());
             existingAppointment.setCustomer(customer);
         }
 
         // Update staff if provided
         if (appointmentDto.getStaffId() > 0
                 && appointmentDto.getStaffId() != existingAppointment.getUser().getUserId()) {
-            User staff = userRepository.findById(appointmentDto.getStaffId())
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+            User staff = userService.getUserEntityById(appointmentDto.getStaffId());
             existingAppointment.setUser(staff);
 
         }
@@ -214,8 +200,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         // Update store if provided
         if (appointmentDto.getStoreId() > 0
                 && appointmentDto.getStoreId() != existingAppointment.getStore().getStoreId()) {
-            Store store = storeRepository.findById(appointmentDto.getStoreId())
-                    .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_EXIST));
+            Store store = storeService.getStoreEntityById(appointmentDto.getStoreId());
             existingAppointment.setStore(store);
         }
 

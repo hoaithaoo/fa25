@@ -19,7 +19,6 @@ public class CreateOrderResponse {
     private BigDecimal totalTaxPrice;
     private BigDecimal totalPromotionAmount;
     private BigDecimal totalPayment;
-
     private int customerId;
     private String customerName;  // For display
     private String customerPhone;

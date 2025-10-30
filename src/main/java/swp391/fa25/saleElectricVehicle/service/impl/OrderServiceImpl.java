@@ -43,7 +43,11 @@ public class OrderServiceImpl implements OrderService {
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
         Customer customer = customerService.getCustomerEntityById(request.getCustomerId());
         User staff = userService.getCurrentUserEntity();
+//        // ✅ TẠM THỜI: Hard-code userId = 1 (hoặc userId nào có trong database)
+//        User staff = userService.getUserEntityById(1);
         Store store = storeService.getCurrentStoreEntity(staff.getUserId());
+//        // ✅ TẠM THỜI: Hard-code storeId = 1 (hoặc storeId nào có trong database)
+//        Store store = storeService.getStoreEntityById(1);
 
         Order savedOrder = orderRepository.save(Order.builder()
                 .totalPrice(BigDecimal.ZERO)
