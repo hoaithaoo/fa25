@@ -7,6 +7,7 @@ import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -44,8 +45,17 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Appointment> appointments = new java.util.ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Appointment> appointments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Feedback> createdFeedbacks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "resolvedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Feedback> resolvedFeedbacks = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "storeId")

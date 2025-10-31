@@ -20,7 +20,7 @@ public class FeedbackDetailController {
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<FeedbackDetailDto>> createFeedbackDetail(
-            @Valid @RequestBody FeedbackDetailDto dto) {
+            @RequestBody FeedbackDetailDto dto) {
         FeedbackDetailDto created = feedbackDetailService.createFeedbackDetail(dto);
         ApiResponse<FeedbackDetailDto> response = ApiResponse.<FeedbackDetailDto>builder()
                 .code(HttpStatus.CREATED.value())

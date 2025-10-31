@@ -5,14 +5,18 @@ import org.springframework.security.core.context.SecurityContextHolder; // ✅ T
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Feedback;
 import swp391.fa25.saleElectricVehicle.entity.Order;
+import swp391.fa25.saleElectricVehicle.entity.User;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.FeedbackStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
+import swp391.fa25.saleElectricVehicle.payload.dto.FeedbackDetailDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.FeedbackDto;
 import swp391.fa25.saleElectricVehicle.payload.request.feedback.CreateFeedbackRequest; // ✅ THÊM MỚI
 import swp391.fa25.saleElectricVehicle.payload.request.feedback.UpdateFeedbackRequest; // ✅ THÊM MỚI
 import swp391.fa25.saleElectricVehicle.repository.FeedbackRepository;
 import swp391.fa25.saleElectricVehicle.service.FeedbackService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
+import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,27 +31,28 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private UserService userService;
+
     // ✅ THAY ĐỔI: Dùng CreateFeedbackRequest thay vì FeedbackDto
+    // tạo draft feedback
     @Override
     public FeedbackDto createFeedback(CreateFeedbackRequest request) {
         // ✅ Validate orderId có tồn tại không
         Order order = orderService.getOrderEntityById(request.getOrderId());
 
         // ✅ Lấy user đang login (từ JWT token)
-        String currentUser = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+//        String currentUser = SecurityContextHolder.getContext()
+//                .getAuthentication().getName();
+        User staff = userService.getCurrentUserEntity();
 
         // ✅ Tạo Feedback với giá trị tự động
         Feedback feedback = Feedback.builder()
                 .order(order)
-                .customerName(request.getCustomerName()) // ✅ Lưu tên khách hàng
-                .status(request.getStatus() != null
-                        ? Feedback.FeedbackStatus.valueOf(request.getStatus())
-                        : Feedback.FeedbackStatus.PENDING) // ✅ Default PENDING
+                .status(FeedbackStatus.DRAFT)
                 .createdAt(LocalDateTime.now()) // ✅ Tự động gán thời gian tạo
-                .createBy(currentUser) // ✅ Tự động lấy từ JWT
-                .resolveAt(null) // ✅ Mặc định null
-                .resolveBy(null) // ✅ Mặc định null
+                .createdBy(staff)
+                .order(order)
                 .build();
 
         Feedback saved = feedbackRepository.save(feedback);
@@ -68,13 +73,13 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<FeedbackDto> getFeedbacksByStatus(String status) {
-        Feedback.FeedbackStatus feedbackStatus = Feedback.FeedbackStatus.valueOf(status);
-        return feedbackRepository.findByStatus(feedbackStatus).stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    public List<FeedbackDto> getFeedbacksByStatus(String status) {
+//        FeedbackStatus feedbackStatus = FeedbackStatus.valueOf(status);
+//        return feedbackRepository.findByStatus(feedbackStatus).stream()
+//                .map(this::mapToDto)
+//                .collect(Collectors.toList());
+//    }
 
     @Override
     public List<FeedbackDto> getFeedbacksByOrder(int orderId) {
@@ -91,14 +96,19 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         // ✅ Update status nếu có
         if (request.getStatus() != null) {
-            feedback.setStatus(Feedback.FeedbackStatus.valueOf(request.getStatus()));
+            feedback.setStatus(request.getStatus());
+            if (FeedbackStatus.RESOLVED.equals(request.getStatus())
+            || FeedbackStatus.REJECTED.equals(request.getStatus())) {
+                feedback.setResolveAt(LocalDateTime.now());
+                feedback.setResolvedBy(userService.getCurrentUserEntity());
+            }
 
             // ✅ Nếu status = "RESOLVED" → tự động gán resolveAt và resolveBy
-            if ("RESOLVED".equals(request.getStatus())) {
-                feedback.setResolveAt(LocalDateTime.now());
-                feedback.setResolveBy(SecurityContextHolder.getContext()
-                        .getAuthentication().getName());
-            }
+//            if ("RESOLVED".equals(request.getStatus())) {
+//                feedback.setResolveAt(LocalDateTime.now());
+//                feedback.setResolveBy(SecurityContextHolder.getContext()
+//                        .getAuthentication().getName());
+//            }
         }
 
         Feedback updated = feedbackRepository.save(feedback);
@@ -122,13 +132,26 @@ public class FeedbackServiceImpl implements FeedbackService {
     private FeedbackDto mapToDto(Feedback feedback) {
         return FeedbackDto.builder()
                 .feedbackId(feedback.getFeedbackId())
-                .customerName(feedback.getCustomerName()) // ✅ THÊM MỚI
+                .orderId(feedback.getOrder().getOrderId())
+                .customerId(feedback.getOrder().getCustomer().getCustomerId())
+                .customerName(feedback.getOrder().getCustomer().getFullName())
+                .feedbackDetails(
+                        feedback.getFeedbackDetails().stream()
+                                .map(fd -> FeedbackDetailDto.builder()
+                                        .feedbackDetailId(fd.getFeedbackDetailId())
+                                        .category(fd.getCategory())
+                                        .rating(fd.getRating())
+                                        .content(fd.getContent())
+                                        .build()
+                                ).toList()
+                )
                 .status(feedback.getStatus().name())
                 .createdAt(feedback.getCreatedAt())
-                .createBy(feedback.getCreateBy())
+                .createdById(feedback.getCreatedBy().getUserId())
+                .createdBy(feedback.getCreatedBy().getFullName())
                 .resolveAt(feedback.getResolveAt())
-                .resolveBy(feedback.getResolveBy())
-                .orderId(feedback.getOrder() != null ? feedback.getOrder().getOrderId() : 0)
+                .resolvedById(feedback.getResolvedBy().getUserId())
+                .resolvedBy(feedback.getResolvedBy().getFullName())
                 .build();
     }
 }

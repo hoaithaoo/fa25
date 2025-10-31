@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
-    List<Feedback> findByStatus(Feedback.FeedbackStatus status);
+//    List<Feedback> findByStatus(Feedback.FeedbackStatus status);
     List<Feedback> findByOrder_OrderId(int orderId);
 }

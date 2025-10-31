@@ -10,13 +10,13 @@ import lombok.*;
 @Builder
 public class CreateFeedbackRequest {
 
-    @NotNull(message = "Order ID không được để trống")
-    private Integer orderId; // ✅ Bắt buộc nhập
+//    @NotNull(message = "Order ID không được để trống")
+    private int orderId; // ✅ Bắt buộc nhập
 
-    @NotNull(message = "Tên khách hàng không được để trống")
-    private String customerName; // ✅ Thêm field mới để lưu tên khách hàng
+//    @NotNull(message = "Tên khách hàng không được để trống")
+//    private int customerId; // ✅ Thêm field mới để lưu tên khách hàng
 
-    private String status; // ✅ Không bắt buộc, default "PENDING" trong service
+//    private String status; // ✅ Không bắt buộc, default "PENDING" trong service
 
     // ❌ KHÔNG có feedbackId (auto-increment)
     // ❌ KHÔNG có createdAt (backend tự gán)

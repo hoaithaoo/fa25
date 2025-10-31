@@ -22,8 +22,8 @@ public class FeedbackController {
 
     // ✅ THAY ĐỔI: Dùng CreateFeedbackRequest thay vì FeedbackDto
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<FeedbackDto>> createFeedback(
-            @Valid @RequestBody CreateFeedbackRequest request) { // ✅ Đổi từ FeedbackDto → CreateFeedbackRequest
+    public ResponseEntity<ApiResponse<FeedbackDto>> createDraftFeedback(
+            @RequestBody CreateFeedbackRequest request) { // ✅ Đổi từ FeedbackDto → CreateFeedbackRequest
         FeedbackDto created = feedbackService.createFeedback(request);
         ApiResponse<FeedbackDto> response = ApiResponse.<FeedbackDto>builder()
                 .code(HttpStatus.CREATED.value())
@@ -56,17 +56,17 @@ public class FeedbackController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<ApiResponse<List<FeedbackDto>>> getFeedbacksByStatus(
-            @PathVariable String status) {
-        List<FeedbackDto> dtos = feedbackService.getFeedbacksByStatus(status);
-        ApiResponse<List<FeedbackDto>> response = ApiResponse.<List<FeedbackDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Feedbacks by status fetched successfully")
-                .data(dtos)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/status/{status}")
+//    public ResponseEntity<ApiResponse<List<FeedbackDto>>> getFeedbacksByStatus(
+//            @PathVariable String status) {
+//        List<FeedbackDto> dtos = feedbackService.getFeedbacksByStatus(status);
+//        ApiResponse<List<FeedbackDto>> response = ApiResponse.<List<FeedbackDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Feedbacks by status fetched successfully")
+//                .data(dtos)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 
     @GetMapping("/order/{orderId}")
     public ResponseEntity<ApiResponse<List<FeedbackDto>>> getFeedbacksByOrder(
@@ -84,7 +84,7 @@ public class FeedbackController {
     @PutMapping("/update/{feedbackId}")
     public ResponseEntity<ApiResponse<FeedbackDto>> updateFeedback(
             @PathVariable int feedbackId,
-            @Valid @RequestBody UpdateFeedbackRequest request) { // ✅ Đổi từ FeedbackDto → UpdateFeedbackRequest
+            @RequestBody UpdateFeedbackRequest request) { // ✅ Đổi từ FeedbackDto → UpdateFeedbackRequest
         FeedbackDto updated = feedbackService.updateFeedback(feedbackId, request);
         ApiResponse<FeedbackDto> response = ApiResponse.<FeedbackDto>builder()
                 .code(HttpStatus.OK.value())
