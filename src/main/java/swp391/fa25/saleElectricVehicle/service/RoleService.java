@@ -6,7 +6,7 @@ import swp391.fa25.saleElectricVehicle.payload.dto.RoleDto;
 import java.util.List;
 
 public interface RoleService {
-    RoleDto createRole(RoleDto roleDto);
+    void createRole(Role role);
 //    RoleDto findRoleById(int roleId);
     RoleDto getRoleByName(String roleName);
     Role getRoleEntityById(int roleId);

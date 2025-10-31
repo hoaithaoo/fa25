@@ -17,16 +17,16 @@ public class RoleController {
     @Autowired
     RoleService roleService;
 
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<RoleDto>> createRole(@RequestBody RoleDto roleDto) {
-        RoleDto createdRole = roleService.createRole(roleDto);
-        ApiResponse<RoleDto> response = ApiResponse.<RoleDto>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("Role created successfully")
-                .data(createdRole)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+//    @PostMapping("/create")
+//    public ResponseEntity<ApiResponse<RoleDto>> createRole(@RequestBody RoleDto roleDto) {
+//        RoleDto createdRole = roleService.createRole(roleDto);
+//        ApiResponse<RoleDto> response = ApiResponse.<RoleDto>builder()
+//                .code(HttpStatus.CREATED.value())
+//                .message("Role created successfully")
+//                .data(createdRole)
+//                .build();
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//    }
 
     @GetMapping("/{roleName}")
     public ResponseEntity<ApiResponse<RoleDto>> getRoleByName(@PathVariable String roleName) {

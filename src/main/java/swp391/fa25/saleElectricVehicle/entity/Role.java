@@ -21,4 +21,8 @@ public class Role {
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<User> users = new java.util.ArrayList<>();
+
+    public Role(String roleName) {
+        this.roleName = roleName;
+    }
 }
