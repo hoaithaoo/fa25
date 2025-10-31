@@ -19,6 +19,7 @@ import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
@@ -106,64 +107,6 @@ public class ContractController {
         return ResponseEntity.ok(response);
     }
 
-
-//    @PostMapping("/create")
-//    public String createContract(@ModelAttribute CreateContractRequest request) {
-//        ContractDto created = contractService.createDraftContract(request);
-//        // redirect đến trang view contract (GET)
-//        return "redirect:/contracts/view/" + created.getContractId();
-//    }
-//
-//    @GetMapping("/view/{id}")
-//    public String viewContract(@PathVariable int id, Model model) {
-//        ContractDto contract = contractService.getContractById(id);
-//        OrderDto order = orderService.getOrderDtoById(contract.getOrderId());
-//        CustomerDto customer = customerService.getCustomerById(order.getCustomerId());
-//
-//        model.addAttribute("contract", contract);
-//        model.addAttribute("order", order);
-//        model.addAttribute("customer", customer);
-//        return "contract"; // spring tìm templates/contract.html
-//    }
-//
-//    @PostMapping("/create")
-//    public ResponseEntity<String> createContract(@RequestBody CreateContractRequest request) {
-//        ContractDto createdContract = contractService.createDraftContract(request);
-//
-//        // Lấy thông tin đơn hàng từ dịch vụ OrderService
-//        OrderDto order = orderService.getOrderDtoById(request.getOrderId());
-//
-//        // Lấy thông tin khách hàng từ dịch vụ CustomerService
-//        CustomerDto customer = customerService.getCustomerById(order.getCustomerId());
-//
-//        // Chuẩn bị model data cho temp-late engine
-//        Context context = new Context();  // Với Thymeleaf
-//        context.setVariable("contract", createdContract); // Đặt biến "contract" cho template
-//        context.setVariable("order", order);
-//        context.setVariable("customer", customer);
-//
-//        // Render ra HTML dựa trên template contract.html
-//        String htmlContent = templateEngine.process("contract", context); // "contract" là tên file contract.html
-//
-//        // Trả về dạng HTML
-//        return ResponseEntity
-//                .status(HttpStatus.CREATED)
-//                .contentType(MediaType.TEXT_HTML)
-//                .body(htmlContent);
-//    }
-
-
-//    @PostMapping("/create")
-//    public ResponseEntity<ApiResponse<ContractDto>> createContract(@RequestBody CreateContractRequest request) {
-//        ContractDto createdContract = contractService.createDraftContract(request);
-//        ApiResponse<ContractDto> response = ApiResponse.<ContractDto>builder()
-//                .code(HttpStatus.CREATED.value())
-//                .message("Create contract successfully")
-//                .data(createdContract)
-//                .build();
-//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
-//
 //    @GetMapping("/{id}")
 //    public ResponseEntity<ApiResponse<ContractDto>> getContractById(@PathVariable int id) {
 //        ContractDto contractDto = contractService.getContractById(id);
@@ -186,16 +129,16 @@ public class ContractController {
 //        return ResponseEntity.ok(response);
 //    }
 //
-//    @GetMapping("/all")
-//    public ResponseEntity<ApiResponse<List<ContractDto>>> getAllContracts() {
-//        List<ContractDto> contracts = contractService.getAllContracts();
-//        ApiResponse<List<ContractDto>> response = ApiResponse.<List<ContractDto>>builder()
-//                .code(HttpStatus.OK.value())
-//                .message("Contracts fetched successfully")
-//                .data(contracts)
-//                .build();
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<GetContractResponse>>> getAllContracts() {
+        List<GetContractResponse> contracts = contractService.getAllContracts();
+        ApiResponse<List<GetContractResponse>> response = ApiResponse.<List<GetContractResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Contracts fetched successfully")
+                .data(contracts)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 //
 //    @GetMapping("/status/{status}")
 //    public ResponseEntity<ApiResponse<List<ContractDto>>> getContractsByStatus(@PathVariable Contract.ContractStatus status) {
