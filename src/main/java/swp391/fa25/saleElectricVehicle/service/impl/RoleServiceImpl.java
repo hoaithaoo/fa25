@@ -18,16 +18,27 @@ public class RoleServiceImpl implements RoleService {
     private RoleRepository roleRepository;
 
     @Override
-    public RoleDto createRole(RoleDto roleDto) {
-        if (roleRepository.existsByRoleName(roleDto.getRoleName())) {
+    public void createRole(Role role) {
+        if (roleRepository.existsByRoleName(role.getRoleName())) {
             throw new AppException(ErrorCode.ROLE_EXISTED);
         }
         Role newRole = Role.builder()
-                .roleName(roleDto.getRoleName())
+                .roleName(role.getRoleName())
                 .build();
         Role savedRole = roleRepository.save(newRole);
-        return mapToDto(savedRole);
     }
+
+//    @Override
+//    public RoleDto createRole(RoleDto roleDto) {
+//        if (roleRepository.existsByRoleName(roleDto.getRoleName())) {
+//            throw new AppException(ErrorCode.ROLE_EXISTED);
+//        }
+//        Role newRole = Role.builder()
+//                .roleName(roleDto.getRoleName())
+//                .build();
+//        Role savedRole = roleRepository.save(newRole);
+//        return mapToDto(savedRole);
+//    }
 
     // dùng để tìm kiếm role (?)
     @Override
