@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.FeedbackStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,9 +18,9 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int feedbackId;
 
-    // ✅ THÊM MỚI: Lưu tên khách hàng
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    private String customerName;
+//    // ✅ THÊM MỚI: Lưu tên khách hàng
+//    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+//    private String customerName;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -28,24 +29,19 @@ public class Feedback {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    private String createBy;
-
     @Column
     private LocalDateTime resolveAt;
 
-    @Column(columnDefinition = "nvarchar(255)")
-    private String resolveBy;
+    @ManyToOne
+    @JoinColumn(name = "resolvedBy")
+    private User resolvedBy;
 
-    public enum FeedbackStatus {
-        PENDING,
-        IN_PROGRESS,
-        RESOLVED,
-        REJECTED
-    }
+    @ManyToOne
+    @JoinColumn(name = "createdBy")
+    private User createdBy;
 
     @OneToOne
-    @JoinColumn(name = "order_id") // ✅ SỬA: "ordeId" → "order_id" (đúng naming convention)
+    @JoinColumn(name = "orderId")
     private Order order;
 
     @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true)
