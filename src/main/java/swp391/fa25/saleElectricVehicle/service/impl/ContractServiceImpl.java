@@ -11,6 +11,7 @@ import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.ContractDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
+import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractResponse;
 import swp391.fa25.saleElectricVehicle.repository.ContractRepository;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
@@ -18,6 +19,7 @@ import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ContractServiceImpl implements ContractService {
@@ -148,6 +150,23 @@ public class ContractServiceImpl implements ContractService {
 
         contractRepository.save(contract);
         return mapToDto(contract);
+    }
+
+    @Override
+    public List<GetContractResponse> getAllContracts() {
+        List<Contract> contracts = contractRepository.findAll();
+        return contracts.stream().map(contract -> GetContractResponse.builder()
+                        .contractId(contract.getContractId())
+                        .contractCode(contract.getContractCode())
+                        .contractDate(contract.getContractDate())
+                        .status(contract.getStatus().name())
+                        .depositPrice(contract.getDepositPrice())
+                        .totalPayment(contract.getTotalPayment())
+                        .remainPrice(contract.getRemainPrice())
+                        .terms(contract.getTerms())
+                        .orderId(contract.getOrder().getOrderId())
+                        .build())
+                .toList();
     }
 
     //    @Override
