@@ -59,13 +59,14 @@ public class ContractServiceImpl implements ContractService {
 
         // Save to get contractId
         contractRepository.save(contract);
-        contract.setContractCode("CTR-" + String.format("%06d", contract.getContractId()));
+        contract.setContractCode("CTR" + String.format("%06d", contract.getContractId()));
         Contract saved = contractRepository.save(contract);
 
         // Generate PDF from template (để in ra)
 //        String unsignedPdfUrl = pdfGeneratorService.generateContractPdf(saved);
 
         // Update order
+        order.setContract(saved);
         order.setStatus(OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
         orderService.updateOrder(order);
         return mapToDto(saved);
@@ -122,9 +123,14 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public ContractDto getContractById(int id) {
-        Contract contract = contractRepository.findById(id)
+    public Contract getContractEntityById(int id) {
+        return contractRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+    }
+
+    @Override
+    public ContractDto getContractById(int id) {
+        Contract contract = getContractEntityById(id);
         return mapToDto(contract);
     }
 

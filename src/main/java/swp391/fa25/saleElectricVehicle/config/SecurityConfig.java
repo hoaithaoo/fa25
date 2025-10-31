@@ -35,7 +35,7 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/users/**",
+//            "/users/**",
             "/auth/**"
     };
 
@@ -73,46 +73,42 @@ public class SecurityConfig {
         return converter;
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        // 🔹 Cho phép domain frontend của bạn
-        config.setAllowedOrigins(List.of(
-                "https://swp-391-frontend.vercel.app", // domain thật của bạn
-                "http://localhost:5173"             // thêm dòng này nếu test local
-//                "http://localhost:8080"
-        ));
-        // 🔹 Cho phép các phương thức HTTP
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // 🔹 Cho phép tất cả header
-        config.setAllowedHeaders(List.of("*"));
-        // 🔹 Nếu bạn dùng cookie hoặc JWT trong header Authorization
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
-
 //    @Bean
 //    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(Arrays.asList(
-//                "http://localhost:5173",
+//        CorsConfiguration config = new CorsConfiguration();
+//        // 🔹 Cho phép domain frontend của bạn
+//        config.setAllowedOrigins(List.of(
+//                "https://swp-391-frontend.vercel.app", // domain thật của bạn
+//                "http://localhost:5173"             // thêm dòng này nếu test local
 //                "http://localhost:8080"
-////                "http://160.191.175.172:5173",
-////                "https://tixclick.site",
-////                "http://192.168.1.15:19006",
-////                "http://160.191.175.172:8080",
-////                "https://pay.payos.vn/"
 //        ));
-//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-//        configuration.setAllowedHeaders(Arrays.asList("*"));
-//        configuration.setAllowCredentials(true);
-//        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+//        // 🔹 Cho phép các phương thức HTTP
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        // 🔹 Cho phép tất cả header
+//        config.setAllowedHeaders(List.of("*"));
+//        // 🔹 Nếu bạn dùng cookie hoặc JWT trong header Authorization
+//        config.setAllowCredentials(true);
 //
 //        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
+//        source.registerCorsConfiguration("/**", config);
 //        return source;
 //    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(
+                "https://swp-391-frontend.vercel.app",
+                "http://localhost:5173"
+//                "http://localhost:8080"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }
