@@ -3,11 +3,15 @@ package swp391.fa25.saleElectricVehicle.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Customer;
+import swp391.fa25.saleElectricVehicle.entity.Store;
+import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
 import swp391.fa25.saleElectricVehicle.repository.CustomerRepository;
 import swp391.fa25.saleElectricVehicle.service.CustomerService;
+import swp391.fa25.saleElectricVehicle.service.StoreService;
+import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +21,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private StoreService storeService;
 
     @Override
     public CustomerDto createCustomer(CustomerDto customerDto) {
@@ -74,8 +84,10 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<CustomerDto> getAllCustomers() {
-        List<Customer> customers = customerRepository.findAll();
+    public List<CustomerDto> getAllCustomersByStore() {
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        List<Customer> customers = customerRepository.findCustomersByStore(store.getStoreId());
         return customers.stream().map(this::mapToDto).toList();
     }
 
@@ -158,6 +170,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private CustomerDto mapToDto(Customer customer) {
+        User user = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(user.getUserId());
         return CustomerDto.builder()
                 .customerId(customer.getCustomerId())
                 .fullName(customer.getFullName())
@@ -165,6 +179,8 @@ public class CustomerServiceImpl implements CustomerService {
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
                 .identificationNumber(customer.getIdentificationNumber())
+                .storeId(store.getStoreId())
+                .storeName(store.getStoreName())
                 .build();
     }
 }

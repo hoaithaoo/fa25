@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
-import swp391.fa25.saleElectricVehicle.payload.request.customer.CreateCustomerRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.CustomerService;
 
@@ -57,7 +56,7 @@ public class CustomerController {
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<CustomerDto>>> getAllCustomers() {
-        List<CustomerDto> customers = customerService.getAllCustomers();
+        List<CustomerDto> customers = customerService.getAllCustomersByStore();
         ApiResponse<List<CustomerDto>> response = ApiResponse.<List<CustomerDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Customers retrieved successfully")
