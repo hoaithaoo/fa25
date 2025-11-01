@@ -13,4 +13,8 @@ public class CustomerDto {
     private String email;
     private String phone;
     private String identificationNumber;
+
+    // trả về thông tin store để track customer của store nào
+    private int storeId;
+    private String storeName;
 }
