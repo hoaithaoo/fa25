@@ -20,5 +20,7 @@ public class PromotionDto {
     private LocalDateTime endDate;
     private boolean isActive;
     private int modelId;
+    private String modelName;
     private int storeId;
+    private String storeName;
 }

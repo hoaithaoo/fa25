@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import swp391.fa25.saleElectricVehicle.entity.Model;
 import swp391.fa25.saleElectricVehicle.entity.Promotion;
 
 import java.time.LocalDateTime;
@@ -22,8 +23,8 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
     List<Promotion> findByStore_StoreId(int storeId);
     List<Promotion> findByPromotionNameContainingIgnoreCase(String promotionName);
     boolean existsByPromotionNameIgnoreCase(String promotionName);
-    List<Promotion> findByModel_ModelId(int modelId);
-
+//    List<Promotion> findByModel_ModelId(int modelId);
+    List<Promotion> findByModel(Model model);
     // Deactivate expired promotions
     @Modifying
     @Query("UPDATE Promotion p " +

@@ -12,6 +12,7 @@ public interface StoreStockService {
     StoreStock getStoreStockEntityById(int stockId);
     StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelColorId);
     StoreStock getStoreStockByStoreIdAndModelColorIdWithLock(int storeId, int modelColorId);
+    int getQuantityByModelIdAndColorId(int modelId, int colorId);
     StoreStockDto updatePriceOfStore(int stockId, BigDecimal price);
     StoreStockDto updateQuantity(int stockId, int quantity);
     void deleteStoreStock(int stockId);

@@ -29,6 +29,17 @@ public class StoreStockController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("quantity")
+    public ResponseEntity<ApiResponse<Integer>> getQuantityByStoreId(@RequestParam int modelId, @RequestParam int colorId) {
+        int quantity = storeStockService.getQuantityByModelIdAndColorId(modelId, colorId);
+        ApiResponse<Integer> response = ApiResponse.<Integer>builder()
+                .code(HttpStatus.OK.value())
+                .message("Get quantity successfully")
+                .data(quantity)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @GetMapping("all")
     public ResponseEntity<ApiResponse<List<StoreStockDto>>> getAllStoreStock() {
         List<StoreStockDto> storeStockDto = storeStockService.getAllStoreStock();

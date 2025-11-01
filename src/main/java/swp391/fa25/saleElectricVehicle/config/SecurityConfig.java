@@ -101,6 +101,7 @@ public class SecurityConfig {
                 "https://swp-391-frontend.vercel.app",
                 "http://localhost:5173",
                 "http://localhost:8080",
+                "http://localhost:8888",
                 "https://tiembanhvuive.io.vn"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

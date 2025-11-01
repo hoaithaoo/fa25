@@ -98,6 +98,13 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     @Override
+    public List<PromotionDto> getPromotionByModelId(int modelId) {
+        Model model = modelService.getModelEntityById(modelId);
+        List<Promotion> promotions = promotionRepository.findByModel(model);
+        return promotions.stream().map(this::mapToDto).toList();
+    }
+
+    @Override
     public PromotionDto updatePromotion(int promotionId, PromotionDto promotionDto) {
         Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
         if (promotion == null) {
@@ -183,7 +190,9 @@ public class PromotionServiceImpl implements PromotionService {
                 .endDate(promotion.getEndDate())
                 .isActive(promotion.isActive())
                 .modelId(promotion.getModel().getModelId())
+                .modelName(promotion.getModel().getModelName())
                 .storeId(promotion.getStore().getStoreId())
+                .storeName(promotion.getStore().getStoreName())
                 .build();
     }
 

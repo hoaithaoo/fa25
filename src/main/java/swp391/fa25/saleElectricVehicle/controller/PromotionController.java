@@ -39,6 +39,17 @@ public class PromotionController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/model/{modelId}")
+    public ResponseEntity<ApiResponse<List<PromotionDto>>> getPromotionByModelId(@PathVariable int modelId) {
+        List<PromotionDto> promotionDto = promotionService.getPromotionByModelId(modelId);
+        ApiResponse<List<PromotionDto>> response = ApiResponse.<List<PromotionDto>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Get promotion by model successfully")
+                .data(promotionDto)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<PromotionDto>>> getAllPromotions() {
         List<PromotionDto> promotions = promotionService.getAllPromotions();
