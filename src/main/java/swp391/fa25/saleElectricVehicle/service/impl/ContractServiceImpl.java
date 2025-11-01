@@ -159,6 +159,7 @@ public class ContractServiceImpl implements ContractService {
                         .contractId(contract.getContractId())
                         .contractCode(contract.getContractCode())
                         .contractDate(contract.getContractDate())
+                        .contractFileUrl(contract.getContractFileUrl())
                         .status(contract.getStatus().name())
                         .depositPrice(contract.getDepositPrice())
                         .totalPayment(contract.getTotalPayment())
