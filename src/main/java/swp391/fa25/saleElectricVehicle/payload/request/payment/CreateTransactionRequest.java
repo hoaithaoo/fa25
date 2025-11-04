@@ -12,11 +12,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class CreateTransactionRequest {
-    private int paymentId;
+//    private int paymentId;
+    private String paymentCode;
     private String transactionRef;
     private BigDecimal amount;
     private LocalDateTime transactionDate;
-    private String payerInfor;
-    private String note;
+    private String bankTransactionCode;
+//    private String payerInfor;
+//    private String note;
     private TransactionStatus status;
 }

@@ -54,7 +54,8 @@ public enum ErrorCode {
     INVENTORY_TRANSACTION_NOT_FOUND(1042, "Giao dịch tồn kho không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_NOT_EDITABLE(1043, "Đơn hàng không thể chỉnh sửa", HttpStatus.BAD_REQUEST),
     IDENTIFICATION_NUMBER_EXISTED(1044, "Số CMND/CCCD đã tồn tại", HttpStatus.BAD_REQUEST),
-    PAYMENT_NOT_EXISTED(1445, "Giao dịch không tồn tại", HttpStatus.NOT_FOUND)
+    PAYMENT_NOT_EXISTED(1445, "Giao dịch không tồn tại", HttpStatus.NOT_FOUND),
+    INVALID_CHECKSUM(1046, "Checksum không hợp lệ", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

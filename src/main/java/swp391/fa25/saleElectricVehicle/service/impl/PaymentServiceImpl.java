@@ -6,11 +6,14 @@ import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentMethod;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.TransactionStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.payload.request.payment.PaymentRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
+import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentResponse;
 import swp391.fa25.saleElectricVehicle.repository.PaymentRepository;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
 import swp391.fa25.saleElectricVehicle.service.PaymentService;
@@ -33,8 +36,50 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private TransactionService transactionService;
+
     @Autowired
-    private VNPayService vNPayService;
+    private VNPayService vnpayService;
+
+    @Autowired
+    private ContractService contractService;
+
+    @Override
+    public GetPaymentResponse createDraftPayment(CreatePaymentRequest request) {
+        Contract contract = contractService.getContractEntityById(request.getContractId());
+
+        Payment payment = paymentRepository.save(Payment.builder()
+                .status(PaymentStatus.DRAFT)
+                .paymentType(request.getPaymentType())
+                .paymentMethod(request.getPaymentMethod())
+                .createdAt(LocalDateTime.now())
+                .contract(contract)
+                .build());
+
+        if (PaymentType.DEPOSIT.equals(request.getPaymentType())) {
+            payment.setPaymentCode("DP" + String.format("%06d", payment.getPaymentId()));
+            payment.setAmount(contract.getDepositPrice()); // số tiền cần thanh toán
+            payment.setRemainPrice(contract.getDepositPrice()); // số tiền còn lại cần thanh toán
+        } else {
+            payment.setPaymentCode("BL" + String.format("%06d", payment.getPaymentId()));
+            payment.setAmount(contract.getRemainPrice()); // số tiền cần thanh toán
+            payment.setRemainPrice(contract.getRemainPrice()); // số tiền còn lại cần thanh toán
+        }
+
+        // lưu lại khi đã có payment code
+        paymentRepository.save(payment);
+
+        return GetPaymentResponse.builder()
+                .paymentId(payment.getPaymentId())
+                .paymentCode(payment.getPaymentCode())
+                .remainPrice(payment.getRemainPrice())
+                .status(payment.getStatus())
+                .paymentType(payment.getPaymentType())
+                .paymentMethod(payment.getPaymentMethod())
+                .amount(payment.getAmount())
+                .createdAt(payment.getCreatedAt())
+                .contractCode(contract.getContractCode())
+                .build();
+    }
 
     @Override
     public Payment getPaymentEntityById(int paymentId) {
@@ -71,7 +116,7 @@ public class PaymentServiceImpl implements PaymentService {
         txn.setNote("Thanh toán qua VNPAY IPN thành công");
         transactionRepository.save(txn);
 
-        boolean isEnough = vNPayService.validateAmount(paymentCode, amount);
+        boolean isEnough = vnpayService.validateAmount(paymentCode, amount);
         if (isEnough) {
             payment.setStatus(PaymentStatus.COMPLETED);
         }

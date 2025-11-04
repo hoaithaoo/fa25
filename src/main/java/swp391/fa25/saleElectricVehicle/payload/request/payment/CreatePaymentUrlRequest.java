@@ -6,7 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PaymentRequest {
+public class CreatePaymentUrlRequest {
 //    private int contractId;
     private int paymentId;
 }

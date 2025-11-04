@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentMethod;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
 
@@ -35,10 +36,10 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    private String paymentMethod;
+    @Column(columnDefinition = "nvarchar(255)")
+    private PaymentMethod paymentMethod;
 
-    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
+    @Column(columnDefinition = "DECIMAL(15,0)")
     private BigDecimal amount;
 
     @Column(nullable = false)

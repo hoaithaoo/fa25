@@ -1,8 +1,10 @@
 package swp391.fa25.saleElectricVehicle.service;
 
+import swp391.fa25.saleElectricVehicle.entity.Transaction;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreateTransactionRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.payment.GetTransactionResponse;
 
 public interface TransactionService {
-    GetTransactionResponse createTransaction(CreateTransactionRequest request);
+    Transaction createTransaction(CreateTransactionRequest request);
+//    GetTransactionResponse createTransaction(CreateTransactionRequest request);
 }

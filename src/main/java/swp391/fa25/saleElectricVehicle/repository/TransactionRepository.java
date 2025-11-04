@@ -6,4 +6,5 @@ import swp391.fa25.saleElectricVehicle.entity.Transaction;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
+    boolean existsTransactionByTransactionRef(String transactionRef);
 }

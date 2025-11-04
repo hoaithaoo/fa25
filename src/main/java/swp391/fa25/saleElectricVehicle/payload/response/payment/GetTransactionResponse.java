@@ -15,7 +15,7 @@ public class GetTransactionResponse {
     private BigDecimal amount;
     private LocalDateTime transactionDate;
     private String gateway;
-    private String payerInfor;
+//    private String payerInfor;
     private String note;
     private String status;
 }

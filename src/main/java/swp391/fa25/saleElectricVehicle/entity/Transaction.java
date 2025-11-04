@@ -34,11 +34,14 @@ public class Transaction {
     @Column(unique = true)
     private String transactionRef;
 
-    @Column
-    private String payerInfor;
+    @Column(unique = true)
+    private String bankTransactionCode;
 
-    @Column(columnDefinition = "nvarchar(255)")
-    private String note;
+//    @Column
+//    private String payerInfor;
+
+//    @Column(columnDefinition = "nvarchar(255)")
+//    private String note;
 
     @ManyToOne
     @JoinColumn(name = "paymentId", nullable = false)
