@@ -241,7 +241,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 .discountAmount(od.getDiscountAmount())
                                 .totalPrice(od.getTotalPrice())
                                 .build()
-                ).toList())
+                        ).toList())
                 .totalPrice(order.getTotalPrice())
                 .totalTaxPrice(order.getTotalTaxPrice())
                 .totalPromotionAmount(order.getTotalPromotionAmount())
@@ -319,14 +319,14 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             BigDecimal discountAmount = BigDecimal.ZERO;
             if (itemReq.getPromotionId() > 0) {
                 promotion = promotionService.getPromotionEntityById(itemReq.getPromotionId());
-                    // Giả sử promotion là giảm giá theo phần trăm
-                    if (promotion.getPromotionType().toString().equals("PERCENTAGE")) {
-                        discountAmount = stock.getPriceOfStore()
-                                .multiply(BigDecimal.valueOf(itemReq.getQuantity()))
-                                .multiply(promotion.getAmount().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
-                    } else if (promotion.getPromotionType().toString().equals("FIXED_AMOUNT")) {
-                        discountAmount = promotion.getAmount().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-                    }
+                // Giả sử promotion là giảm giá theo phần trăm
+                if (promotion.getPromotionType().toString().equals("PERCENTAGE")) {
+                    discountAmount = stock.getPriceOfStore()
+                            .multiply(BigDecimal.valueOf(itemReq.getQuantity()))
+                            .multiply(promotion.getAmount().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+                } else if (promotion.getPromotionType().toString().equals("FIXED_AMOUNT")) {
+                    discountAmount = promotion.getAmount().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                }
             }
 
             totalPromotions = totalPromotions.add(discountAmount);
@@ -373,27 +373,27 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         order.setTotalTaxPrice(totalTax);
         order.setTotalPromotionAmount(totalPromotions);
         order.setTotalPayment(finalAmount);
-        order.setStatus(OrderStatus.CONFIRMED);
+//        order.setStatus(OrderStatus.CONFIRMED);
         orderService.updateOrder(order);
 
         return CreateOrderWithItemsResponse.builder()
                 .orderDetailsResponses(
                         orderDetails.stream().map(od -> CreateOrderDetailsResponse.builder()
-                                .orderDetailId(od.getId())
-                                .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
-                                .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
-                                .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
-                                .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
-                                .unitPrice(od.getUnitPrice())
-                                .quantity(od.getQuantity())
+                                        .orderDetailId(od.getId())
+                                        .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
+                                        .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
+                                        .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
+                                        .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
+                                        .unitPrice(od.getUnitPrice())
+                                        .quantity(od.getQuantity())
 //                                .vatAmount(od.getVatAmount())
-                                .licensePlateFee(od.getLicensePlateFee())
-                                .registrationFee(od.getRegistrationFee())
-                                .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
-                                .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
-                                .discountAmount(od.getDiscountAmount())
-                                .totalPrice(od.getTotalPrice())
-                                .build()
+                                        .licensePlateFee(od.getLicensePlateFee())
+                                        .registrationFee(od.getRegistrationFee())
+                                        .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
+                                        .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
+                                        .discountAmount(od.getDiscountAmount())
+                                        .totalPrice(od.getTotalPrice())
+                                        .build()
                         ).toList()
                 )
                 .build();
@@ -475,7 +475,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrder_OrderId(orderId);
         return orderDetails.stream().map(this::mapToDto).toList();
     }
-//
+    //
 //    @Override
 //    public OrderDetailDto updateQuantity(int id, int quantity) {
 //        OrderDetail orderDetail = orderDetailRepository.findById(id)
@@ -535,8 +535,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 //    @Override
     private BigDecimal calculateTotalPrice(BigDecimal priceOfStore, int quantity,
 //                                          BigDecimal vatAmount,
-                                          BigDecimal licensePlateFee,
-                                          BigDecimal registrationFee, BigDecimal discountAmount) {
+                                           BigDecimal licensePlateFee,
+                                           BigDecimal registrationFee, BigDecimal discountAmount) {
         return priceOfStore.add(priceOfStore.multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)))
                 .multiply(BigDecimal.valueOf(quantity))
 //                .add(vatAmount)
@@ -544,7 +544,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 .add(registrationFee)
                 .subtract(discountAmount);
     }
-//
+    //
 //    // =============== HELPER METHODS ===============
 //
     private GetOrderDetailsResponse mapToDto(OrderDetail od) {

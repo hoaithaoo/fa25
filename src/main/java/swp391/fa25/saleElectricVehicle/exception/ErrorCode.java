@@ -53,7 +53,11 @@ public enum ErrorCode {
     TEST_DRIVE_CONFIG_NOT_FOUND(1041, "Cấu hình lái thử không tồn tại", HttpStatus.NOT_FOUND),
     INVENTORY_TRANSACTION_NOT_FOUND(1042, "Giao dịch tồn kho không tồn tại", HttpStatus.NOT_FOUND),
     ORDER_NOT_EDITABLE(1043, "Đơn hàng không thể chỉnh sửa", HttpStatus.BAD_REQUEST),
+    DUPLICATE_ORDER_ITEM(1044, "Mục đơn hàng bị trùng lặp", HttpStatus.BAD_REQUEST),
+    PROMOTION_EXPIRED(1045, "Khuyến mãi đã hết hạn", HttpStatus.BAD_REQUEST),
     IDENTIFICATION_NUMBER_EXISTED(1044, "Số CMND/CCCD đã tồn tại", HttpStatus.BAD_REQUEST),
+    PAYMENT_NOT_EXISTED(1445, "Giao dịch không tồn tại", HttpStatus.NOT_FOUND),
+    INVALID_CHECKSUM(1046, "Checksum không hợp lệ", HttpStatus.BAD_REQUEST),
     CANNOT_DELETE_SIGNED_CONTRACT(1045, "Không thể xóa hợp đồng đã ký", HttpStatus.BAD_REQUEST),
     ;
 

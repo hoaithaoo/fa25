@@ -10,6 +10,8 @@ import java.util.List;
 public interface ContractService {
     ContractDto createDraftContract(CreateContractRequest request);
 //    ContractDto updateContract(int id, ContractDto contractDto);
+    Contract getContractEntityById(int id);
+    Contract getContractEntityByContractCode(String contractCode);
     ContractDto getContractById(int id);
     ContractDto addFileUrlContract(int id, String fileUrl);
 //    ContractDto getContractByFileUrl(String fileUrl);

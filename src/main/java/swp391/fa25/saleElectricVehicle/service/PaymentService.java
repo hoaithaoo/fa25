@@ -1,0 +1,14 @@
+package swp391.fa25.saleElectricVehicle.service;
+
+import swp391.fa25.saleElectricVehicle.entity.Payment;
+import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
+import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentResponse;
+
+import java.math.BigDecimal;
+
+public interface PaymentService {
+    GetPaymentResponse createDraftPayment(CreatePaymentRequest request);
+    Payment getPaymentEntityById(int paymentId);
+    Payment getPaymentEntityByPaymentCode(String paymentCode);
+    void confirmPayment(Payment payment, BigDecimal amount);
+}

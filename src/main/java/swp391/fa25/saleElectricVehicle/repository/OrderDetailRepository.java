@@ -14,6 +14,11 @@ import java.util.List;
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Integer> {
 
+    // đếm xem có bao nhiêu order detail trong một order cụ thể với một model color cụ thể
+    @Query("SELECT CASE WHEN COUNT(od) > 0 THEN true ELSE false END FROM OrderDetail od WHERE od.order.orderId = :orderId AND od.storeStock.modelColor.modelColorId = :modelColorId")
+    boolean existsByOrderIdAndModelColorId(@Param("orderId") int orderId, @Param("modelColorId") int modelColorId);
+
+
     // Find by Order
     List<OrderDetail> findByOrder_OrderId(int orderId);
 

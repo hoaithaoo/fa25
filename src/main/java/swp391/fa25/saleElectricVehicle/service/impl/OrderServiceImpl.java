@@ -56,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
                 .customer(customer)
                 .user(staff)
                 .build());
-        String orderCode = "ORD-" + String.format("%06d", savedOrder.getOrderId());
+        String orderCode = "ORD" + String.format("%06d", savedOrder.getOrderId());
         savedOrder.setOrderCode(orderCode);
         savedOrder = orderRepository.save(savedOrder);
 
