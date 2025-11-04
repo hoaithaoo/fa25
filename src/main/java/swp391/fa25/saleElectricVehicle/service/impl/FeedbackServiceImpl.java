@@ -21,6 +21,9 @@ import swp391.fa25.saleElectricVehicle.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Collections;
+
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
@@ -52,7 +55,6 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .status(FeedbackStatus.DRAFT)
                 .createdAt(LocalDateTime.now()) // ✅ Tự động gán thời gian tạo
                 .createdBy(staff)
-                .order(order)
                 .build();
 
         Feedback saved = feedbackRepository.save(feedback);
@@ -130,28 +132,33 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     // ✅ THÊM customerName vào mapping
     private FeedbackDto mapToDto(Feedback feedback) {
+        List<FeedbackDetailDto> detailDtos = Optional.ofNullable(feedback.getFeedbackDetails())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(fd -> FeedbackDetailDto.builder()
+                        .feedbackDetailId(fd.getFeedbackDetailId())
+                        .category(fd.getCategory())
+                        .rating(fd.getRating())
+                        .content(fd.getContent())
+                        .build())
+                .collect(Collectors.toList());
+
+        User resolvedBy = feedback.getResolvedBy();
+        User createdBy = feedback.getCreatedBy();
+
         return FeedbackDto.builder()
                 .feedbackId(feedback.getFeedbackId())
                 .orderId(feedback.getOrder().getOrderId())
                 .customerId(feedback.getOrder().getCustomer().getCustomerId())
                 .customerName(feedback.getOrder().getCustomer().getFullName())
-                .feedbackDetails(
-                        feedback.getFeedbackDetails().stream()
-                                .map(fd -> FeedbackDetailDto.builder()
-                                        .feedbackDetailId(fd.getFeedbackDetailId())
-                                        .category(fd.getCategory())
-                                        .rating(fd.getRating())
-                                        .content(fd.getContent())
-                                        .build()
-                                ).toList()
-                )
+                .feedbackDetails(detailDtos) // sẽ là empty list nếu null
                 .status(feedback.getStatus().name())
                 .createdAt(feedback.getCreatedAt())
-                .createdById(feedback.getCreatedBy().getUserId())
-                .createdBy(feedback.getCreatedBy().getFullName())
+                .createdById(createdBy == null ? 0 : createdBy.getUserId())
+                .createdBy(createdBy == null ? null : createdBy.getFullName())
                 .resolveAt(feedback.getResolveAt())
-                .resolvedById(feedback.getResolvedBy().getUserId())
-                .resolvedBy(feedback.getResolvedBy().getFullName())
+                .resolvedById(resolvedBy == null ? 0 : resolvedBy.getUserId())
+                .resolvedBy(resolvedBy == null ? null : resolvedBy.getFullName())
                 .build();
     }
 }
