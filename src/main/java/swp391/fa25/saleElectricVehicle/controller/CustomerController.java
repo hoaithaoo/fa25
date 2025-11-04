@@ -54,9 +54,10 @@ public class CustomerController {
         return ResponseEntity.ok(response);
     }
 
+    // cho phép lấy tất cả khách hàng (không theo store)
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<CustomerDto>>> getAllCustomers() {
-        List<CustomerDto> customers = customerService.getAllCustomersByStore();
+        List<CustomerDto> customers = customerService.getAllCustomers();
         ApiResponse<List<CustomerDto>> response = ApiResponse.<List<CustomerDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Customers retrieved successfully")
