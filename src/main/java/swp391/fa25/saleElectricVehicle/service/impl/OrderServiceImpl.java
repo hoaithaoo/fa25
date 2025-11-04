@@ -36,9 +36,6 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     StoreService storeService;
 
-    @Autowired
-    private ContractService contractService;
-
     @Override
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
         Customer customer = customerService.getCustomerEntityById(request.getCustomerId());
