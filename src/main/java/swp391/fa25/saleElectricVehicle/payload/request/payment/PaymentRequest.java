@@ -7,6 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class PaymentRequest {
-    private int contractId;
-
+//    private int contractId;
+    private int paymentId;
 }
