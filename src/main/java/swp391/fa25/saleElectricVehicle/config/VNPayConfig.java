@@ -23,13 +23,15 @@ import org.springframework.context.annotation.Configuration;
 public class VNPayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-//    public static String vnp_ReturnUrl = "http://localhost:8080/vnpay_jsp/vnpay_return.jsp";
+//    public static String vnp_ReturnUrl = "https://tiembanhvuive.io.vn/api/payment";
+    public static String vnp_ReturnUrl = "http://localhost:8080/api/payment/vnpay/ipn"; // cấu hình để vnpay gọi lại khi thanh toán xong
     public static String vnp_TmnCode = "A9TOUI59";
     public static String secretKey = "K4HF0IZ41BTYDY1U5JOLW8FNDUM0FC51";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";
+    public static String vnp_OrderType = "240000"; // mã loại hàng hóa dịch vụ của vnpay - 240000: Xe cộ - phương tiện
 
 //    public static String md5(String message) {
 //        String digest = null;
@@ -111,18 +113,18 @@ public class VNPayConfig {
         }
     }
     
-//    public static String getIpAddress(HttpServletRequest request) {
-//        String ipAdress;
-//        try {
-//            ipAdress = request.getHeader("X-FORWARDED-FOR");
-//            if (ipAdress == null) {
-//                ipAdress = request.getRemoteAddr();
-//            }
-//        } catch (Exception e) {
-//            ipAdress = "Invalid IP:" + e.getMessage();
-//        }
-//        return ipAdress;
-//    }
+    public static String getIpAddress(HttpServletRequest request) {
+        String ipAdress;
+        try {
+            ipAdress = request.getHeader("X-FORWARDED-FOR");
+            if (ipAdress == null) {
+                ipAdress = request.getRemoteAddr();
+            }
+        } catch (Exception e) {
+            ipAdress = "Invalid IP:" + e.getMessage();
+        }
+        return ipAdress;
+    }
 //
 //    public static String getRandomNumber(int len) {
 //        Random rnd = new Random();

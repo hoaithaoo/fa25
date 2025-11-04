@@ -1,12 +1,11 @@
 package swp391.fa25.saleElectricVehicle.service;
 
-import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentUrlRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 public interface VNPayService {
-    String buildPaymentUrl(CreatePaymentUrlRequest request);
+    String buildPaymentUrl(int paymentId, HttpServletRequest request);
     Map<String, String> processIpn(Map<String, String> params);
 //    boolean validateAmount(String paymentCode, BigDecimal amount);
 }

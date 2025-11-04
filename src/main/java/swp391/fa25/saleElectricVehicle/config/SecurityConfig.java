@@ -37,7 +37,8 @@ public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
 //            "/users/**",
             "/auth/**",
-            "/models/all" // cho phép truy cập để hiển thị model ở home page
+            "/models/all", // cho phép truy cập để hiển thị model ở home page
+            "/payment/vnpay/ipn"
     };
 
     @Bean

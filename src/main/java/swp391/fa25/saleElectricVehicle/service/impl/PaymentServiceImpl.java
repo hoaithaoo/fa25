@@ -34,11 +34,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    @Autowired
-    private TransactionService transactionService;
-
-    @Autowired
-    private VNPayService vnpayService;
+//    @Autowired
+//    private TransactionService transactionService;
+//
+//    @Autowired
+//    private VNPayService vnpayService;
 
     @Autowired
     private ContractService contractService;

@@ -170,8 +170,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private CustomerDto mapToDto(Customer customer) {
-        User user = userService.getCurrentUserEntity();
-        Store store = storeService.getCurrentStoreEntity(user.getUserId());
+//        User user = userService.getCurrentUserEntity();
+//        Store store = storeService.getCurrentStoreEntity(user.getUserId());
         return CustomerDto.builder()
                 .customerId(customer.getCustomerId())
                 .fullName(customer.getFullName())
@@ -179,8 +179,8 @@ public class CustomerServiceImpl implements CustomerService {
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
                 .identificationNumber(customer.getIdentificationNumber())
-                .storeId(store.getStoreId())
-                .storeName(store.getStoreName())
+//                .storeId(store.getStoreId())
+//                .storeName(store.getStoreName())
                 .build();
     }
 }

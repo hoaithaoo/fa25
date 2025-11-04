@@ -21,16 +21,16 @@ public class VNPayController {
     @Autowired
     private VNPayService vnpayService;
 
-    @GetMapping("/payment-url")
-    public ResponseEntity<ApiResponse<String>> createPaymentUrl(CreatePaymentUrlRequest request){
-        String paymentUrl = vnpayService.buildPaymentUrl(request);
-        ApiResponse<String> response = ApiResponse.<String>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("VNPay payment URL generated successfully")
-                .data(paymentUrl)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+//    @GetMapping("/payment-url")
+//    public ResponseEntity<ApiResponse<String>> createPaymentUrl(CreatePaymentUrlRequest request){
+//        String paymentUrl = vnpayService.buildPaymentUrl(request);
+//        ApiResponse<String> response = ApiResponse.<String>builder()
+//                .code(HttpStatus.CREATED.value())
+//                .message("VNPay payment URL generated successfully")
+//                .data(paymentUrl)
+//                .build();
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//    }
 
     @GetMapping("/ipn")
     public ResponseEntity<Map<String, String>> handleIPN(@RequestParam Map<String,String> params) {

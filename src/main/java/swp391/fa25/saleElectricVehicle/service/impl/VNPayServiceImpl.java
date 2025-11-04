@@ -1,5 +1,6 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
@@ -7,10 +8,8 @@ import swp391.fa25.saleElectricVehicle.entity.Contract;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentGateway;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.TransactionStatus;
-import swp391.fa25.saleElectricVehicle.exception.AppException;
-import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentUrlRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreateTransactionRequest;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
 import swp391.fa25.saleElectricVehicle.service.PaymentService;
@@ -39,10 +38,13 @@ public class VNPayServiceImpl implements VNPayService {
     private TransactionService transactionService;
 
     @Override
-    public String buildPaymentUrl(CreatePaymentUrlRequest request) {
-        Payment payment = paymentService.getPaymentEntityById(request.getPaymentId());
+    public String buildPaymentUrl(int paymentId, HttpServletRequest request) {
+        Payment payment = paymentService.getPaymentEntityById(paymentId);
         Contract contract = contractService.getContractEntityById(payment.getContract().getContractId());
-        BigDecimal amount = contract.getTotalPayment().multiply(BigDecimal.valueOf(100));
+
+//        if (payment.getPaymentType().equals(PaymentType.DEPOSIT))
+        BigDecimal amount = payment.getRemainPrice().multiply(BigDecimal.valueOf(100));
+//        BigDecimal amount = contract.getTotalPayment().multiply(BigDecimal.valueOf(100));
 
         try {
 //        String vnp_Version = "2.1.0";
@@ -56,7 +58,7 @@ public class VNPayServiceImpl implements VNPayService {
             // phân biệt cả loại thanh toán (cọc hay còn lại)
             String vnp_TxnRef = payment.getPaymentCode();
 //            String vnp_TxnRef = VNPayConfig.getRandomNumber(8);
-//        String vnp_IpAddr = VNPayConfig.getIpAddress(req);
+            String vnp_IpAddr = VNPayConfig.getIpAddress(request);
 
             String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
 
@@ -67,14 +69,16 @@ public class VNPayServiceImpl implements VNPayService {
             vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
             vnp_Params.put("vnp_Amount", String.valueOf(amount));
             vnp_Params.put("vnp_CurrCode", "VND");
-            vnp_Params.put("vnp_BankCode", "NCB"); // test default là NCB (trong mail phần ngân hàng)
+//            vnp_Params.put("vnp_BankCode", "NCB");
             vnp_Params.put("vnp_Locale", "vn");
+            vnp_Params.put("vnp_OrderType", VNPayConfig.vnp_OrderType);
+            vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
 
 //        if (bankCode != null && !bankCode.isEmpty()) {
 //            vnp_Params.put("vnp_BankCode", bankCode);
 //        }
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-            vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang:" + vnp_TxnRef); // mã đơn hàng (?)
+            vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang: " + vnp_TxnRef + ". So tien " + amount + " VND");
 //        vnp_Params.put("vnp_OrderType", orderType);
 
 //        String locate = req.getParameter("language");
@@ -84,7 +88,7 @@ public class VNPayServiceImpl implements VNPayService {
 //            vnp_Params.put("vnp_Locale", "vn");
 //        }
 //        vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
-//        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
             Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
