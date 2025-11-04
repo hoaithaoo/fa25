@@ -10,7 +10,7 @@ public interface CustomerService {
     CustomerDto getCustomerById(int customerId);
     Customer getCustomerEntityById(int customerId);
     CustomerDto getCustomerByPhone(String phone);
-    List<CustomerDto> getAllCustomersByStore();
+    List<CustomerDto> getAllCustomers();
     List<CustomerDto> getAllCustomersByStaffId(int staffId);
     CustomerDto updateCustomer(int customerId, CustomerDto customerDto);
     void deleteCustomer(int customerId);

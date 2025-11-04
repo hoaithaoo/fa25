@@ -35,8 +35,9 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/users/**",
-            "/auth/**"
+//            "/users/**",
+            "/auth/**",
+            "/models/all" // cho phép truy cập để hiển thị model ở home page
     };
 
     @Bean

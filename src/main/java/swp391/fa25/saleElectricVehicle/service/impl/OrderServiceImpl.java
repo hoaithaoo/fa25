@@ -14,10 +14,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderRespons
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
-import swp391.fa25.saleElectricVehicle.service.CustomerService;
-import swp391.fa25.saleElectricVehicle.service.OrderService;
-import swp391.fa25.saleElectricVehicle.service.StoreService;
-import swp391.fa25.saleElectricVehicle.service.UserService;
+import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -194,6 +191,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // không xóa được đơn hàng đã hoàn thành hoặc đã giao
+    // xóa đơn hàng sẽ xóa cả hợp đồng liên quan (nếu có)
     @Override
     public void deleteOrder(int orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);

@@ -5,6 +5,7 @@ import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.FeedbackStatus;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -44,6 +45,7 @@ public class Feedback {
     @JoinColumn(name = "orderId")
     private Order order;
 
+    @Builder.Default
     @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FeedbackDetail> feedbackDetails = new java.util.ArrayList<>();
+    private List<FeedbackDetail> feedbackDetails = new ArrayList<>();
 }
