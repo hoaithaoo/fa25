@@ -29,8 +29,6 @@ public class StoreStockServiceImpl implements StoreStockService {
 
     @Autowired
     ModelColorService modelColorService;
-    @Autowired
-    private UserService userService;
 
     @Override
     public StoreStockDto createStoreStock(StoreStockDto request) {
@@ -76,26 +74,6 @@ public class StoreStockServiceImpl implements StoreStockService {
             throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
         }
         return storeStock;
-    }
-
-    @Override
-    public StoreStock getStoreStockByStoreIdAndModelColorIdWithLock(int storeId, int modelColorId) {
-        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorIdWithLock(storeId, modelColorId);
-        if (storeStock == null) {
-            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
-        }
-        return storeStock;
-    }
-
-    @Override
-    public int getQuantityByModelIdAndColorId(int modelId, int colorId) {
-        Model model = modelService.getModelEntityById(modelId);
-        Color color = colorService.getColorEntityById(colorId);
-        ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
-        User user = userService.getCurrentUserEntity();
-        Store store = storeService.getCurrentStoreEntity(user.getUserId());
-        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(store.getStoreId(), modelColor.getModelColorId());
-        return storeStock.getQuantity();
     }
 
     // update giá bán của cửa hàng

@@ -30,12 +30,13 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionRef(request.getTransactionRef())
                 .amount(request.getAmount())
                 .transactionTime(request.getTransactionDate())
+                .gateway(request.getGateway())
+                .bankTransactionCode(request.getBankTransactionCode())
 //                .payerInfor(request.getPayerInfor())
 //                .note(request.getNote())
                 .status(request.getStatus())
                 .build();
-        Transaction savedTransaction = transactionRepository.save(transaction);
-        return savedTransaction;
+        return transactionRepository.save(transaction);
 //        return GetTransactionResponse.builder()
 //                .transactionId(savedTransaction.getTransactionId())
 //                .transactionRef(savedTransaction.getTransactionRef())

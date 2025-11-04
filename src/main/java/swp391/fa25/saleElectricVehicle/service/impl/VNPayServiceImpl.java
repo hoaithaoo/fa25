@@ -6,6 +6,7 @@ import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentGateway;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.TransactionStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
@@ -266,12 +267,18 @@ public class VNPayServiceImpl implements VNPayService {
                     .amount(amount)
                     .transactionDate(vnp_PayDate)
                     .bankTransactionCode(vnp_BankTranNo)
+                    .gateway(PaymentGateway.VNPAY)
                     .status(status)
                     .build();
 
             // tạo transaction ghi lại thông tin của lần thanh toán này
             Transaction transaction = transactionService.createTransaction(transactionRequest);
-            boolean isEnough = validateAmount(payment, amount);
+            boolean validAmount = validateAmount(payment, amount);
+            if (!validAmount) {
+                response.put("RspCode", "04");
+                response.put("Message", "Invalid Amount");
+                return response;
+            }
 //            // lấy chữ ký từ params rồi bỏ các trường chữ ký trước khi dựng chuỗi để tính lại hash
 //            // lấy giá trị chữ ký VNPay gửi kèm (chuỗi hexa hash)
 //            // Cần giữ lại để so sánh với hash tự tính
@@ -358,8 +365,9 @@ public class VNPayServiceImpl implements VNPayService {
 //                return response;
 //            }
 //
-            String responseCode = params.get("vnp_ResponseCode");
+//            String responseCode = params.get("vnp_ResponseCode");
             if ("00".equals(responseCode)) {
+                paymentService.confirmPayment(payment, amount);
                 // TODO: mark order as paid in DB
                 response.put("RspCode", "00");
                 response.put("Message", "Confirm Success");

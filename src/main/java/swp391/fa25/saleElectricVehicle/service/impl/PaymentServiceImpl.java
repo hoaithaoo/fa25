@@ -93,36 +93,37 @@ public class PaymentServiceImpl implements PaymentService {
         // xử lí null ở vnpay service
     }
 
-    public void confirmPayment(String paymentCode, BigDecimal amount) {
+    @Override
+    public void confirmPayment(Payment payment, BigDecimal amount) {
         // Tìm payment theo orderCode (tùy business, có thể là orderId hoặc mã khác)
-        Payment payment = paymentRepository.findPaymentByPaymentCode(paymentCode);
+//        Payment payment = getPaymentEntityById(paymentId);
 
-        Transaction transaction = transactionService.createTransaction(payment.getPaymentId())
+//        Transaction transaction = transactionService.createTransaction(payment.getPaymentId())
+//
+//        Transaction txn = Transaction.builder()
+//                        .amount(amount)
+//                        .transactionTime(LocalDateTime.now())
+//                        .status(TransactionStatus.SUCCESS)
+//                        .gateway("VNPAY")
+//                        .payerInfor("IPN")
+//                        .note("Thanh toán qua VNPAY IPN thành công")
+//                        .payment(payment)
+//                        .build();
+//
+//        txn.setPayment(payment);
+//        txn.setAmount(amount);
+//        txn.setTransactionTime(LocalDateTime.now());
+//        txn.setStatus("SUCCESS"); // mã hóa có thể lấy từ IPN params
+//        txn.setNote("Thanh toán qua VNPAY IPN thành công");
+//        transactionRepository.save(txn);
 
-        Transaction txn = Transaction.builder()
-                        .amount(amount)
-                        .transactionTime(LocalDateTime.now())
-                        .status(TransactionStatus.SUCCESS)
-                        .gateway("VNPAY")
-                        .payerInfor("IPN")
-                        .note("Thanh toán qua VNPAY IPN thành công")
-                        .payment(payment)
-                        .build();
-
-        txn.setPayment(payment);
-        txn.setAmount(amount);
-        txn.setTransactionTime(LocalDateTime.now());
-        txn.setStatus("SUCCESS"); // mã hóa có thể lấy từ IPN params
-        txn.setNote("Thanh toán qua VNPAY IPN thành công");
-        transactionRepository.save(txn);
-
-        boolean isEnough = vnpayService.validateAmount(paymentCode, amount);
-        if (isEnough) {
-            payment.setStatus(PaymentStatus.COMPLETED);
-        }
-
-        payment.setAmount(amount); // có thể cộng dồn nếu nhận từng phần
-        payment.setConfirmedAt(LocalDateTime.now());
+//        boolean isEnough = vnpayService.validateAmount(paymentCode, amount);
+//        if (isEnough) {
+//            payment.setStatus(PaymentStatus.COMPLETED);
+//        }
+        payment.setRemainPrice(payment.getAmount().subtract(amount)); // tiền còn lại = tiền phải trả - tiền đã trả ở lần này
+        payment.setStatus(PaymentStatus.COMPLETED);
+        payment.setUpdatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
 
         // Lưu transaction cho lần nhận IPN này (phiên bản tối giản)

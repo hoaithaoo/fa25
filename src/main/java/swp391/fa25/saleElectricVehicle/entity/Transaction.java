@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentGateway;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.TransactionStatus;
 
 import java.math.BigDecimal;
@@ -29,7 +30,7 @@ public class Transaction {
     private TransactionStatus status;
 
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
-    private String gateway;
+    private PaymentGateway gateway;
 
     @Column(unique = true)
     private String transactionRef;

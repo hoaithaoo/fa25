@@ -14,12 +14,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface OrderDetailService {
-//    StockValidationResponse validateStockAvailability(StockValidationRequest request);
 
 //    // =============== CRUD OPERATIONS ===============
-    GetQuoteResponse createQuote(CreateOrderWithItemsRequest request);
-//    CreateOrderWithItemsResponse createOrderDetail(CreateOrderWithItemsRequest request);
-    GetOrderDetailsResponse getOrderDetailById(int id);
+    CreateOrderDetailsResponse createOrderDetail(CreateOrderDetailsRequest request);
 //    OrderDetailDto getOrderDetailById(int id);
 //    List<OrderDetailDto> getAllOrderDetails();
 //    OrderDetailDto updateOrderDetail(int id, OrderDetailDto orderDetailDto);
@@ -30,7 +27,7 @@ public interface OrderDetailService {
 //    OrderDetailDto updateQuantity(int id, int quantity);
 //
 //    // =============== VALIDATION ===============
-//    boolean validateStockAvailability(int storeStockId, int requestedQuantity);
+////    boolean validateStockAvailability(int storeStockId, int requestedQuantity);
 //
 //    // =============== CALCULATION ===============
 //    BigDecimal calculateTotalPrice(BigDecimal unitPrice, int quantity,

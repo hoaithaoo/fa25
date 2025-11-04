@@ -1,7 +1,9 @@
 package swp391.fa25.saleElectricVehicle.payload.request.payment;
 
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentGateway;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.TransactionStatus;
 
 import java.math.BigDecimal;
@@ -18,6 +20,7 @@ public class CreateTransactionRequest {
     private BigDecimal amount;
     private LocalDateTime transactionDate;
     private String bankTransactionCode;
+    private PaymentGateway gateway;
 //    private String payerInfor;
 //    private String note;
     private TransactionStatus status;
