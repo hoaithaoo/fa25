@@ -35,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     StoreService storeService;
+
     @Autowired
     private ContractService contractService;
 
@@ -205,10 +206,6 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.ORDER_NOT_EDITABLE);
         }
         orderRepository.delete(order);
-
-        if (order.getContract() != null) {
-            contractService.deleteContractById(order.getContract().getContractId());
-        }
     }
 
 //    @Override
