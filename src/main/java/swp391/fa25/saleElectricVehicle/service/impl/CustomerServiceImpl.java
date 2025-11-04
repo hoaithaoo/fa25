@@ -87,7 +87,7 @@ public class CustomerServiceImpl implements CustomerService {
     public List<CustomerDto> getAllCustomers() {
 //        User currentUser = userService.getCurrentUserEntity();
 //        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        List<Customer> customers = customerRepository.findCustomersByStore(store.getStoreId());
+        List<Customer> customers = customerRepository.findAll();
         return customers.stream().map(this::mapToDto).toList();
     }
 
