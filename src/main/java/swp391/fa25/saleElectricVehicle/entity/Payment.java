@@ -2,6 +2,8 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,16 +21,19 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int paymentId;
 
+    @Column
+    private String paymentCode;
+
     @Column(columnDefinition = "DECIMAL(15,0)")
     private BigDecimal remainPrice;
 
-    public enum PaymentStatus {
-        PENDING, COMPLETED, FAILED
-    }
+    @Column
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 
     @Column
     @Enumerated(EnumType.STRING)
-    private PaymentStatus status = PaymentStatus.PENDING;
+    private PaymentType paymentType;
 
     @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String paymentMethod;

@@ -25,31 +25,31 @@ public class OrderDetailController {
     private OrderDetailService orderDetailService;
 
     // API 2.3: VALIDATE STOCK (KHÔNG LƯU DB)
-    @PostMapping("/validate")
-    public ResponseEntity<ApiResponse<StockValidationResponse>> validateStock(
-            @Valid @RequestBody StockValidationRequest request) {
-
-        StockValidationResponse validation =
-                orderDetailService.validateStockAvailability(request);
-        ApiResponse<StockValidationResponse> response = ApiResponse.<StockValidationResponse>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("Order detail added successfully")
-                .data(validation)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+//    @PostMapping("/validate")
+//    public ResponseEntity<ApiResponse<StockValidationResponse>> validateStock(
+//            @Valid @RequestBody StockValidationRequest request) {
+//
+//        StockValidationResponse validation =
+//                orderDetailService.validateStockAvailability(request);
+//        ApiResponse<StockValidationResponse> response = ApiResponse.<StockValidationResponse>builder()
+//                .code(HttpStatus.CREATED.value())
+//                .message("Order detail added successfully")
+//                .data(validation)
+//                .build();
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//    }
 
     // CREATE
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<CreateOrderWithItemsResponse>> createOrderDetail(@RequestBody CreateOrderWithItemsRequest request) {
-        CreateOrderWithItemsResponse created = orderDetailService.createOrderDetail(request);
-        ApiResponse<CreateOrderWithItemsResponse> response = ApiResponse.<CreateOrderWithItemsResponse>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("Order detail created successfully")
-                .data(created)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+//    @PostMapping("/create")
+//    public ResponseEntity<ApiResponse<CreateOrderWithItemsResponse>> createOrderDetail(@RequestBody CreateOrderWithItemsRequest request) {
+//        CreateOrderWithItemsResponse created = orderDetailService.createOrderDetail(request);
+//        ApiResponse<CreateOrderWithItemsResponse> response = ApiResponse.<CreateOrderWithItemsResponse>builder()
+//                .code(HttpStatus.CREATED.value())
+//                .message("Order detail created successfully")
+//                .data(created)
+//                .build();
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//    }
 
 //    // READ - Get by ID
     @GetMapping("/{id}")

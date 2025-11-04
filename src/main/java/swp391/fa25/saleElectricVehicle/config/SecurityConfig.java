@@ -35,7 +35,7 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/users/**",
+//            "/users/**",
             "/auth/**"
     };
 
@@ -46,10 +46,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // Cho phép public endpoints + Swagger
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                                .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
 //                        .anyRequest().permitAll()
-                                .anyRequest().authenticated()
+                        .anyRequest().authenticated()
                 )
                 // Cấu hình JWT cho các endpoint còn lại
                 .oauth2ResourceServer(oauth2 -> oauth2
@@ -80,7 +80,7 @@ public class SecurityConfig {
 //        config.setAllowedOrigins(List.of(
 //                "https://swp-391-frontend.vercel.app", // domain thật của bạn
 //                "http://localhost:5173"             // thêm dòng này nếu test local
-    ////                "http://localhost:8080"
+//                "http://localhost:8080"
 //        ));
 //        // 🔹 Cho phép các phương thức HTTP
 //        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -99,14 +99,11 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
                 "https://swp-391-frontend.vercel.app",
-                "http://localhost:5173",
-                "http://localhost:8080",
-                "http://localhost:8888",
-                "https://tiembanhvuive.io.vn"
+                "http://localhost:5173"
+//                "http://localhost:8080"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-//        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
