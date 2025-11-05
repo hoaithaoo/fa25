@@ -42,8 +42,11 @@ public class ContractServiceImpl implements ContractService {
 //
     @Override
     public ContractDto createDraftContract(CreateContractRequest request) {
-        // Validate order
+        // Validate order, không thể tạo contract nếu chưa confirm order
         Order order = orderService.getOrderEntityById(request.getOrderId());
+        if (!order.getStatus().equals(OrderStatus.CONFIRMED)) {
+            throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS);
+        }
         User staff = userService.getCurrentUserEntity();
 
         // Create draft contract

@@ -29,7 +29,8 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column
+    @Enumerated(EnumType.STRING)
     private PaymentGateway gateway;
 
     @Column(unique = true)
