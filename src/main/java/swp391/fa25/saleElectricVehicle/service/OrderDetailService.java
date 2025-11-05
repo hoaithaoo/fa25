@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface OrderDetailService {
-    StockValidationResponse validateStockAvailability(StockValidationRequest request);
+//    StockValidationResponse validateStockAvailability(StockValidationRequest request);
 
     //    // =============== CRUD OPERATIONS ===============
     GetQuoteResponse createQuote(CreateOrderWithItemsRequest request);

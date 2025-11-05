@@ -236,7 +236,7 @@ public class VNPayServiceImpl implements VNPayService {
 //                throw new AppException(ErrorCode.INVALID_CHECKSUM);
                 response.put("RspCode", "97");
                 response.put("Message", "Invalid Checksum");
-                return response;
+//                return response;
             }
 
             // lấy các tham số cần thiết từ params
@@ -252,14 +252,14 @@ public class VNPayServiceImpl implements VNPayService {
                 response.put("RspCode", "01");
                 response.put("Message", "Payment not Found");
 //                response.put("Message", "Order not Found");
-                return response;
+//                return response;
             }
 
             // validate đã thanh toán payment này chưa để tránh xử lí trùng
             if (payment.getStatus().equals(PaymentStatus.COMPLETED)) {
                 response.put("RspCode", "02");
                 response.put("Message", "Payment already confirmed");
-                return response;
+//                return response;
             }
 
             String vnp_TransactionNo = params.get("vnp_TransactionNo");
@@ -289,7 +289,7 @@ public class VNPayServiceImpl implements VNPayService {
             if (!validAmount) {
                 response.put("RspCode", "04");
                 response.put("Message", "Invalid Amount");
-                return response;
+//                return response;
             }
 //            // lấy chữ ký từ params rồi bỏ các trường chữ ký trước khi dựng chuỗi để tính lại hash
 //            // lấy giá trị chữ ký VNPay gửi kèm (chuỗi hexa hash)
@@ -379,22 +379,22 @@ public class VNPayServiceImpl implements VNPayService {
 //
 //            String responseCode = params.get("vnp_ResponseCode");
             if ("00".equals(responseCode)) {
-                paymentService.confirmPayment(payment, amount);
+                paymentService.updatePaymentStatus(payment, amount, PaymentStatus.COMPLETED);
                 // TODO: mark order as paid in DB
                 response.put("RspCode", "00");
                 response.put("Message", "Confirm Success");
-            }
-//            } else {
+            } else {
+                paymentService.updatePaymentStatus(payment, amount, PaymentStatus.CANCELLED);
 //                // TODO: mark order as failed in DB
 //                response.put("RspCode", "00");
 //                response.put("Message", "Confirm Success"); // still return 00 to acknowledge IPN receipt
-//            }
+            }
 //            return response;
         } catch (Exception ex) {
 //            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             response.put("RspCode", "99");
             response.put("Message", "Unknown error");
-            return response;
+//            return response;
         }
         return response;
     }

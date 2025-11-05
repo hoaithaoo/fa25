@@ -47,8 +47,8 @@ public class Model {
     @Column(nullable = false)
     private int seatingCapacity;
 
-    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
-    private BigDecimal price;
+//    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
+//    private BigDecimal price;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
