@@ -80,7 +80,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public GetOrderResponse getOrderById(int orderId) {
-        Order order = orderRepository.findById(orderId).orElse(null);
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        Order order = orderRepository.findOrderByUser_Store_StoreIdAndOrderId((store.getStoreId()), orderId);
+//        Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
@@ -138,8 +141,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<GetOrderResponse> getAllOrders() {
-        return orderRepository.findAll().stream()
+    public List<GetOrderResponse> getAllOrdersByStore() {
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        List<Order> order = orderRepository.findOrdersByUser_Store_StoreId(store.getStoreId());
+        return order.stream()
                 .map(this::mapToDto)
                 .toList();
     }
@@ -185,16 +191,22 @@ public class OrderServiceImpl implements OrderService {
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
+
+        // không thể xác nhận đơn hàng nếu không có sản phẩm nào
+        if (order.getOrderDetails().isEmpty()) {
+            throw new AppException(ErrorCode.ORDER_NO_ITEMS);
+        }
         order.setStatus(OrderStatus.CONFIRMED);
         updateOrder(order);
         return mapToDto(order);
     }
 
     // không xóa được đơn hàng đã hoàn thành hoặc đã giao
-    // xóa đơn hàng sẽ xóa cả hợp đồng liên quan (nếu có)
     @Override
     public void deleteOrder(int orderId) {
-        Order order = orderRepository.findById(orderId).orElse(null);
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        Order order = orderRepository.findOrderByUser_Store_StoreIdAndOrderId((store.getStoreId()), orderId);
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
@@ -220,8 +232,10 @@ public class OrderServiceImpl implements OrderService {
 //
     @Override
     public List<GetOrderResponse> getOrdersByCustomerId(int customerId) {
-        return orderRepository.findByCustomer_CustomerId(customerId)
-                .stream()
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        List<Order> orders = orderRepository.findByCustomer_CustomerIdAndUser_Store_StoreId(customerId, store.getStoreId());
+        return orders.stream()
                 .map(this::mapToDto)
                 .toList();
     }
@@ -234,21 +248,29 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<GetOrderResponse> getOrdersByStatus(String status) {
-        return orderRepository.findByStatus(OrderStatus.valueOf(status.toUpperCase())).stream()
+    public List<GetOrderResponse> getOrdersByCurrentStaff() {
+        User currentUser = userService.getCurrentUserEntity();
+        return orderRepository.findByUser_UserId(currentUser.getUserId()).stream()
                 .map(this::mapToDto)
                 .toList();
     }
 
-    @Override
-    public List<GetOrderResponse> getOrdersByDateRange(LocalDate startDate, LocalDate endDate) {
-        // Convert LocalDate to LocalDateTime for the full day range
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
-        return orderRepository.findByOrderDateBetween(startDateTime, endDateTime).stream()
-                .map(this::mapToDto)
-                .toList();
-    }
+//    @Override
+//    public List<GetOrderResponse> getOrdersByStatus(OrderStatus status) {
+//        return orderRepository.findByStatus(OrderStatus.valueOf(status.toUpperCase())).stream()
+//                .map(this::mapToDto)
+//                .toList();
+//    }
+//
+//    @Override
+//    public List<GetOrderResponse> getOrdersByDateRange(LocalDate startDate, LocalDate endDate) {
+//        // Convert LocalDate to LocalDateTime for the full day range
+//        LocalDateTime startDateTime = startDate.atStartOfDay();
+//        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+//        return orderRepository.findByOrderDateBetween(startDateTime, endDateTime).stream()
+//                .map(this::mapToDto)
+//                .toList();
+//    }
 
 //    @Override
 //    public List<OrderDto> searchOrdersByCustomerPhone(String phone) {

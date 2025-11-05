@@ -5,8 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swp391.fa25.saleElectricVehicle.entity.Order;
-import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderWithItemsRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
@@ -18,7 +17,6 @@ import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -67,7 +65,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // READ - Get by ID
+    // chỉ get order của store hiện tại
     @GetMapping("/{orderId}")
     public ResponseEntity<ApiResponse<GetOrderResponse>> getOrderById(@PathVariable int orderId) {
         GetOrderResponse order = orderService.getOrderById(orderId);
@@ -79,10 +77,10 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    // READ - Get all
+    // chỉ get order của store hiện tại
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getAllOrders() {
-        List<GetOrderResponse> orders = orderService.getAllOrders();
+    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getAllOrdersByStore() {
+        List<GetOrderResponse> orders = orderService.getAllOrdersByStore();
         ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Orders retrieved successfully")
@@ -133,6 +131,7 @@ public class OrderController {
 //    }
 //
     // BUSINESS - Get orders by customer
+    // dành cho quản lí và staff của store
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByCustomer(@PathVariable int customerId) {
         List<GetOrderResponse> orders = orderService.getOrdersByCustomerId(customerId);
@@ -145,6 +144,7 @@ public class OrderController {
     }
 
     // BUSINESS - Get orders by staff
+    // dành cho quản lí của store
     @GetMapping("/staff/{staffId}")
     public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByStaff(@PathVariable int staffId) {
         List<GetOrderResponse> orders = orderService.getOrdersByStaffId(staffId);
@@ -156,18 +156,32 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    // BUSINESS - Get orders by status
-    @GetMapping("/status/{status}")
-    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByStatus(@PathVariable String status) {
-        List<GetOrderResponse> orders = orderService.getOrdersByStatus(status);
+    // BUSINESS - Get orders by staff
+    // dành cho staff hiện tại của store
+    @GetMapping("/staff")
+    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByCurrentStaff() {
+        List<GetOrderResponse> orders = orderService.getOrdersByCurrentStaff();
         ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
                 .code(HttpStatus.OK.value())
-                .message("Orders by status retrieved successfully")
+                .message("Staff orders retrieved successfully")
                 .data(orders)
                 .build();
         return ResponseEntity.ok(response);
     }
 
+//    // BUSINESS - Get orders by status
+//    @GetMapping("/status/{status}")
+//    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByStatus(@PathVariable OrderStatus status) {
+//        List<GetOrderResponse> orders = orderService.getOrdersByStatus(status);
+//        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Orders by status retrieved successfully")
+//                .data(orders)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
+
+    // lấy tất cả order details của một order, không cho xem order của store khác
     @GetMapping("{orderId}/order-details")
     public ResponseEntity<ApiResponse<List<GetOrderDetailsResponse>>> getOrderDetails(@PathVariable int orderId) {
         List<GetOrderDetailsResponse> list = orderDetailService.getOrderDetailsByOrderId(orderId);
@@ -192,19 +206,19 @@ public class OrderController {
 //    }
 //
     // BUSINESS - Get orders by date range
-    @GetMapping("/date-range")
-    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByDateRange(
-            @RequestParam @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate endDate) {
-
-        List<GetOrderResponse> orders = orderService.getOrdersByDateRange(startDate, endDate);
-        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Orders by date range retrieved successfully")
-                .data(orders)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/date-range")
+//    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByDateRange(
+//            @RequestParam @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate startDate,
+//            @RequestParam @DateTimeFormat(pattern = "yyyy/MM/dd") LocalDate endDate) {
+//
+//        List<GetOrderResponse> orders = orderService.getOrdersByDateRange(startDate, endDate);
+//        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Orders by date range retrieved successfully")
+//                .data(orders)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 //
 //    // ANALYTICS - Get recent orders
 //    @GetMapping("/recent")
