@@ -38,7 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
     public GetPaymentResponse createDraftPayment(CreatePaymentRequest request) {
         Contract contract = contractService.getContractEntityById(request.getContractId());
 
-        // không cho thanh toán khi hợp đồng chưa ký
+        // không cho thanh toán khi hợp đồng chưa ký,
         if (!contract.getStatus().equals(ContractStatus.SIGNED)) {
             throw new AppException(ErrorCode.CONTRACT_NOT_SIGNED);
         }
@@ -47,14 +47,16 @@ public class PaymentServiceImpl implements PaymentService {
             // Kiểm tra xem đã có payment đặt cọc chưa
             Optional<Payment> existingDepositPayment = paymentRepository
                     .findByContractAndPaymentType(contract, PaymentType.DEPOSIT);
-            if (existingDepositPayment.isPresent()) {
+            // nếu đã có và chưa bị hủy thì không được tạo nữa
+            // bị hủy khi khách thanh toán không thành công và tự hủy giao dịch
+            if (existingDepositPayment.isPresent() && !existingDepositPayment.get().getStatus().equals(PaymentStatus.CANCELLED)) {
                 throw new AppException(ErrorCode.DEPOSIT_PAYMENT_ALREADY_EXISTS);
             }
         } else if (request.getPaymentType() == PaymentType.BALANCE) {
             // Kiểm tra xem đã có payment thanh toán số dư chưa
             Optional<Payment> existingBalancePayment = paymentRepository
                     .findByContractAndPaymentType(contract, PaymentType.BALANCE);
-            if (existingBalancePayment.isPresent()) {
+            if (existingBalancePayment.isPresent() && !existingBalancePayment.get().getStatus().equals(PaymentStatus.CANCELLED)) {
                 throw new AppException(ErrorCode.BALANCE_PAYMENT_ALREADY_EXISTS);
             }
         }
@@ -106,7 +108,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void confirmPayment(Payment payment, BigDecimal amount) {
+    public void updatePaymentStatus(Payment payment, BigDecimal amount, PaymentStatus status) {
         // Tìm payment theo orderCode (tùy business, có thể là orderId hoặc mã khác)
 //        Payment payment = getPaymentEntityById(paymentId);
 
@@ -134,7 +136,7 @@ public class PaymentServiceImpl implements PaymentService {
 //            payment.setStatus(PaymentStatus.COMPLETED);
 //        }
         payment.setRemainPrice(payment.getAmount().subtract(amount)); // tiền còn lại = tiền phải trả - tiền đã trả ở lần này
-        payment.setStatus(PaymentStatus.COMPLETED);
+        payment.setStatus(status);
         payment.setUpdatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
 

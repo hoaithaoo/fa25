@@ -38,4 +38,6 @@ public interface StoreStockRepository extends JpaRepository<StoreStock, Integer>
 
     // Count by store
     long countByStore_StoreId(int storeId);
+
+    List<StoreStock> findStoreStocksByStore_StoreId(int storeStoreId);
 }

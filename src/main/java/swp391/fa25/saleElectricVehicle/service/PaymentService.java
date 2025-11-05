@@ -1,6 +1,7 @@
 package swp391.fa25.saleElectricVehicle.service;
 
 import swp391.fa25.saleElectricVehicle.entity.Payment;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentResponse;
 
@@ -10,5 +11,5 @@ public interface PaymentService {
     GetPaymentResponse createDraftPayment(CreatePaymentRequest request);
     Payment getPaymentEntityById(int paymentId);
     Payment getPaymentEntityByPaymentCode(String paymentCode);
-    void confirmPayment(Payment payment, BigDecimal amount);
+    void updatePaymentStatus(Payment payment, BigDecimal amount, PaymentStatus status);
 }

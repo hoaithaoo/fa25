@@ -6,6 +6,8 @@ import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.*;
+import swp391.fa25.saleElectricVehicle.payload.request.stock.CreateStoreStockRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.stock.UpdatePriceOfStoreRequest;
 import swp391.fa25.saleElectricVehicle.repository.StoreStockRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
@@ -29,12 +31,14 @@ public class StoreStockServiceImpl implements StoreStockService {
 
     @Autowired
     ModelColorService modelColorService;
+
     @Autowired
     private UserService userService;
 
     @Override
-    public StoreStockDto createStoreStock(StoreStockDto request) {
-        Store store = storeService.getStoreEntityById(request.getStoreId());
+    public StoreStockDto createStoreStock(CreateStoreStockRequest request) {
+        User user = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(user.getUserId());
         Model model = modelService.getModelEntityById(request.getModelId());
         Color color = colorService.getColorEntityById(request.getColorId());
         ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
@@ -55,8 +59,10 @@ public class StoreStockServiceImpl implements StoreStockService {
     }
 
     @Override
-    public List<StoreStockDto> getAllStoreStock() {
-        List<StoreStock> storeStocks = storeStockRepository.findAll();
+    public List<StoreStockDto> getAllStoreStockByStoreId() {
+        User user = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(user.getUserId());
+        List<StoreStock> storeStocks = storeStockRepository.findStoreStocksByStore_StoreId(store.getStoreId());
         return storeStocks.stream().map(this::mapToDto).toList();
     }
 
@@ -100,22 +106,28 @@ public class StoreStockServiceImpl implements StoreStockService {
 
     // update giá bán của cửa hàng
     @Override
-    public StoreStockDto updatePriceOfStore(int stockId, BigDecimal price) {
-        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
+    public StoreStockDto updatePriceOfStore(UpdatePriceOfStoreRequest request) {
+        User user = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(user.getUserId());
+        Model model = modelService.getModelEntityById(request.getModelId());
+        Color color = colorService.getColorEntityById(request.getColorId());
+        ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
+        StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(store.getStoreId(), modelColor.getModelColorId());
         if (storeStock == null) {
             throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
         }
 
-        if (price.compareTo(BigDecimal.ZERO) < 0) {
+        if (request.getPrice().compareTo(BigDecimal.ZERO) < 0) {
             throw new AppException(ErrorCode.INVALID_NUMBER);
         }
-        storeStock.setPriceOfStore(price);
+        storeStock.setPriceOfStore(request.getPrice());
         storeStockRepository.save(storeStock);
 
         return mapToDto(storeStock);
     }
 
     // update số lượng tồn kho của cửa hàng
+    // chỉ dùng nội bộ khi có đơn hàng hoặc nhập kho
     @Override
     public StoreStockDto updateQuantity(int stockId, int quantity) {
         StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
@@ -132,14 +144,14 @@ public class StoreStockServiceImpl implements StoreStockService {
         return mapToDto(storeStock);
     }
 
-    @Override
-    public void deleteStoreStock(int stockId) {
-        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
-        if (storeStock == null) {
-            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
-        }
-        storeStockRepository.delete(storeStock);
-    }
+//    @Override
+//    public void deleteStoreStock(int stockId) {
+//        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
+//        if (storeStock == null) {
+//            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+//        }
+//        storeStockRepository.delete(storeStock);
+//    }
 
     private StoreStockDto mapToDto(StoreStock storeStock) {
         return StoreStockDto.builder()

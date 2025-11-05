@@ -1,4 +1,4 @@
-package swp391.fa25.saleElectricVehicle.payload.request.model;
+package swp391.fa25.saleElectricVehicle.payload.request.stock;
 
 import lombok.*;
 
@@ -8,9 +8,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateModelColorRequest {
+public class UpdatePriceOfStoreRequest {
     private int modelId;
     private int colorId;
     private BigDecimal price;
-    private String imagePath;
 }

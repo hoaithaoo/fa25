@@ -2,6 +2,8 @@ package swp391.fa25.saleElectricVehicle.payload.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,5 +15,6 @@ public class ModelColorDto {
     private int colorId;
     private String colorName;
     private String colorCode;
+    private BigDecimal price;
     private String imagePath;
 }

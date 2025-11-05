@@ -41,6 +41,7 @@ public class ModelColorServiceImpl implements ModelColorService {
         ModelColor newModelColor = modelColorRepository.save(ModelColor.builder()
                 .model(model)
                 .color(color)
+                .price(request.getPrice())
                 .imagePath(request.getImagePath())
                 .build());
 
@@ -162,6 +163,7 @@ public class ModelColorServiceImpl implements ModelColorService {
                 .colorId(modelColor.getColor().getColorId())
                 .colorName(modelColor.getColor().getColorName())
                 .colorCode(modelColor.getColor().getColorCode())
+                .price(modelColor.getPrice())
                 .imagePath(modelColor.getImagePath())
                 .build();
     }

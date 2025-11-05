@@ -82,4 +82,8 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 
     // Find by quantity range
     List<OrderDetail> findByQuantityBetween(int minQuantity, int maxQuantity);
+
+    List<OrderDetail> findByOrder_OrderIdAndOrder_User_UserId(int orderOrderId, int orderUserUserId);
+
+    List<OrderDetail> findByOrder_OrderIdAndOrder_User_Store_StoreId(int orderOrderId, int orderUserStoreStoreId);
 }

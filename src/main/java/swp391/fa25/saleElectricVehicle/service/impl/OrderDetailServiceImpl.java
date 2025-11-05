@@ -59,53 +59,53 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     private final BigDecimal REGISTRATION_FEE_AMOUNT = BigDecimal.valueOf(1500000); // 1.5 millions VND
 
 
-    @Override
-    public StockValidationResponse validateStockAvailability(StockValidationRequest request) {
-        // 1. Validate model exists
-        Model model = modelService.getModelEntityById(request.getModelId());
-
-        // 2. Validate color exists
-        Color color = colorService.getColorEntityById(request.getColorId());
-
-        ModelColor modelColor = modelColorService
-                .getModelColorEntityByModelIdAndColorId(
-                        model.getModelId(),
-                        color.getColorId()
-                );
-
-        // 3. Get store of current user
-        User staff = userService.getCurrentUserEntity();
-        Store store = storeService.getCurrentStoreEntity(staff.getUserId());
-
-        // 4. Get stock from warehouse
-        StoreStock stock = storeStockService
-                .getStoreStockByStoreIdAndModelColorId(
-                        store.getStoreId(),
-                        modelColor.getModelColorId()
-                );
-
-        // 5. Check quantity
-        validateStockAvailability(stock, request.getQuantity());
-
-        // 6. Apply promotion if any (NOT affecting stock validation)
-        if (request.getPromotionId() > 0) {
-            Promotion promotion = promotionService.getPromotionEntityById(request.getPromotionId());
-        }
-
-        // 6. Return success validation (NO DB WRITE)
-        return StockValidationResponse.builder()
-                .modelId(model.getModelId())
-                .modelName(model.getModelName())
-                .colorId(color.getColorId())
-                .colorName(color.getColorName())
-                .requestedQuantity(request.getQuantity())
-                .promotionId(request.getPromotionId())
-                .promotionName(request.getPromotionId() > 0 ?
-                        promotionService.getPromotionEntityById(request.getPromotionId()).getPromotionName() : null)
-                .build();
+//    @Override
+//    public StockValidationResponse validateStockAvailability(StockValidationRequest request) {
+//        // 1. Validate model exists
+//        Model model = modelService.getModelEntityById(request.getModelId());
+//
+//        // 2. Validate color exists
+//        Color color = colorService.getColorEntityById(request.getColorId());
+//
+//        ModelColor modelColor = modelColorService
+//                .getModelColorEntityByModelIdAndColorId(
+//                        model.getModelId(),
+//                        color.getColorId()
+//                );
+//
+//        // 3. Get store of current user
+//        User staff = userService.getCurrentUserEntity();
+//        Store store = storeService.getCurrentStoreEntity(staff.getUserId());
+//
+//        // 4. Get stock from warehouse
+//        StoreStock stock = storeStockService
+//                .getStoreStockByStoreIdAndModelColorId(
+//                        store.getStoreId(),
+//                        modelColor.getModelColorId()
+//                );
+//
+//        // 5. Check quantity
+//        validateStockAvailability(stock, request.getQuantity());
+//
+//        // 6. Apply promotion if any (NOT affecting stock validation)
+//        if (request.getPromotionId() > 0) {
+//            Promotion promotion = promotionService.getPromotionEntityById(request.getPromotionId());
+//        }
+//
+//        // 6. Return success validation (NO DB WRITE)
+//        return StockValidationResponse.builder()
+//                .modelId(model.getModelId())
+//                .modelName(model.getModelName())
+//                .colorId(color.getColorId())
+//                .colorName(color.getColorName())
+//                .requestedQuantity(request.getQuantity())
+//                .promotionId(request.getPromotionId())
+//                .promotionName(request.getPromotionId() > 0 ?
+//                        promotionService.getPromotionEntityById(request.getPromotionId()).getPromotionName() : null)
+//                .build();
 //                .availableStock(stock.getQuantity())
 //                .isAvailable(true)
-    }
+//    }
 
 // =============== CRUD OPERATIONS ===============
 
@@ -307,7 +307,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
             // Check province for license plate fee
             BigDecimal licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
-            if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh") || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
+            if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh") || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
                 licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             }
             BigDecimal registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
@@ -472,7 +472,9 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 
     @Override
     public List<GetOrderDetailsResponse> getOrderDetailsByOrderId(int orderId) {
-        List<OrderDetail> orderDetails = orderDetailRepository.findByOrder_OrderId(orderId);
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrder_OrderIdAndOrder_User_Store_StoreId(orderId, currentStore.getStoreId());
         return orderDetails.stream().map(this::mapToDto).toList();
     }
     //

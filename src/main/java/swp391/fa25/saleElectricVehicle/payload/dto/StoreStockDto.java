@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class StoreStockDto {
-
     private int stockId;
     private int storeId;
     private String storeName;
@@ -18,8 +17,4 @@ public class StoreStockDto {
     private String colorName;
     private BigDecimal priceOfStore;
     private int quantity;
-
-    // Foreign Keys
-//    private int storeId;
-//    private int modelColorId;
 }
