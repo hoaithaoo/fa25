@@ -38,7 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
     public GetPaymentResponse createDraftPayment(CreatePaymentRequest request) {
         Contract contract = contractService.getContractEntityById(request.getContractId());
 
-        // không cho thanh toán khi hợp đồng chưa ký
+        // không cho thanh toán khi hợp đồng chưa ký,
         if (!contract.getStatus().equals(ContractStatus.SIGNED)) {
             throw new AppException(ErrorCode.CONTRACT_NOT_SIGNED);
         }

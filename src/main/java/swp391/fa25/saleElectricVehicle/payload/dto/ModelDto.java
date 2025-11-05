@@ -19,7 +19,7 @@ public class ModelDto {
     private BigDecimal torqueNm;
     private BigDecimal acceleration;
     private int seatingCapacity;
-    private BigDecimal price;
+//    private BigDecimal price;
     private BodyType bodyType;
     private String description;
 }

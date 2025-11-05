@@ -53,9 +53,9 @@ public class ModelServiceImpl implements ModelService {
             throw new AppException(ErrorCode.INVALID_NUMBER);
         }
 
-        if (modelDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
+//        if (modelDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+//            throw new AppException(ErrorCode.INVALID_NUMBER);
+//        }
 
         Model newModel = Model.builder()
                 .modelName(modelDto.getModelName())
@@ -66,7 +66,7 @@ public class ModelServiceImpl implements ModelService {
                 .torqueNm(modelDto.getTorqueNm())
                 .acceleration(modelDto.getAcceleration())
                 .seatingCapacity(modelDto.getSeatingCapacity())
-                .price(modelDto.getPrice())
+//                .price(modelDto.getPrice())
                 .bodyType(modelDto.getBodyType())
                 .description(modelDto.getDescription())
                 .createAt(LocalDateTime.now())
@@ -160,10 +160,10 @@ public class ModelServiceImpl implements ModelService {
         }
         existingModel.setSeatingCapacity(modelDto.getSeatingCapacity());
 
-        if (modelDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_NUMBER);
-        }
-        existingModel.setPrice(modelDto.getPrice());
+//        if (modelDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+//            throw new AppException(ErrorCode.INVALID_NUMBER);
+//        }
+//        existingModel.setPrice(modelDto.getPrice());
 
         // body type phải được dropdown
         if (modelDto.getBodyType() != null
@@ -195,7 +195,7 @@ public class ModelServiceImpl implements ModelService {
                 .torqueNm(model.getTorqueNm())
                 .acceleration(model.getAcceleration())
                 .seatingCapacity(model.getSeatingCapacity())
-                .price(model.getPrice())
+//                .price(model.getPrice())
                 .bodyType(model.getBodyType())
                 .description(model.getDescription())
                 .build();

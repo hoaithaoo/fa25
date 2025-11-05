@@ -162,6 +162,7 @@ public class ModelColorServiceImpl implements ModelColorService {
                 .colorId(modelColor.getColor().getColorId())
                 .colorName(modelColor.getColor().getColorName())
                 .colorCode(modelColor.getColor().getColorCode())
+                .price(modelColor.getPrice())
                 .imagePath(modelColor.getImagePath())
                 .build();
     }
