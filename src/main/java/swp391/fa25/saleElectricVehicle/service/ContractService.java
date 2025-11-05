@@ -17,6 +17,6 @@ public interface ContractService {
 //    ContractDto getContractByFileUrl(String fileUrl);
     List<GetContractResponse> getAllContracts();
 //    List<ContractDto> getContractsByStatus(Contract.ContractStatus status);
-//    void deleteContractById(int id);
+    void deleteContractById(int id);
 //    ContractDto updateContractStatus(int id, Contract.ContractStatus status);
 }

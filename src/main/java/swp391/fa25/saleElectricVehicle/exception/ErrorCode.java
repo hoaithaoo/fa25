@@ -58,6 +58,7 @@ public enum ErrorCode {
     IDENTIFICATION_NUMBER_EXISTED(1044, "Số CMND/CCCD đã tồn tại", HttpStatus.BAD_REQUEST),
     PAYMENT_NOT_EXISTED(1445, "Giao dịch không tồn tại", HttpStatus.NOT_FOUND),
     INVALID_CHECKSUM(1046, "Checksum không hợp lệ", HttpStatus.BAD_REQUEST),
+    CANNOT_DELETE_SIGNED_CONTRACT(1045, "Không thể xóa hợp đồng đã ký", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

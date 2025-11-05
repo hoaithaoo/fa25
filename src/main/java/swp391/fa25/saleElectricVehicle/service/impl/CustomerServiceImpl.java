@@ -22,11 +22,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     CustomerRepository customerRepository;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private StoreService storeService;
+//    @Autowired
+//    private UserService userService;
+//
+//    @Autowired
+//    private StoreService storeService;
 
     @Override
     public CustomerDto createCustomer(CustomerDto customerDto) {

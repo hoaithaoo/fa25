@@ -206,12 +206,15 @@ public class ContractServiceImpl implements ContractService {
 //        return contracts.stream().map(this::mapToDto).toList();
 //    }
 //
-//    @Override
-//    public void deleteContractById(int id) {
-//        Contract contract = contractRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
-//        contractRepository.delete(contract);
-//    }
+    @Override
+    public void deleteContractById(int id) {
+        Contract contract = contractRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+        if (contract.getStatus() == ContractStatus.SIGNED) {
+            throw new AppException(ErrorCode.CANNOT_DELETE_SIGNED_CONTRACT);
+        }
+        contractRepository.delete(contract);
+    }
 //
 //    @Override
 //    public ContractDto updateContract(int id, ContractDto contractDto) {
