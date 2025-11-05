@@ -6,10 +6,7 @@ import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentMethod;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.TransactionStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.*;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
@@ -34,18 +31,33 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
-//    @Autowired
-//    private TransactionService transactionService;
-//
-//    @Autowired
-//    private VNPayService vnpayService;
-
     @Autowired
     private ContractService contractService;
 
     @Override
     public GetPaymentResponse createDraftPayment(CreatePaymentRequest request) {
         Contract contract = contractService.getContractEntityById(request.getContractId());
+
+        // không cho thanh toán khi hợp đồng chưa ký
+        if (!contract.getStatus().equals(ContractStatus.SIGNED)) {
+            throw new AppException(ErrorCode.CONTRACT_NOT_SIGNED);
+        }
+
+        if (request.getPaymentType() == PaymentType.DEPOSIT) {
+            // Kiểm tra xem đã có payment đặt cọc chưa
+            Optional<Payment> existingDepositPayment = paymentRepository
+                    .findByContractAndPaymentType(contract, PaymentType.DEPOSIT);
+            if (existingDepositPayment.isPresent()) {
+                throw new AppException(ErrorCode.DEPOSIT_PAYMENT_ALREADY_EXISTS);
+            }
+        } else if (request.getPaymentType() == PaymentType.BALANCE) {
+            // Kiểm tra xem đã có payment thanh toán số dư chưa
+            Optional<Payment> existingBalancePayment = paymentRepository
+                    .findByContractAndPaymentType(contract, PaymentType.BALANCE);
+            if (existingBalancePayment.isPresent()) {
+                throw new AppException(ErrorCode.BALANCE_PAYMENT_ALREADY_EXISTS);
+            }
+        }
 
         Payment payment = paymentRepository.save(Payment.builder()
                 .status(PaymentStatus.DRAFT)

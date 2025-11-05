@@ -36,7 +36,8 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
 
-    @Column(columnDefinition = "nvarchar(255)")
+    @Column
+    @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
     @Column(columnDefinition = "DECIMAL(15,0)")

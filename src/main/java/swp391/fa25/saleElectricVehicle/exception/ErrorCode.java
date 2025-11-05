@@ -59,6 +59,10 @@ public enum ErrorCode {
     PAYMENT_NOT_EXISTED(1445, "Giao dịch không tồn tại", HttpStatus.NOT_FOUND),
     INVALID_CHECKSUM(1046, "Checksum không hợp lệ", HttpStatus.BAD_REQUEST),
     CANNOT_DELETE_SIGNED_CONTRACT(1045, "Không thể xóa hợp đồng đã ký", HttpStatus.BAD_REQUEST),
+    DEPOSIT_PAYMENT_ALREADY_EXISTS(1046, "Đã tồn tại khoản thanh toán đặt cọc cho hợp đồng này", HttpStatus.BAD_REQUEST),
+    BALANCE_PAYMENT_ALREADY_EXISTS(1047, "Đã tồn tại khoản thanh toán số dư cho hợp đồng này", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_IN_CONFIRMED_STATUS(1048, "Đơn hàng không ở trạng thái đã xác nhận, không thể tạo hợp đồng", HttpStatus.BAD_REQUEST),
+    CONTRACT_NOT_SIGNED(1049, "Hợp đồng chưa được ký, không thể thanh toán", HttpStatus.BAD_REQUEST)
     ;
 
     private final int code;

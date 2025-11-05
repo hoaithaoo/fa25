@@ -8,6 +8,7 @@ import swp391.fa25.saleElectricVehicle.entity.Contract;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentGateway;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.TransactionStatus;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreateTransactionRequest;
@@ -251,6 +252,13 @@ public class VNPayServiceImpl implements VNPayService {
                 response.put("RspCode", "01");
                 response.put("Message", "Payment not Found");
 //                response.put("Message", "Order not Found");
+                return response;
+            }
+
+            // validate đã thanh toán payment này chưa để tránh xử lí trùng
+            if (payment.getStatus().equals(PaymentStatus.COMPLETED)) {
+                response.put("RspCode", "02");
+                response.put("Message", "Payment already confirmed");
                 return response;
             }
 
