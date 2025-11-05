@@ -53,8 +53,8 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // CREATE ORDER
-    @PostMapping("/{orderId}/confirm")
+    // CONFIRM ORDER FROM DRAFT
+    @PutMapping("/{orderId}/confirm")
     public ResponseEntity<ApiResponse<GetOrderResponse>> confirmOrder(@PathVariable int orderId) {
         GetOrderResponse createdOrder = orderService.confirmOrder(orderId);
         ApiResponse<GetOrderResponse> response = ApiResponse.<GetOrderResponse>builder()
