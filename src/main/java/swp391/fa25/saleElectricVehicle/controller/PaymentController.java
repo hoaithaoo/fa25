@@ -13,6 +13,7 @@ import swp391.fa25.saleElectricVehicle.service.PaymentService;
 import swp391.fa25.saleElectricVehicle.service.VNPayService;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,6 +47,30 @@ public class PaymentController {
 //                .data(payment)
 //                .build();
 //        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // chỉ được xem payment của cửa hàng mình
+    @GetMapping("/{paymentId}")
+    public ResponseEntity<ApiResponse<GetPaymentResponse>> getPaymentById(@PathVariable int paymentId) {
+        GetPaymentResponse payment = paymentService.getPaymentById(paymentId);
+        ApiResponse<GetPaymentResponse> response = ApiResponse.<GetPaymentResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Payment retrieved successfully")
+                .data(payment)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    // lấy tất cả payment của cửa hàng
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<GetPaymentResponse>>> getAllPaymentsByStore() {
+        List<GetPaymentResponse> payments = paymentService.getAllPaymentsByStore();
+        ApiResponse<List<GetPaymentResponse>> response = ApiResponse.<List<GetPaymentResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("All payments retrieved successfully")
+                .data(payments)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
 //    @GetMapping("/vnpay/payment-url")

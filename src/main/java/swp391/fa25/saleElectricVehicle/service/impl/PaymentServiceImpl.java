@@ -3,19 +3,14 @@ package swp391.fa25.saleElectricVehicle.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
-import swp391.fa25.saleElectricVehicle.entity.Contract;
-import swp391.fa25.saleElectricVehicle.entity.Payment;
-import swp391.fa25.saleElectricVehicle.entity.Transaction;
+import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.*;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentResponse;
 import swp391.fa25.saleElectricVehicle.repository.PaymentRepository;
-import swp391.fa25.saleElectricVehicle.service.ContractService;
-import swp391.fa25.saleElectricVehicle.service.PaymentService;
-import swp391.fa25.saleElectricVehicle.service.TransactionService;
-import swp391.fa25.saleElectricVehicle.service.VNPayService;
+import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -33,6 +28,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private ContractService contractService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private StoreService storeService;
 
     @Override
     public GetPaymentResponse createDraftPayment(CreatePaymentRequest request) {
@@ -96,6 +97,17 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    public GetPaymentResponse getPaymentById(int paymentId) {
+        User user = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(user.getUserId());
+        Payment payment = paymentRepository.findPaymentByPaymentIdAndContract_Order_User_Store(paymentId, store);
+        if (payment == null) {
+            throw new AppException(ErrorCode.PAYMENT_NOT_EXISTED);
+        }
+        return mapToDto(payment);
+    }
+
+    @Override
     public Payment getPaymentEntityById(int paymentId) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_EXISTED));
@@ -105,6 +117,16 @@ public class PaymentServiceImpl implements PaymentService {
     public Payment getPaymentEntityByPaymentCode(String paymentCode) {
         return paymentRepository.findPaymentByPaymentCode(paymentCode);
         // xử lí null ở vnpay service
+    }
+
+    @Override
+    public List<GetPaymentResponse> getAllPaymentsByStore() {
+        User user = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(user.getUserId());
+        List<Payment> payments = paymentRepository.findPaymentsByContract_Order_User_Store(store);
+        return payments.stream()
+                .map(this::mapToDto)
+                .toList();
     }
 
     @Override
@@ -142,5 +164,19 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Lưu transaction cho lần nhận IPN này (phiên bản tối giản)
 
+    }
+
+    private GetPaymentResponse mapToDto(Payment payment) {
+        return GetPaymentResponse.builder()
+                .paymentId(payment.getPaymentId())
+                .paymentCode(payment.getPaymentCode())
+                .remainPrice(payment.getRemainPrice())
+                .status(payment.getStatus())
+                .paymentType(payment.getPaymentType())
+                .paymentMethod(payment.getPaymentMethod())
+                .amount(payment.getAmount())
+                .createdAt(payment.getCreatedAt())
+                .contractCode(payment.getContract().getContractCode())
+                .build();
     }
 }

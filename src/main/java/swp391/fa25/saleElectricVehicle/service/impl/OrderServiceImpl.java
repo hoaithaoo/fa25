@@ -186,6 +186,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void updateOrderStatus(Order order, OrderStatus status) {
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
+
+    @Override
     public GetOrderResponse confirmOrder(int orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
@@ -196,12 +202,11 @@ public class OrderServiceImpl implements OrderService {
         if (order.getOrderDetails().isEmpty()) {
             throw new AppException(ErrorCode.ORDER_NO_ITEMS);
         }
-        order.setStatus(OrderStatus.CONFIRMED);
-        updateOrder(order);
+        updateOrderStatus(order, OrderStatus.CONFIRMED);
         return mapToDto(order);
     }
 
-    // không xóa được đơn hàng đã hoàn thành hoặc đã giao
+    // không xóa được đơn hàng đã ký hợp đồng, đã thanh toán đặt cọc, đã thanh toán đầy đủ, đã giao hàng
     @Override
     public void deleteOrder(int orderId) {
         User currentUser = userService.getCurrentUserEntity();
@@ -210,7 +215,9 @@ public class OrderServiceImpl implements OrderService {
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
-        if (order.getStatus() == OrderStatus.COMPLETED
+        if (order.getStatus() == OrderStatus.CONTRACT_SIGNED
+                || order.getStatus() == OrderStatus.DEPOSIT_PAID
+                || order.getStatus() == OrderStatus.FULLY_PAID
                 || order.getStatus() == OrderStatus.DELIVERED) {
             throw new AppException(ErrorCode.ORDER_NOT_EDITABLE);
         }
