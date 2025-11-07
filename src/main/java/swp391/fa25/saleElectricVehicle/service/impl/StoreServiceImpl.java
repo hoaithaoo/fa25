@@ -52,6 +52,27 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
+    public StoreDto addStoreImagePath(int storeId, String imagePath) {
+        Store store = storeRepository.findById(storeId).orElse(null);
+        if (store == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        store.setImagePath(imagePath);
+        store.setUpdatedAt(LocalDateTime.now());
+        storeRepository.save(store);
+        return mapTodo(store);
+    }
+
+    @Override
+    public StoreDto getStoreById(int storeId) {
+        Store store = storeRepository.findById(storeId).orElse(null);
+        if (store == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        return mapTodo(store);
+    }
+
+    @Override
     public Store getStoreEntityById(int storeId) {
         Store store = storeRepository.findById(storeId).orElse(null);
         if (store == null) {

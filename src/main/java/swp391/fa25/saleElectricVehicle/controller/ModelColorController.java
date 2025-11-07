@@ -1,12 +1,18 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelColorDto;
 import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelColorRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.ModelColorService;
 
 import java.util.List;
@@ -18,7 +24,10 @@ public class ModelColorController {
     @Autowired
     private ModelColorService modelColorService;
 
-    @PostMapping
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @PostMapping("/create")
     public ResponseEntity<ApiResponse<ModelColorDto>> createModelColor(@RequestBody CreateModelColorRequest request) {
         ModelColorDto createdModelColor = modelColorService.createModelColor(request);
         ApiResponse<ModelColorDto> response = ApiResponse.<ModelColorDto>   builder()
@@ -27,6 +36,27 @@ public class ModelColorController {
                 .data(createdModelColor)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // Upload ảnh model color
+    @PostMapping(
+            value = "/{modelId}/{colorId}/upload-model-color-image",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ApiResponse<String>> uploadImageModelColor(
+            @PathVariable int modelId, @PathVariable int colorId,
+            @Parameter(description = "Ảnh model color", required = true,
+                    content = @Content(schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("file") MultipartFile file) {
+        ModelColorDto dto = modelColorService.getModelColorByModelIdAndColorId(modelId, colorId);
+        String fileUrl = cloudinaryService.uploadFile(file, "model-colors/" + modelId);
+        modelColorService.addModelColorImagePath(dto.getModelColorId(), fileUrl);
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("File uploaded successfully")
+                .data(fileUrl)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

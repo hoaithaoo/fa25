@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface StoreService {
     StoreDto createStore(StoreDto storeDto);
+    StoreDto addStoreImagePath(int storeId, String imagePath);
+    StoreDto getStoreById(int storeId);
     Store getStoreEntityById(int storeId);
     List<StoreDto> getStoreByNameContaining(String storeName);
     Store getCurrentStoreEntity(int userId);
