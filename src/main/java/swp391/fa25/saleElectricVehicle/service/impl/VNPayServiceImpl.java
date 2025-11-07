@@ -7,15 +7,9 @@ import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentGateway;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
-import swp391.fa25.saleElectricVehicle.entity.entity_enum.TransactionStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.*;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreateTransactionRequest;
-import swp391.fa25.saleElectricVehicle.service.ContractService;
-import swp391.fa25.saleElectricVehicle.service.PaymentService;
-import swp391.fa25.saleElectricVehicle.service.TransactionService;
-import swp391.fa25.saleElectricVehicle.service.VNPayService;
+import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -37,6 +31,8 @@ public class VNPayServiceImpl implements VNPayService {
 
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private OrderService orderService;
 
     @Override
     public String buildPaymentUrl(int paymentId, HttpServletRequest request) {
@@ -380,6 +376,15 @@ public class VNPayServiceImpl implements VNPayService {
 //            String responseCode = params.get("vnp_ResponseCode");
             if ("00".equals(responseCode)) {
                 paymentService.updatePaymentStatus(payment, amount, PaymentStatus.COMPLETED);
+
+                // cập nhật contract status nếu đã đặt cọc hoặc thanh toán hết thành công
+                if (payment.getPaymentType().equals(PaymentType.DEPOSIT)) {
+                    contractService.updateContractStatus(payment.getContract(), ContractStatus.DEPOSIT_PAID);
+                    orderService.updateOrderStatus(payment.getContract().getOrder(), OrderStatus.DEPOSIT_PAID);
+                } else if (payment.getPaymentType().equals(PaymentType.BALANCE)) {
+                    contractService.updateContractStatus(payment.getContract(), ContractStatus.FULLY_PAID);
+                    orderService.updateOrderStatus(payment.getContract().getOrder(), OrderStatus.FULLY_PAID);
+                }
                 // TODO: mark order as paid in DB
                 response.put("RspCode", "00");
                 response.put("Message", "Confirm Success");

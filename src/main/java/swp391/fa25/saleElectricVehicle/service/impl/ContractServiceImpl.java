@@ -70,10 +70,11 @@ public class ContractServiceImpl implements ContractService {
         // Generate PDF from template (để in ra)
 //        String unsignedPdfUrl = pdfGeneratorService.generateContractPdf(saved);
 
-        // Update order
+//         Update order
         order.setContract(saved);
         order.setStatus(OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
-        orderService.updateOrder(order);
+        orderService.updateOrder(order); // phải lưu 2 chiều
+//        orderService.updateOrderStatus(saved.getOrder(), OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
         return mapToDto(saved);
 
 //        // Validate contractFileUrl unique
@@ -162,9 +163,11 @@ public class ContractServiceImpl implements ContractService {
         contract.setStatus(ContractStatus.SIGNED); // Đã ký
         contract.setUpdatedAt(LocalDateTime.now());
 
-        Order order = contract.getOrder();
-        order.setStatus(OrderStatus.COMPLETED); // Hoàn tất
-        orderService.updateOrder(order);
+//        Order order = contract.getOrder();
+//        order.setStatus(OrderStatus.CONTRACT_SIGNED); // Hoàn tất
+//        orderService.updateOrder(order);
+
+        orderService.updateOrderStatus(contract.getOrder(), OrderStatus.CONTRACT_SIGNED); // Hoàn tất
 
         contractRepository.save(contract);
         return mapToDto(contract);
@@ -182,10 +185,20 @@ public class ContractServiceImpl implements ContractService {
                         .depositPrice(contract.getDepositPrice())
                         .totalPayment(contract.getTotalPayment())
                         .remainPrice(contract.getRemainPrice())
-                        .terms(contract.getTerms())
+//                        .terms(contract.getTerms())
                         .orderId(contract.getOrder().getOrderId())
+                        .orderCode(contract.getOrder().getOrderCode())
+                        .customerId(contract.getOrder().getCustomer().getCustomerId())
+                        .customerName(contract.getOrder().getCustomer().getFullName())
                         .build())
                 .toList();
+    }
+
+    // không cần kiểm tra vì gọi nội bộ
+    @Override
+    public void updateContractStatus(Contract contract, ContractStatus status) {
+        contract.setStatus(status);
+        contractRepository.save(contract);
     }
 
     //    @Override

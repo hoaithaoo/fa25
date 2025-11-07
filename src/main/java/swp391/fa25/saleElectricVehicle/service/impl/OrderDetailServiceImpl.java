@@ -216,6 +216,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             orderDetails.add(saved);
         }
 
+        // cập nhật order khi có order details
         order.setTotalPrice(totalOrderPrice);
         order.setTotalTaxPrice(totalTax);
         order.setTotalPromotionAmount(totalPromotions);
@@ -249,156 +250,6 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 .status(order.getStatus().name())
                 .build();
     }
-
-    @Transactional
-    @Override
-    public CreateOrderWithItemsResponse createOrderDetail(CreateOrderWithItemsRequest request) {
-        // Validate dependencies
-        Order order = orderService.getOrderEntityById(request.getOrderId());
-
-        if (order.getStatus() != OrderStatus.DRAFT) {
-            throw new AppException(ErrorCode.ORDER_NOT_EDITABLE);
-        }
-
-//        List<OrderDetail> orderDetails = new ArrayList<>();
-        List<OrderDetail> orderDetails = order.getOrderDetails();
-        BigDecimal price = BigDecimal.ZERO;
-        BigDecimal totalOrderPrice = BigDecimal.ZERO;
-        BigDecimal totalTax = BigDecimal.ZERO;
-        BigDecimal totalPromotions = BigDecimal.ZERO;
-        BigDecimal finalAmount = BigDecimal.ZERO;
-
-        for (int i = 0; i < request.getOrderDetails().size(); i++) {
-            CreateOrderDetailsRequest itemReq = request.getOrderDetails().get(i);
-
-            // Get model
-            Model model = modelService.getModelEntityById(itemReq.getModelId());
-
-            // Get color
-            Color color = colorService.getColorEntityById(itemReq.getColorId());
-
-            // Get modelColor
-            ModelColor modelColor = modelColorService
-                    .getModelColorEntityByModelIdAndColorId(
-                            model.getModelId(),
-                            color.getColorId()
-                    );
-
-            User staff = userService.getCurrentUserEntity();
-            Store store = storeService.getCurrentStoreEntity(staff.getUserId());
-
-            // Get stock WITH PESSIMISTIC LOCK
-            // LOCK row này để tránh race condition
-            StoreStock stock = storeStockService.getStoreStockByStoreIdAndModelColorIdWithLock(
-                    store.getStoreId(),
-                    modelColor.getModelColorId()
-            );
-
-            // Validate stock availability again
-            validateStockAvailability(stock, itemReq.getQuantity());
-
-            BigDecimal unitPriceAfterVat = stock.getPriceOfStore()
-                    .add(stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)));
-            // Calculate total order price before service price and discounts
-            totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
-
-            // Calculate VAT amount
-//            BigDecimal vatAmount = stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-
-            // Check province for license plate fee
-            BigDecimal licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
-            if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh") || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
-                licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-            }
-            BigDecimal registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-//            totalTax = totalTax.add(vatAmount).add(licensePlateFee).add(REGISTRATION_FEE_AMOUNT);
-            totalTax = totalTax.add(licensePlateFee).add(registrationFee);
-
-            // Calculate discount amount
-            Promotion promotion = null;
-            BigDecimal discountAmount = BigDecimal.ZERO;
-            if (itemReq.getPromotionId() > 0) {
-                promotion = promotionService.getPromotionEntityById(itemReq.getPromotionId());
-                // Giả sử promotion là giảm giá theo phần trăm
-                if (promotion.getPromotionType().toString().equals("PERCENTAGE")) {
-                    discountAmount = stock.getPriceOfStore()
-                            .multiply(BigDecimal.valueOf(itemReq.getQuantity()))
-                            .multiply(promotion.getAmount().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
-                } else if (promotion.getPromotionType().toString().equals("FIXED_AMOUNT")) {
-                    discountAmount = promotion.getAmount().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-                }
-            }
-
-            totalPromotions = totalPromotions.add(discountAmount);
-
-            // Calculate total price
-            // tính vat ở trong hàm calculateTotalPrice
-            price = calculateTotalPrice(
-                    stock.getPriceOfStore(),
-                    itemReq.getQuantity(),
-//                    vatAmount,
-                    licensePlateFee,
-                    registrationFee,
-                    discountAmount
-            );
-            // calculate final amount
-            finalAmount = finalAmount.add(price);
-
-            // Create OrderDetail
-            OrderDetail orderDetail = OrderDetail.builder()
-                    // set đơn giá là giá tại cửa hàng đã bao gồm VAT
-                    .unitPrice(unitPriceAfterVat)
-                    .quantity(itemReq.getQuantity())
-//                    .vatAmount(vatAmount)
-                    .licensePlateFee(licensePlateFee) // phí biển số theo số lượng
-                    .registrationFee(registrationFee)
-                    .discountAmount(discountAmount)
-                    .totalPrice(price) // price after tax and discount
-                    .createdAt(LocalDateTime.now())
-                    .order(order)
-                    .storeStock(stock)
-                    .promotion(promotion)
-                    .build();
-
-            // Save OrderDetail
-            OrderDetail saved = orderDetailRepository.save(orderDetail);
-            orderDetails.add(saved);
-
-            // Update stock quantity
-            int newQuantity = stock.getQuantity() - itemReq.getQuantity();
-            storeStockService.updateQuantity(stock.getStockId(), newQuantity);
-        }
-
-        order.setTotalPrice(totalOrderPrice);
-        order.setTotalTaxPrice(totalTax);
-        order.setTotalPromotionAmount(totalPromotions);
-        order.setTotalPayment(finalAmount);
-//        order.setStatus(OrderStatus.CONFIRMED);
-        orderService.updateOrder(order);
-
-        return CreateOrderWithItemsResponse.builder()
-                .orderDetailsResponses(
-                        orderDetails.stream().map(od -> CreateOrderDetailsResponse.builder()
-                                        .orderDetailId(od.getId())
-                                        .modelId(od.getStoreStock().getModelColor().getModel().getModelId())
-                                        .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
-                                        .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
-                                        .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
-                                        .unitPrice(od.getUnitPrice())
-                                        .quantity(od.getQuantity())
-//                                .vatAmount(od.getVatAmount())
-                                        .licensePlateFee(od.getLicensePlateFee())
-                                        .registrationFee(od.getRegistrationFee())
-                                        .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
-                                        .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
-                                        .discountAmount(od.getDiscountAmount())
-                                        .totalPrice(od.getTotalPrice())
-                                        .build()
-                        ).toList()
-                )
-                .build();
-    }
-
 
     @Override
     public GetOrderDetailsResponse getOrderDetailById(int id) {
@@ -518,7 +369,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 //    }
 //
 //    // =============== VALIDATION ===============
-//
+
     private void validateStockAvailability(StoreStock stock, int requestedQuantity) {
         if (stock.getQuantity() < requestedQuantity) {
 
@@ -531,10 +382,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         }
     }
 
-    //
-//    // =============== CALCULATION ===============
-//
-//    @Override
+//      Override
     private BigDecimal calculateTotalPrice(BigDecimal priceOfStore, int quantity,
 //                                          BigDecimal vatAmount,
                                            BigDecimal licensePlateFee,
@@ -546,9 +394,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 .add(registrationFee)
                 .subtract(discountAmount);
     }
-    //
-//    // =============== HELPER METHODS ===============
-//
+
     private GetOrderDetailsResponse mapToDto(OrderDetail od) {
         return GetOrderDetailsResponse.builder()
                 .orderDetailId(od.getId())
@@ -566,68 +412,5 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 .discountAmount(od.getDiscountAmount())
                 .totalPrice(od.getTotalPrice())
                 .build();
-//        OrderDetailDto dto = OrderDetailDto.builder()
-//                .id(entity.getId())
-//                .unitPrice(entity.getUnitPrice())
-//                .quantity(entity.getQuantity())
-//                .vatAmount(entity.getVatAmount())
-//                .licensePlateFee(entity.getLicensePlateFee())
-//                .registrationFee(entity.getRegistrationFee())
-//                .discountAmount(entity.getDiscountAmount())
-//                .totalPrice(entity.getTotalPrice())
-//                .createdAt(entity.getCreatedAt())
-//                .updatedAt(entity.getUpdatedAt())
-//                .orderId(entity.getOrder().getOrderId())
-//                .storeStockId(entity.getStoreStock().getStockId())
-//                .promotionId(entity.getPromotion() != null ? entity.getPromotion().getPromotionId() : 0)
-//                .build();
-//
-//        // ✅ Set display fields safely - KHÔNG CÓ BRAND:
-//        if (entity.getStoreStock() != null && entity.getStoreStock().getModelColor() != null) {
-//            ModelColor modelColor = entity.getStoreStock().getModelColor();
-//
-//            if (modelColor.getModel() != null) {
-//                Model model = modelColor.getModel();
-//                dto.setModelName(model.getModelName()); // ✅ CÓ
-//                // ❌ LOẠI BỎ: dto.setBrandName(...) - KHÔNG CÓ BRAND!
-//            }
-//
-//            if (modelColor.getColor() != null) {
-//                dto.setColorName(modelColor.getColor().getColorName());
-//            }
-//
-//            dto.setModelPrice(entity.getStoreStock().getPriceOfStore());
-//            dto.setAvailableStock(entity.getStoreStock().getQuantity());
-//        }
-//
-//        // Set order info safely
-//        if (entity.getOrder() != null && entity.getOrder().getStatus() != null) {
-//            dto.setOrderStatus(entity.getOrder().getStatus().toString());
-//
-//            if (entity.getOrder().getCustomer() != null) {
-//                dto.setCustomerName(entity.getOrder().getCustomer().getFullName());
-//                dto.setCustomerPhone(entity.getOrder().getCustomer().getPhone());
-//            }
-//        }
-//
-//        // Set promotion info safely
-//        if (entity.getPromotion() != null) {
-//            dto.setPromotionName(entity.getPromotion().getPromotionName());
-//            dto.setPromotionType(entity.getPromotion().getPromotionType().toString());
-//        }
-//
-//        // Set calculated fields
-//        dto.setSubtotal(entity.getUnitPrice().multiply(BigDecimal.valueOf(entity.getQuantity())));
-//        dto.setTotalFees(entity.getLicensePlateFee().add(entity.getRegistrationFee()));
-//        dto.setTotalTax(entity.getVatAmount());
-//        dto.setPriceBeforeDiscount(dto.getSubtotal().add(dto.getTotalFees()).add(dto.getTotalTax()));
-//        dto.setFinalAmount(entity.getTotalPrice());
-//
-//        // Set display text
-//        String modelName = dto.getModelName() != null ? dto.getModelName() : "Unknown Model";
-//        String colorName = dto.getColorName() != null ? dto.getColorName() : "Unknown Color";
-//        dto.setDisplayText(String.format("%s - %s (Qty: %d)", modelName, colorName, dto.getQuantity()));
-//
-//        return dto;
     }
 }
