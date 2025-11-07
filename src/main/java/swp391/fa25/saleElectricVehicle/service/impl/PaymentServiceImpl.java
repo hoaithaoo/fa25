@@ -40,7 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
         Contract contract = contractService.getContractEntityById(request.getContractId());
 
         // không cho thanh toán khi hợp đồng chưa ký,
-        if (!contract.getStatus().equals(ContractStatus.SIGNED)) {
+        if (contract.getStatus().equals(ContractStatus.DRAFT)) {
             throw new AppException(ErrorCode.CONTRACT_NOT_SIGNED);
         }
 

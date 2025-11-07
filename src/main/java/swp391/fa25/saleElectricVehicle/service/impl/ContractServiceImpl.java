@@ -70,11 +70,11 @@ public class ContractServiceImpl implements ContractService {
         // Generate PDF from template (để in ra)
 //        String unsignedPdfUrl = pdfGeneratorService.generateContractPdf(saved);
 
-        // Update order
-//        order.setContract(saved);
-//        order.setStatus(OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
-//        orderService.updateOrder(order);
-        orderService.updateOrderStatus(saved.getOrder(), OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
+//         Update order
+        order.setContract(saved);
+        order.setStatus(OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
+        orderService.updateOrder(order); // phải lưu 2 chiều
+//        orderService.updateOrderStatus(saved.getOrder(), OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
         return mapToDto(saved);
 
 //        // Validate contractFileUrl unique
@@ -185,8 +185,11 @@ public class ContractServiceImpl implements ContractService {
                         .depositPrice(contract.getDepositPrice())
                         .totalPayment(contract.getTotalPayment())
                         .remainPrice(contract.getRemainPrice())
-                        .terms(contract.getTerms())
+//                        .terms(contract.getTerms())
                         .orderId(contract.getOrder().getOrderId())
+                        .orderCode(contract.getOrder().getOrderCode())
+                        .customerId(contract.getOrder().getCustomer().getCustomerId())
+                        .customerName(contract.getOrder().getCustomer().getFullName())
                         .build())
                 .toList();
     }
