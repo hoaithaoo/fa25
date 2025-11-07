@@ -49,6 +49,17 @@ public class ModelColorServiceImpl implements ModelColorService {
     }
 
     @Override
+    public ModelColorDto addModelColorImagePath(int modelColorId, String imagePath) {
+        ModelColor modelColor = modelColorRepository.findById(modelColorId).orElse(null);
+        if (modelColor == null) {
+            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
+        }
+        modelColor.setImagePath(imagePath);
+        modelColorRepository.save(modelColor);
+        return mapToDto(modelColor);
+    }
+
+    @Override
     public ModelColorDto getModelColorById(int id) {
         ModelColor modelColor = modelColorRepository.findById(id).orElse(null);
         if (modelColor == null) {
@@ -64,6 +75,15 @@ public class ModelColorServiceImpl implements ModelColorService {
             throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
         }
         return modelColor;
+    }
+
+    @Override
+    public ModelColorDto getModelColorByModelIdAndColorId(int modelId, int colorId) {
+        ModelColor modelColor = modelColorRepository.findByModel_ModelIdAndColor_ColorId(modelId, colorId);
+        if (modelColor == null) {
+            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
+        }
+        return mapToDto(modelColor);
     }
 
     @Override

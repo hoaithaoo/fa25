@@ -184,6 +184,15 @@ public class ModelServiceImpl implements ModelService {
         return mapToDto(existingModel);
     }
 
+//    @Override
+//    public ModelDto getModelById(int modelId) {
+//        Model model = modelRepository.findById(modelId).orElse(null);
+//        if (model == null) {
+//            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+//        }
+//        return mapToDto(model);
+//    }
+
     private ModelDto mapToDto(Model model) {
         return ModelDto.builder()
                 .modelId(model.getModelId())

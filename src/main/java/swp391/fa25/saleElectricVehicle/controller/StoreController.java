@@ -1,11 +1,17 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.StoreService;
 
 import java.util.List;
@@ -17,6 +23,9 @@ public class StoreController {
     @Autowired
     StoreService storeService;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<StoreDto>> createStore(@RequestBody StoreDto storeDto) {
         StoreDto createdStore = storeService.createStore(storeDto);
@@ -26,6 +35,27 @@ public class StoreController {
                 .data(createdStore)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // Upload ảnh của store
+    @PostMapping(
+            value = "/{storeId}/upload-image",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ApiResponse<String>> uploadImageStore(
+            @PathVariable int storeId,
+            @Parameter(description = "Hình ảnh cửa hàng", required = true,
+                    content = @Content(schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("file") MultipartFile file) {
+        storeService.getStoreById(storeId);
+        String fileUrl = cloudinaryService.uploadFile(file, "stores");
+        storeService.addStoreImagePath(storeId, fileUrl);
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("File uploaded successfully")
+                .data(fileUrl)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{storeName}")
