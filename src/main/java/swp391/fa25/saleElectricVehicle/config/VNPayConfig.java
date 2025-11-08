@@ -23,8 +23,9 @@ import org.springframework.context.annotation.Configuration;
 public class VNPayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "https://swp-391-frontend.vercel.app/dealer-staff/payment-management";
+//    public static String vnp_ReturnUrl = "https://swp-391-frontend.vercel.app/dealer-staff/payment-management";
 //    public static String vnp_ReturnUrl = "http://localhost:8080/api/payment/vnpay/ipn"; // cấu hình để vnpay gọi lại khi thanh toán xong
+    public static String vnp_ReturnUrl = "http://localhost:5173/dealer-staff/payment-management"; // cho fe test tạm
     public static String vnp_TmnCode = "A9TOUI59";
     public static String secretKey = "K4HF0IZ41BTYDY1U5JOLW8FNDUM0FC51";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
