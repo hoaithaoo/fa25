@@ -13,6 +13,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.LoginRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.IntrospectResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.LoginResponse;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 import swp391.fa25.saleElectricVehicle.service.LoginService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
@@ -41,6 +42,10 @@ public class LoginServiceImpl implements LoginService {
             throw new AppException(ErrorCode.WRONG_PASSWORD);
         }
 
+        // Kiểm tra nếu user là staff (không phải admin) và status là PENDING
+        boolean isStaff = !user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên");
+        boolean requirePasswordChange = isStaff && user.getStatus() == UserStatus.PENDING;
+
         UserDto userDto = UserDto.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
@@ -54,6 +59,8 @@ public class LoginServiceImpl implements LoginService {
                 .refreshToken(tokenPair.refreshToken().token())
                 .accessTokenExpiry(tokenPair.accessToken().expiryDate().getTime())
                 .refreshTokenExpiry(tokenPair.refreshToken().expiryDate().getTime())
+                .requirePasswordChange(requirePasswordChange)
+                .status(user.getStatus().toString())
                 .build();
     }
 

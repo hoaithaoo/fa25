@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.jwt.Jwt;
+import swp391.fa25.saleElectricVehicle.payload.request.ChangePasswordRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.LoginRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.RefreshTokenRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.ChangePasswordResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.LoginResponse;
 import swp391.fa25.saleElectricVehicle.service.AuthTokenService;
 import swp391.fa25.saleElectricVehicle.service.LoginService;
@@ -26,6 +28,9 @@ public class AuthController {
 
     @Autowired
     AuthTokenService authTokenService;
+
+    @Autowired
+    UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login (@RequestBody LoginRequest loginRequest) {
@@ -49,5 +54,19 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid refresh token");
         }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<ChangePasswordResponse>> changePassword(
+            @RequestBody ChangePasswordRequest changePasswordRequest) {
+        ChangePasswordResponse changePasswordResponse = userService.changePassword(changePasswordRequest);
+        
+        ApiResponse<ChangePasswordResponse> response = ApiResponse.<ChangePasswordResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Đổi mật khẩu thành công")
+                .data(changePasswordResponse)
+                .build();
+        
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

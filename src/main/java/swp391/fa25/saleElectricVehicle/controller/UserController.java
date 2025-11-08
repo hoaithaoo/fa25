@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
@@ -74,6 +75,30 @@ public class UserController {
                 .code(HttpStatus.NO_CONTENT.value())
                 .message("User deleted successfully")
                 .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<GetUserResponse>> getCurrentUser() {
+        User currentUser = userService.getCurrentUserEntity();
+        GetUserResponse userResponse = GetUserResponse.builder()
+                .userId(currentUser.getUserId())
+                .fullName(currentUser.getFullName())
+                .email(currentUser.getEmail())
+                .phone(currentUser.getPhone())
+                .status(currentUser.getStatus().name())
+                .storeId(currentUser.getStore() != null ? currentUser.getStore().getStoreId() : 0)
+                .storeName(currentUser.getStore() != null ? currentUser.getStore().getStoreName() : null)
+                .roleId(currentUser.getRole().getRoleId())
+                .roleName(currentUser.getRole().getRoleName())
+                .build();
+        
+        ApiResponse<GetUserResponse> response = ApiResponse.<GetUserResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("User information fetched successfully")
+                .data(userResponse)
+                .build();
+        
         return ResponseEntity.ok(response);
     }
 }

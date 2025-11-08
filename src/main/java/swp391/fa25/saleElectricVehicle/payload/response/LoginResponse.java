@@ -11,4 +11,6 @@ public class LoginResponse {
     private String refreshToken;
     private Long accessTokenExpiry;
     private Long refreshTokenExpiry;
+    private Boolean requirePasswordChange;
+    private String status;
 }
