@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateOwnProfileUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
@@ -99,6 +100,19 @@ public class UserController {
                 .data(userResponse)
                 .build();
         
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/me/profile")
+    public ResponseEntity<ApiResponse<UpdateUserProfileResponse>> updateOwnProfile
+            (@RequestBody UpdateOwnProfileUserRequest updateOwnProfileRequest) {
+        UpdateUserProfileResponse updatedUser = userService.updateOwnProfile(updateOwnProfileRequest);
+
+        ApiResponse<UpdateUserProfileResponse> response = ApiResponse.<UpdateUserProfileResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Profile updated successfully")
+                .data(updatedUser)
+                .build();
         return ResponseEntity.ok(response);
     }
 }

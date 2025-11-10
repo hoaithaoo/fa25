@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.User;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.jwt.Jwt;
@@ -40,6 +41,11 @@ public class LoginServiceImpl implements LoginService {
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.WRONG_PASSWORD);
+        }
+
+        // Kiểm tra nếu user có store và store đó bị inactive thì không cho đăng nhập
+        if (user.getStore() != null && user.getStore().getStatus() == StoreStatus.INACTIVE) {
+            throw new AppException(ErrorCode.STORE_INACTIVE);
         }
 
         // Kiểm tra nếu user là staff (không phải admin) và status là PENDING

@@ -7,7 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import swp391.fa25.saleElectricVehicle.entity.Role;
 import swp391.fa25.saleElectricVehicle.entity.User;
-import swp391.fa25.saleElectricVehicle.payload.dto.RoleDto;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
 import swp391.fa25.saleElectricVehicle.service.RoleService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
@@ -49,7 +49,7 @@ public class SaleElectricVehicleApplication implements CommandLineRunner {
 
         if (userService.getAllUsers().isEmpty()) {
             User adminUser = new User("ADMIN", "admin@gmail.com", "123", "0356964383",
-                    LocalDateTime.now(), roleService.getRoleEntityById(1));
+                    LocalDateTime.now(), roleService.getRoleEntityById(1), UserStatus.ACTIVE);
             userService.createUser(CreateUserRequest.builder()
                     .fullName(adminUser.getFullName())
                     .email(adminUser.getEmail())

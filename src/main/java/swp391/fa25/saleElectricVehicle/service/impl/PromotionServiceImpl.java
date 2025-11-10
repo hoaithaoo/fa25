@@ -19,6 +19,7 @@ import swp391.fa25.saleElectricVehicle.service.StoreService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -70,6 +71,69 @@ public class PromotionServiceImpl implements PromotionService {
         promotionRepository.save(newPromotion);
 
         return mapToDto(newPromotion);
+    }
+
+    @Override
+    @Transactional
+    public List<PromotionDto> createPromotionForAllModels(PromotionDto promotionDto) {
+        Store store = storeService.getStoreEntityById(promotionDto.getStoreId());
+
+        if (promotionDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_AMOUNT);
+        }
+
+        if (promotionDto.getEndDate().isBefore(promotionDto.getStartDate())) {
+            throw new AppException(ErrorCode.INVALID_END_DATE);
+        }
+
+        // Lấy tất cả model
+        List<Model> allModels = modelService.getAllModels().stream()
+                .map(modelDto -> modelService.getModelEntityById(modelDto.getModelId()))
+                .toList();
+
+        if (allModels.isEmpty()) {
+            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
+        }
+
+        // Khuyến mãi chỉ active nếu thời gian hiện tại nằm trong khoảng startDate và endDate
+        LocalDateTime now = LocalDateTime.now();
+        boolean isActive =
+                (promotionDto.getStartDate().isBefore(now) || promotionDto.getStartDate().isEqual(now)) &&
+                        (promotionDto.getEndDate().isAfter(now) || promotionDto.getEndDate().isEqual(now));
+
+        List<PromotionDto> createdPromotions = new ArrayList<>();
+        LocalDateTime createdAt = LocalDateTime.now();
+
+        // Tạo promotion cho mỗi model
+        for (Model model : allModels) {
+            // Tạo promotion name unique bằng cách thêm model name
+            String uniquePromotionName = promotionDto.getPromotionName() + " - " + model.getModelName();
+            
+            // Kiểm tra promotion name đã tồn tại chưa
+            if (promotionRepository.existsByPromotionNameIgnoreCase(uniquePromotionName)) {
+                logger.warn("Promotion name '{}' already exists, skipping model {}", uniquePromotionName, model.getModelName());
+                continue;
+            }
+
+            Promotion newPromotion = Promotion.builder()
+                    .promotionName(uniquePromotionName)
+                    .description(promotionDto.getDescription())
+                    .promotionType(promotionDto.getPromotionType())
+                    .amount(promotionDto.getAmount())
+                    .startDate(promotionDto.getStartDate())
+                    .endDate(promotionDto.getEndDate())
+                    .isActive(isActive)
+                    .model(model)
+                    .store(store)
+                    .createdAt(createdAt)
+                    .build();
+
+            Promotion savedPromotion = promotionRepository.save(newPromotion);
+            createdPromotions.add(mapToDto(savedPromotion));
+        }
+
+        logger.info("Created {} promotions for all models ({} models)", createdPromotions.size(), allModels.size());
+        return createdPromotions;
     }
 
     @Override
@@ -196,25 +260,19 @@ public class PromotionServiceImpl implements PromotionService {
                 .build();
     }
 
-    // Runs every hour
+    // Runs every hour at minute 0 (e.g., 1:00, 2:00, 3:00, ...)
     @Scheduled(cron = "0 0 * * * *", zone = "Asia/Ho_Chi_Minh")
     @Transactional
     public void updatePromotionStatus() {
         LocalDateTime now = LocalDateTime.now();
+        logger.info("Checking promotion status at {}", now);
 
-        // trả về số dòng hiệu lực bị thay đổi
+        // Deactivate expired promotions (endDate < now)
         int deactivated = promotionRepository.deactivateExpiredPromotions(now);
+        logger.info("Deactivated {} expired promotions", deactivated);
+
+        // Activate current promotions (startDate <= now <= endDate)
         int activated = promotionRepository.activateCurrentPromotions(now);
-        logger.info("deactivateExpiredPromotions ran at {}, deactivated {} promotions", now, deactivated);
-        logger.info("deactivateExpiredPromotions ran at {}, deactivated {} promotions", now, activated);
-//        List<Promotion> activePromotions = promotionRepository.findByIsActiveTrue();
-//        LocalDateTime now = LocalDateTime.now();
-//        for (Promotion promotion : activePromotions) {
-//            if (promotion.getEndDate().isBefore(now)) {
-//                promotion.setActive(false);
-//                promotion.setUpdatedAt(now);
-//                promotionRepository.save(promotion);
-//            }
-//        }
+        logger.info("Activated {} current promotions", activated);
     }
 }

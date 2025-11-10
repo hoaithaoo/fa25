@@ -66,7 +66,8 @@ public enum ErrorCode {
     ORDER_NO_ITEMS(1050, "Đơn hàng không có danh sách sản phẩm nào, không thể xác nhận", HttpStatus.BAD_REQUEST),
     PASSWORD_CHANGE_REQUIRED(1051, "Vui lòng đổi mật khẩu trước khi tiếp tục", HttpStatus.FORBIDDEN),
     PASSWORD_NOT_CHANGED(1052, "Mật khẩu mới phải khác mật khẩu cũ", HttpStatus.BAD_REQUEST),
-    INVALID_OLD_PASSWORD(1053, "Mật khẩu cũ không đúng", HttpStatus.BAD_REQUEST)
+    INVALID_OLD_PASSWORD(1053, "Mật khẩu cũ không đúng", HttpStatus.BAD_REQUEST),
+    STORE_INACTIVE(1054, "Không thể đăng nhập vì store đã bị vô hiệu hóa", HttpStatus.FORBIDDEN)
     ;
 
     private final int code;

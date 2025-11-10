@@ -1,7 +1,11 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
@@ -15,6 +19,8 @@ import java.util.List;
 
 @Service
 public class StoreServiceImpl implements StoreService {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private StoreRepository storeRepository;
@@ -209,5 +215,21 @@ public class StoreServiceImpl implements StoreService {
                 .contractStartDate(store.getContractStartDate())
                 .contractEndDate(store.getContractEndDate())
                 .build();
+    }
+
+    // Runs every day at midnight (00:00:00)
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Ho_Chi_Minh")
+    @Transactional
+    public void updateStoreContractStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        logger.info("Checking store contract status at {}", now);
+
+        // Deactivate stores with expired contracts (contractEndDate < now)
+        int deactivated = storeRepository.deactivateStoresWithExpiredContracts(now);
+        logger.info("Deactivated {} stores with expired contracts", deactivated);
+
+        // Activate stores with valid contracts (contractStartDate <= now <= contractEndDate)
+        int activated = storeRepository.activateStoresWithValidContracts(now);
+        logger.info("Activated {} stores with valid contracts", activated);
     }
 }
