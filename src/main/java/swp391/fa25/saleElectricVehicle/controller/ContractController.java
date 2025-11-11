@@ -17,15 +17,13 @@ import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.payload.dto.ContractDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractDetailResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
-import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
-import swp391.fa25.saleElectricVehicle.service.ContractService;
-import swp391.fa25.saleElectricVehicle.service.CustomerService;
-import swp391.fa25.saleElectricVehicle.service.OrderService;
+import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +47,8 @@ public class ContractController {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+    @Autowired
+    private StoreService storeService;
 
     // Tạo hợp đồng nháp
     @PostMapping("/contracts")
@@ -70,12 +70,14 @@ public class ContractController {
         ContractDto contract = contractService.getContractById(id);
         OrderDto order = orderService.getOrderDtoById(contract.getOrderId());
         CustomerDto customer = customerService.getCustomerById(order.getCustomerId());
+        StoreDto store = storeService.getStoreById(order.getStoreId());
 
         // Chuẩn bị model data cho temp-late engine
         Context context = new Context();  // Với Thymeleaf
         context.setVariable("contract", contract); // Đặt biến "contract" cho template
         context.setVariable("order", order);
         context.setVariable("customer", customer);
+        context.setVariable("store", store);
 
         // Render ra HTML dựa trên template contract.html
         String htmlContent = templateEngine.process("contract", context); // "contract" là tên file contract.html
