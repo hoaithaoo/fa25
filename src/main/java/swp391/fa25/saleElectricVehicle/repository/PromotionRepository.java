@@ -23,9 +23,11 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
     // Find by store
     List<Promotion> findByStore_StoreId(int storeId);
     List<Promotion> findByPromotionNameContainingIgnoreCase(String promotionName);
+    List<Promotion> findByStore_StoreIdAndPromotionNameContainingIgnoreCase(int storeId, String promotionName);
     boolean existsByPromotionNameIgnoreCase(String promotionName);
 //    List<Promotion> findByModel_ModelId(int modelId);
     List<Promotion> findByModel(Model model);
+    List<Promotion> findByStore_StoreIdAndModel(int storeId, Model model);
     
     // Deactivate expired promotions
     @Modifying

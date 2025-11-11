@@ -168,7 +168,16 @@ public class PromotionServiceImpl implements PromotionService {
 
     @Override
     public List<PromotionDto> getPromotionByName(String promotionName) {
-        List<Promotion> promotion = promotionRepository.findByPromotionNameContainingIgnoreCase(promotionName);
+        // Lấy user hiện tại và store của user
+        User currentUser = userService.getCurrentUserEntity();
+        
+        // Kiểm tra user có store không
+        if (currentUser.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        
+        int storeId = currentUser.getStore().getStoreId();
+        List<Promotion> promotion = promotionRepository.findByStore_StoreIdAndPromotionNameContainingIgnoreCase(storeId, promotionName);
         if (promotion.isEmpty()) {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
@@ -178,7 +187,16 @@ public class PromotionServiceImpl implements PromotionService {
 
     @Override
     public List<PromotionDto> getAllPromotions() {
-        List<Promotion> promotions = promotionRepository.findAll();
+        // Lấy user hiện tại và store của user
+        User currentUser = userService.getCurrentUserEntity();
+        
+        // Kiểm tra user có store không
+        if (currentUser.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        
+        int storeId = currentUser.getStore().getStoreId();
+        List<Promotion> promotions = promotionRepository.findByStore_StoreId(storeId);
         return promotions.stream().map(this::mapToDto).toList();
     }
 
@@ -188,20 +206,47 @@ public class PromotionServiceImpl implements PromotionService {
         if (promotion == null) {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
+        
+        // Kiểm tra promotion có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser.getStore() == null || promotion.getStore().getStoreId() != currentUser.getStore().getStoreId()) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+        
         return promotion;
     }
 
     @Override
     public List<PromotionDto> getPromotionByModelId(int modelId) {
+        // Lấy user hiện tại và store của user
+        User currentUser = userService.getCurrentUserEntity();
+        
+        // Kiểm tra user có store không
+        if (currentUser.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        
+        int storeId = currentUser.getStore().getStoreId();
         Model model = modelService.getModelEntityById(modelId);
-        List<Promotion> promotions = promotionRepository.findByModel(model);
+        List<Promotion> promotions = promotionRepository.findByStore_StoreIdAndModel(storeId, model);
         return promotions.stream().map(this::mapToDto).toList();
     }
 
     @Override
     public PromotionDto updatePromotion(int promotionId, PromotionDto promotionDto) {
+        // Lấy user hiện tại và kiểm tra quyền
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        
         Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
         if (promotion == null) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+        
+        // Kiểm tra promotion có thuộc store của user hiện tại không
+        if (promotion.getStore().getStoreId() != currentUser.getStore().getStoreId()) {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
 
@@ -210,10 +255,11 @@ public class PromotionServiceImpl implements PromotionService {
             promotion.setModel(model);
         }
 
-        if (promotionDto.getStoreId() != 0 && promotionDto.getStoreId() != promotion.getStore().getStoreId()) {
-            Store store = storeService.getStoreEntityById(promotionDto.getStoreId());
-            promotion.setStore(store);
-        }
+        // Không cho phép thay đổi store của promotion
+        // if (promotionDto.getStoreId() != 0 && promotionDto.getStoreId() != promotion.getStore().getStoreId()) {
+        //     Store store = storeService.getStoreEntityById(promotionDto.getStoreId());
+        //     promotion.setStore(store);
+        // }
 
         if (promotionDto.getPromotionName() != null && !promotionDto.getPromotionName().trim().isEmpty() &&
                 !promotionDto.getPromotionName().equalsIgnoreCase(promotion.getPromotionName()) &&
@@ -266,10 +312,22 @@ public class PromotionServiceImpl implements PromotionService {
 
     @Override
     public void deletePromotion(int promotionId) {
+        // Lấy user hiện tại và kiểm tra quyền
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        
         Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
         if (promotion == null) {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
+        
+        // Kiểm tra promotion có thuộc store của user hiện tại không
+        if (promotion.getStore().getStoreId() != currentUser.getStore().getStoreId()) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+        
         promotionRepository.delete(promotion);
     }
 
