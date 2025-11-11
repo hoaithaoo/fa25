@@ -236,33 +236,33 @@
         <div class="section-title">BÊN BÁN (BÊN A):</div>
         <div class="info-row">
             <span class="info-label">Tên:</span>
-            <span class="info-value"></span>
+            <span class="info-value" th:text="${store.ownerName}"></span>
         </div>
-        <div class="info-row">
-            <span class="info-label">MSDN:</span>
-            <span class="info-value"></span>
-        </div>
+<!--        <div class="info-row">-->
+<!--            <span class="info-label">MSDN:</span>-->
+<!--            <span class="info-value"></span>-->
+<!--        </div>-->
         <div class="info-row">
             <span class="info-label">Địa chỉ:</span>
-            <span class="info-value"></span>
+            <span class="info-value" th:text="${store.address}"></span>
         </div>
-        <div class="info-row">
-            <span class="info-label">Đại diện:</span>
-            <span class="info-value"></span>
-        </div>
+<!--        <div class="info-row">-->
+<!--            <span class="info-label">Đại diện:</span>-->
+<!--            <span class="info-value"></span>-->
+<!--        </div>-->
         <div class="info-row">
             <span class="info-label">Điện thoại:</span>
-            <span class="info-value"></span>
+            <span class="info-value" th:text="${store.phone}"></span>
         </div>
+<!--        <div class="info-row">-->
+<!--            <span class="info-label">Tài khoản:</span>-->
+<!--            <span class="info-value"></span>-->
+<!--        </div>-->
         <div class="info-row">
-            <span class="info-label">Tài khoản:</span>
-            <span class="info-value"></span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Mở tại:</span>
-            <span class="info-value"></span>
-            <span class="info-label" style="margin-left: 20px;">Chức vụ:</span>
-            <span class="info-value"></span>
+<!--            <span class="info-label">Mở tại:</span>-->
+<!--            <span class="info-value"></span>-->
+            <span class="info-label">Chức vụ:</span>
+            <span class="info-value">Chủ đại lý</span>
         </div>
     </div>
 
@@ -272,10 +272,10 @@
             <span class="info-label">Họ và tên:</span>
             <span class="info-value" th:text="${customer.fullName}"></span>
         </div>
-        <div class="info-row">
-            <span class="info-label">Ngày sinh:</span>
-            <span class="info-value"></span>
-        </div>
+<!--        <div class="info-row">-->
+<!--            <span class="info-label">Ngày sinh:</span>-->
+<!--            <span class="info-value"></span>-->
+<!--        </div>-->
         <div class="info-row">
             <span class="info-label">CMND/CCCD:</span>
             <span class="info-value" th:text="${customer.identificationNumber}"></span>
@@ -344,8 +344,8 @@
             <p>Bên B thực hiện thanh toán giá trị hợp đồng cho Bên A theo các đợt như sau:</p>
             <ul>
                 <li><strong>Đặt Cọc: </strong>Trong thời hạn 02 (hai) ngày làm việc kể từ ngày hai bên ký hợp đồng,
-                    Bên B sẽ đặt cọc cho Bên A ngay khi ký hợp đồng với số tiền là <span th:text="${contract.depositPrice}">...</span> VNĐ
-                    . Khoản đặt cọc này được coi là khoản thanh toán lần I.
+                    Bên B sẽ đặt cọc cho Bên A ngay khi ký hợp đồng với số tiền là <span th:text="${contract.depositPrice}">...</span> VNĐ.
+                    Khoản đặt cọc này được coi là khoản thanh toán lần I.
                     Bên B không thể đòi lại số tiền đặt cọc, trừ trường hợp bên B thanh toán hết hợp đồng.</li>
                 <li><strong>Thanh Toán: </strong>Bên B thanh toán số tiền còn lại (05 ngày làm việc kể từ khi Bên A gửi
                     thông báo sẵn sàng giao xe, Bên B thanh toán cho Bên A giá trị hợp đồng còn lại tương đương với số tiền

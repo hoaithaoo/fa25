@@ -2,8 +2,6 @@ package swp391.fa25.saleElectricVehicle.payload.request.order;
 
 import lombok.*;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor

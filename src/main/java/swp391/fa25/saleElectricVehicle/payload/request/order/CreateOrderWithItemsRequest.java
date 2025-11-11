@@ -12,4 +12,5 @@ import java.util.List;
 public class CreateOrderWithItemsRequest {
     private int orderId;
     List<CreateOrderDetailsRequest> orderDetails;
+    private boolean includeLicensePlateService; // true nếu khách chọn dịch vụ đăng ký biển số, false hoặc null nếu không chọn
 }
