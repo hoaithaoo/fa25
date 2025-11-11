@@ -14,11 +14,14 @@ import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.jwt.Jwt;
 import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
+import swp391.fa25.saleElectricVehicle.payload.request.ChangePasswordRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.LoginRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateOwnProfileUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.*;
+import swp391.fa25.saleElectricVehicle.payload.response.ChangePasswordResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.UpdateUserProfileResponse;
@@ -173,27 +176,54 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-//    @Override
-//    public UserDto updateOwnProfile(int userId, UserDto userDto) {
-//        User user = userRepository.findById(userId).orElse(null);
-//        if (user == null) {
-//            throw new AppException(ErrorCode.USER_NOT_EXIST);
-//        }
-//
-//        if (userDto.getFullName() != null && !userDto.getFullName().trim().isEmpty()) {
-//            user.setFullName(userDto.getFullName());
-//        }
-//
-//        if (userDto.getPhone() != null && !userDto.getPhone().trim().isEmpty()) {
-//            user.setPhone(userDto.getPhone());
-//        }
-//
-//        user.setUpdatedAt(LocalDateTime.now());
-//
-//        userRepository.save(user);
-//
-//        return userDto;
-//    }
+    @Override
+    public UpdateUserProfileResponse updateOwnProfile(UpdateOwnProfileUserRequest updateOwnProfileRequest) {
+        // Lấy user hiện tại từ SecurityContext
+        User user = getCurrentUserEntity();
+
+        // Cập nhật fullName
+        if (updateOwnProfileRequest.getFullName() != null
+                && !updateOwnProfileRequest.getFullName().trim().isEmpty()
+                && !updateOwnProfileRequest.getFullName().equals(user.getFullName())) {
+            user.setFullName(updateOwnProfileRequest.getFullName());
+        }
+
+        // Cập nhật email (kiểm tra trùng lặp)
+        if (updateOwnProfileRequest.getEmail() != null
+                && !updateOwnProfileRequest.getEmail().trim().isEmpty()) {
+            if (!user.getEmail().equals(updateOwnProfileRequest.getEmail())
+                    && userRepository.existsByEmail(updateOwnProfileRequest.getEmail())) {
+                throw new AppException(ErrorCode.USER_EXISTED);
+            } else if (!user.getEmail().equals(updateOwnProfileRequest.getEmail())) {
+                user.setEmail(updateOwnProfileRequest.getEmail());
+            }
+        }
+
+        // Cập nhật phone (kiểm tra trùng lặp)
+        if (updateOwnProfileRequest.getPhone() != null
+                && !updateOwnProfileRequest.getPhone().trim().isEmpty()) {
+            if (!user.getPhone().equals(updateOwnProfileRequest.getPhone())
+                    && userRepository.existsByPhone(updateOwnProfileRequest.getPhone())) {
+                throw new AppException(ErrorCode.PHONE_EXISTED);
+            } else if (!user.getPhone().equals(updateOwnProfileRequest.getPhone())) {
+                user.setPhone(updateOwnProfileRequest.getPhone());
+            }
+        }
+
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        return UpdateUserProfileResponse.builder()
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .status(user.getStatus())
+                .storeId(user.getStore() != null ? user.getStore().getStoreId() : 0)
+                .storeName(user.getStore() != null ? user.getStore().getStoreName() : null)
+                .roleId(user.getRole().getRoleId())
+                .roleName(user.getRole().getRoleName())
+                .build();
+    }
 
     //update profile of any user by Quản trị viên
     @Override
@@ -279,5 +309,38 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
         userRepository.delete(user);
+    }
+
+    @Override
+    public ChangePasswordResponse changePassword(ChangePasswordRequest changePasswordRequest) {
+        // Lấy user hiện tại từ SecurityContext
+        User user = getCurrentUserEntity();
+
+        // Kiểm tra mật khẩu cũ
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_OLD_PASSWORD);
+        }
+
+        // Kiểm tra mật khẩu mới phải khác mật khẩu cũ
+        if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_NOT_CHANGED);
+        }
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        
+        // Nếu user là staff và status là PENDING, cập nhật thành ACTIVE
+        boolean isStaff = !user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên");
+        if (isStaff && user.getStatus() == UserStatus.PENDING) {
+            user.setStatus(UserStatus.ACTIVE);
+        }
+        
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        return ChangePasswordResponse.builder()
+                .message("Đổi mật khẩu thành công")
+                .status(user.getStatus().toString())
+                .build();
     }
 }

@@ -65,12 +65,13 @@ public class User {
     @JoinColumn(name = "roleId", nullable = false)
     private Role role;
 
-    public User(String fullName, String email, String password, String phone, LocalDateTime createdAt, Role role) {
+    public User(String fullName, String email, String password, String phone, LocalDateTime createdAt, Role role, UserStatus status) {
         this.fullName = fullName;
         this.email = email;
         this.password = password;
         this.phone = phone;
         this.createdAt = createdAt;
         this.role = role;
+        this.status = status;
     }
 }

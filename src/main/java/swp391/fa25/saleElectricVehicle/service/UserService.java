@@ -6,8 +6,11 @@ import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.LoginRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.ChangePasswordRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateOwnProfileUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.*;
+import swp391.fa25.saleElectricVehicle.payload.response.ChangePasswordResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.UpdateUserProfileResponse;
@@ -22,9 +25,10 @@ public interface UserService {
     List<GetUserResponse> getAllUsers();
     User getCurrentUserEntity();
     User getUserByEmail(String email);
-//    UserDto updateOwnProfile(int userId, UserDto userDto);
+    UpdateUserProfileResponse updateOwnProfile(UpdateOwnProfileUserRequest updateOwnProfileRequest);
     UpdateUserProfileResponse updateUserProfile(int userId, UpdateUserProfileRequest updateUserProfileRequest);
     void deleteUser(int userId);
+    ChangePasswordResponse changePassword(ChangePasswordRequest changePasswordRequest);
 
 //    LoginResponse login(LoginRequest loginRequest);
 //    IntrospectResponse introspect(IntrospectRequest introspectRequest);

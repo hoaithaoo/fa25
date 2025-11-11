@@ -80,6 +80,17 @@ public class StoreController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<ApiResponse<List<StoreDto>>> getAllActiveStores() {
+        List<StoreDto> stores = storeService.getAllActiveStores();
+        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Active stores retrieved successfully")
+                .data(stores)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/update/{storeId}")
     public ResponseEntity<ApiResponse<StoreDto>> updateStore(@PathVariable int storeId, @RequestBody StoreDto storeDto) {
         StoreDto updatedStore = storeService.updateStore(storeId, storeDto);
@@ -103,16 +114,16 @@ public class StoreController {
     }
 
     // BUSINESS - Get stores by status
-    @GetMapping("/status/{status}")
-    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByStatus(@PathVariable String status) {
-        List<StoreDto> stores = storeService.getAllActiveStores();
-        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Stores by status retrieved successfully")
-                .data(stores)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/status/{status}")
+//    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByStatus(@PathVariable String status) {
+//        List<StoreDto> stores = storeService.getAllActiveStores();
+//        ApiResponse<List<StoreDto>> response = ApiResponse.<List<StoreDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Stores by status retrieved successfully")
+//                .data(stores)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 //
 //    // BUSINESS - Get stores by province
 //    @GetMapping("/province/{provinceName}")

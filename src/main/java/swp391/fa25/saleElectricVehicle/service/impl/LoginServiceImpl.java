@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.User;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.jwt.Jwt;
@@ -13,6 +14,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.LoginRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.IntrospectResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.LoginResponse;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 import swp391.fa25.saleElectricVehicle.service.LoginService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
@@ -41,6 +43,15 @@ public class LoginServiceImpl implements LoginService {
             throw new AppException(ErrorCode.WRONG_PASSWORD);
         }
 
+        // Kiểm tra nếu user có store và store đó bị inactive thì không cho đăng nhập
+        if (user.getStore() != null && user.getStore().getStatus() == StoreStatus.INACTIVE) {
+            throw new AppException(ErrorCode.STORE_INACTIVE);
+        }
+
+        // Kiểm tra nếu user là staff (không phải admin) và status là PENDING
+        boolean isStaff = !user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên");
+        boolean requirePasswordChange = isStaff && user.getStatus() == UserStatus.PENDING;
+
         UserDto userDto = UserDto.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
@@ -54,6 +65,8 @@ public class LoginServiceImpl implements LoginService {
                 .refreshToken(tokenPair.refreshToken().token())
                 .accessTokenExpiry(tokenPair.accessToken().expiryDate().getTime())
                 .refreshTokenExpiry(tokenPair.refreshToken().expiryDate().getTime())
+                .requirePasswordChange(requirePasswordChange)
+                .status(user.getStatus().toString())
                 .build();
     }
 

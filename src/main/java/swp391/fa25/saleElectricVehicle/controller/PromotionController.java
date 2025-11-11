@@ -28,6 +28,17 @@ public class PromotionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping("/create-for-all-models")
+    public ResponseEntity<ApiResponse<List<PromotionDto>>> createPromotionForAllModels(@RequestBody PromotionDto promotionDto) {
+        List<PromotionDto> createdPromotions = promotionService.createPromotionForAllModels(promotionDto);
+        ApiResponse<List<PromotionDto>> response = ApiResponse.<List<PromotionDto>>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("Promotions created successfully for all models")
+                .data(createdPromotions)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @GetMapping("/{name}")
     public ResponseEntity<ApiResponse<List<PromotionDto>>> getPromotionByName(@PathVariable String name) {
         List<PromotionDto> promotionDto = promotionService.getPromotionByName(name);

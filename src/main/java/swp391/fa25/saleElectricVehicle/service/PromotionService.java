@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface PromotionService {
     PromotionDto createPromotion(PromotionDto promotionDto);
+    
+    List<PromotionDto> createPromotionForAllModels(PromotionDto promotionDto);
 
     List<PromotionDto> getPromotionByName(String promotionName);
 
