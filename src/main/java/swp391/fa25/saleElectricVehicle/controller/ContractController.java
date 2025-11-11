@@ -19,6 +19,7 @@ import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractDetailResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
@@ -136,6 +137,17 @@ public class ContractController {
                 .code(HttpStatus.OK.value())
                 .message("Contracts fetched successfully")
                 .data(contracts)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<ApiResponse<GetContractDetailResponse>> getContractDetail(@PathVariable int id) {
+        GetContractDetailResponse contractDetail = contractService.getContractDetailById(id);
+        ApiResponse<GetContractDetailResponse> response = ApiResponse.<GetContractDetailResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Get contract detail successfully")
+                .data(contractDetail)
                 .build();
         return ResponseEntity.ok(response);
     }

@@ -68,7 +68,8 @@ public enum ErrorCode {
     PASSWORD_NOT_CHANGED(1052, "Mật khẩu mới phải khác mật khẩu cũ", HttpStatus.BAD_REQUEST),
     INVALID_OLD_PASSWORD(1053, "Mật khẩu cũ không đúng", HttpStatus.BAD_REQUEST),
     STORE_INACTIVE(1054, "Không thể đăng nhập vì store đã bị vô hiệu hóa", HttpStatus.FORBIDDEN),
-    INVALID_START_DATE(1055, "Ngày bắt đầu không được trước ngày hiện tại", HttpStatus.BAD_REQUEST)
+    INVALID_START_DATE(1055, "Ngày bắt đầu không được trước ngày hiện tại", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_CREATE_PROMOTION(1056, "Chỉ quản lý cửa hàng mới được tạo khuyến mãi cho store của mình", HttpStatus.FORBIDDEN)
     ;
 
     private final int code;

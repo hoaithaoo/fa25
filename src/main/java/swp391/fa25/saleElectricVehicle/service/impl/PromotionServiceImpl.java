@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import swp391.fa25.saleElectricVehicle.entity.Model;
 import swp391.fa25.saleElectricVehicle.entity.Promotion;
 import swp391.fa25.saleElectricVehicle.entity.Store;
+import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.PromotionDto;
@@ -16,6 +17,7 @@ import swp391.fa25.saleElectricVehicle.repository.PromotionRepository;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
 import swp391.fa25.saleElectricVehicle.service.PromotionService;
 import swp391.fa25.saleElectricVehicle.service.StoreService;
+import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,10 +38,26 @@ public class PromotionServiceImpl implements PromotionService {
     @Autowired
     StoreService storeService;
 
+    @Autowired
+    UserService userService;
+
     @Override
     public PromotionDto createPromotion(PromotionDto promotionDto) {
+        // Kiểm tra quyền: chỉ manager của store mới được tạo promotion
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        // Kiểm tra user có phải là manager không
+        // if (!currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng")) {
+        //     throw new AppException(ErrorCode.UNAUTHORIZED_CREATE_PROMOTION);
+        // }
+        
+        // Kiểm tra user có thuộc store này không
+        // if (currentUser.getStore() == null || currentUser.getStore().getStoreId() != store.getStoreId()) {
+        //     throw new AppException(ErrorCode.UNAUTHORIZED_CREATE_PROMOTION);
+        // }
+        
         Model model = modelService.getModelEntityById(promotionDto.getModelId());
-        Store store = storeService.getStoreEntityById(promotionDto.getStoreId());
 
         if (promotionDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new AppException(ErrorCode.INVALID_AMOUNT);
@@ -76,7 +94,19 @@ public class PromotionServiceImpl implements PromotionService {
     @Override
     @Transactional
     public List<PromotionDto> createPromotionForAllModels(PromotionDto promotionDto) {
-        Store store = storeService.getStoreEntityById(promotionDto.getStoreId());
+        // Kiểm tra quyền: chỉ manager của store mới được tạo promotion
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        // Kiểm tra user có phải là manager không
+//        if (!currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng")) {
+//            throw new AppException(ErrorCode.UNAUTHORIZED_CREATE_PROMOTION);
+//        }
+        
+        // Kiểm tra user có thuộc store này không
+//        if (currentUser.getStore() == null || currentUser.getStore().getStoreId() != store.getStoreId()) {
+//            throw new AppException(ErrorCode.UNAUTHORIZED_CREATE_PROMOTION);
+//        }
 
         if (promotionDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new AppException(ErrorCode.INVALID_AMOUNT);

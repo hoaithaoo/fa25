@@ -3,14 +3,19 @@ package swp391.fa25.saleElectricVehicle.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
+import swp391.fa25.saleElectricVehicle.entity.Customer;
 import swp391.fa25.saleElectricVehicle.entity.Order;
+import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.ContractDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.OrderDetailsDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
+import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractDetailResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractResponse;
 import swp391.fa25.saleElectricVehicle.repository.ContractRepository;
 import swp391.fa25.saleElectricVehicle.service.ContractService;
@@ -147,6 +152,94 @@ public class ContractServiceImpl implements ContractService {
     public ContractDto getContractById(int id) {
         Contract contract = getContractEntityById(id);
         return mapToDto(contract);
+    }
+
+    @Override
+    public GetContractDetailResponse getContractDetailById(int id) {
+        Contract contract = getContractEntityById(id);
+        Order order = contract.getOrder();
+        Customer customer = order.getCustomer();
+        User staff = order.getUser();
+        Store store = staff.getStore();
+        
+        // Map customer
+        CustomerDto customerDto = CustomerDto.builder()
+                .customerId(customer.getCustomerId())
+                .fullName(customer.getFullName())
+                .address(customer.getAddress())
+                .email(customer.getEmail())
+                .phone(customer.getPhone())
+                .identificationNumber(customer.getIdentificationNumber())
+                .build();
+        
+        // Map order details
+        List<OrderDetailsDto> orderDetails = order.getOrderDetails().stream()
+                .map(od -> OrderDetailsDto.builder()
+                        .modelName(od.getStoreStock().getModelColor().getModel().getModelName())
+                        .modelYear(od.getStoreStock().getModelColor().getModel().getModelYear())
+                        .seatingCapacity(od.getStoreStock().getModelColor().getModel().getSeatingCapacity())
+                        .bodyType(od.getStoreStock().getModelColor().getModel().getBodyType().name())
+                        .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
+                        .quantity(od.getQuantity())
+                        .unitPrice(od.getUnitPrice())
+                        .discount(od.getDiscountAmount())
+                        .totalTax(od.getLicensePlateFee().add(od.getRegistrationFee()))
+                        .totalPrice(od.getTotalPrice())
+                        .build())
+                .toList();
+        
+        // Map payments
+        List<GetContractDetailResponse.PaymentInfo> payments = contract.getPayments().stream()
+                .map(payment -> GetContractDetailResponse.PaymentInfo.builder()
+                        .paymentId(payment.getPaymentId())
+                        .paymentCode(payment.getPaymentCode())
+                        .remainPrice(payment.getRemainPrice())
+                        .status(payment.getStatus() != null ? payment.getStatus().name() : null)
+                        .paymentType(payment.getPaymentType() != null ? payment.getPaymentType().name() : null)
+                        .paymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod().name() : null)
+                        .amount(payment.getAmount())
+                        .createdAt(payment.getCreatedAt())
+                        .updatedAt(payment.getUpdatedAt())
+                        .build())
+                .toList();
+        
+        return GetContractDetailResponse.builder()
+                // Contract info
+                .contractId(contract.getContractId())
+                .contractCode(contract.getContractCode())
+                .contractDate(contract.getContractDate())
+                .status(contract.getStatus() != null ? contract.getStatus().name() : null)
+                .depositPrice(contract.getDepositPrice())
+                .totalPayment(contract.getTotalPayment())
+                .remainPrice(contract.getRemainPrice())
+                .terms(contract.getTerms())
+                .contractFileUrl(contract.getContractFileUrl())
+                .uploadedBy(contract.getUploadedBy())
+                .createdAt(contract.getCreatedAt())
+//                .updatedAt(contract.getUpdatedAt())
+                // Order info
+                .orderId(order.getOrderId())
+                .orderCode(order.getOrderCode())
+                .orderStatus(order.getStatus() != null ? order.getStatus().name() : null)
+                .orderDate(order.getOrderDate())
+                .orderTotalPrice(order.getTotalPrice())
+                .orderTotalTaxPrice(order.getTotalTaxPrice())
+                .orderTotalPromotionAmount(order.getTotalPromotionAmount())
+                .orderTotalPayment(order.getTotalPayment())
+                // Customer info
+                .customer(customerDto)
+                // Staff info
+                .staffId(staff.getUserId())
+                .staffName(staff.getFullName())
+                // Store info
+                .storeId(store != null ? store.getStoreId() : 0)
+                .storeName(store != null ? store.getStoreName() : null)
+                .storeAddress(store != null ? store.getAddress() : null)
+                // Order details
+                .orderDetails(orderDetails)
+                // Payments
+                .payments(payments)
+                .build();
     }
 
     @Override

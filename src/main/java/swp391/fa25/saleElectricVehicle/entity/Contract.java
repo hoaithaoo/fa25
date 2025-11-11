@@ -47,7 +47,7 @@ public class Contract {
     @Column(columnDefinition = "NVARCHAR(1000)")
     private String terms;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String uploadedBy;
 
     @Column(nullable = false)
