@@ -23,7 +23,7 @@ public class Model {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int modelId;
 
-    @Column(nullable = false, unique = true, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String modelName;
 
     @Column(nullable = false)

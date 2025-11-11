@@ -14,6 +14,7 @@ import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
 import swp391.fa25.saleElectricVehicle.repository.StoreRepository;
 import swp391.fa25.saleElectricVehicle.service.StoreService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,9 +33,10 @@ public class StoreServiceImpl implements StoreService {
 //            throw new AppException(ErrorCode.STORE_EXISTED);
 //        }
 
+        LocalDate nowDate = LocalDate.now();
         // ngày bắt đầu không được trước ngày hiện tại
-        if (storeDto.getContractStartDate().isBefore(LocalDateTime.now())) {
-            throw new AppException(ErrorCode.INVALID_START_DATE_TIME);
+        if (storeDto.getContractStartDate().isBefore(nowDate)) {
+            throw new AppException(ErrorCode.INVALID_START_DATE);
         }
 
         // ngày kết thúc phải sau ngày bắt đầu
@@ -43,15 +45,14 @@ public class StoreServiceImpl implements StoreService {
         }
 
         // ngày kết thúc phải sau ngày hiện tại
-        if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
+        if (storeDto.getContractEndDate().isBefore(nowDate)) {
             throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
         }
 
         // check status dựa trên ngày hợp đồng
-        LocalDateTime now = LocalDateTime.now();
         StoreStatus status;
         // nếu ngày bắt đầu hợp đồng > now hoặc ngày kết thúc < now thì inactive
-        if (now.isBefore(storeDto.getContractStartDate()) || now.isAfter(storeDto.getContractEndDate())) {
+        if (nowDate.isBefore(storeDto.getContractStartDate()) || nowDate.isAfter(storeDto.getContractEndDate())) {
             status = StoreStatus.INACTIVE;
         } else {
             status = StoreStatus.ACTIVE;
@@ -144,26 +145,30 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
-        if (storeDto.getStoreName() != null
-                && !storeDto.getStoreName().trim().isEmpty()
-                && !store.getStoreName().equals(storeDto.getStoreName()) &&
-                storeRepository.existsByStoreName(storeDto.getStoreName())) {
-            throw new AppException(ErrorCode.STORE_EXISTED);
-        }
+//        if (storeDto.getStoreName() != null
+//                && !storeDto.getStoreName().trim().isEmpty()
+//                && !store.getStoreName().equals(storeDto.getStoreName()) &&
+//                storeRepository.existsByStoreName(storeDto.getStoreName())) {
+//            throw new AppException(ErrorCode.STORE_EXISTED);
+//        }
 
-
+        LocalDate nowDate = LocalDate.now();
+        // ngày bắt đầu không được trước ngày hiện tại
         if (storeDto.getContractStartDate() != null
                 && !storeDto.getContractStartDate().isEqual(store.getContractStartDate())) {
+            if (storeDto.getContractStartDate().isBefore(nowDate)) {
+                throw new AppException(ErrorCode.INVALID_START_DATE);
+            }
             store.setContractStartDate(storeDto.getContractStartDate());
         }
 
-        // ✅ Cần check null trước
+        // ngày kết thúc phải sau ngày bắt đầu và sau ngày hiện tại
         if (storeDto.getContractEndDate() != null
                 && !storeDto.getContractEndDate().isEqual(store.getContractEndDate())) {
             if (storeDto.getContractEndDate().isBefore(storeDto.getContractStartDate())) {
                 throw new AppException(ErrorCode.INVALID_END_DATE);
             }
-            if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
+            if (storeDto.getContractEndDate().isBefore(nowDate)) {
                 throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
             }
             store.setContractEndDate(storeDto.getContractEndDate());
