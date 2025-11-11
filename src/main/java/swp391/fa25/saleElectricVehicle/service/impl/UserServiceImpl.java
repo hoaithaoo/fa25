@@ -328,13 +328,12 @@ public class UserServiceImpl implements UserService {
 
         // Cập nhật mật khẩu mới
         user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
-        
+
         // Nếu user là staff và status là PENDING, cập nhật thành ACTIVE
-        boolean isStaff = !user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên");
-        if (isStaff && user.getStatus() == UserStatus.PENDING) {
+//        boolean isStaff = !user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên");
+        if (user.getStatus() == UserStatus.PENDING) {
             user.setStatus(UserStatus.ACTIVE);
         }
-        
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
 
