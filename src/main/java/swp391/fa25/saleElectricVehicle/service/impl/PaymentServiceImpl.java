@@ -50,14 +50,26 @@ public class PaymentServiceImpl implements PaymentService {
                     .findByContractAndPaymentType(contract, PaymentType.DEPOSIT);
             // nếu đã có và chưa bị hủy thì không được tạo nữa
             // bị hủy khi khách thanh toán không thành công và tự hủy giao dịch
-            if (existingDepositPayment.isPresent() && !existingDepositPayment.get().getStatus().equals(PaymentStatus.CANCELLED)) {
+            if (existingDepositPayment.isPresent()
+                    && !existingDepositPayment.get().getStatus().equals(PaymentStatus.CANCELLED)
+                    && !existingDepositPayment.get().getStatus().equals(PaymentStatus.DRAFT)) {
                 throw new AppException(ErrorCode.DEPOSIT_PAYMENT_ALREADY_EXISTS);
             }
         } else if (request.getPaymentType() == PaymentType.BALANCE) {
+            // kiểm tra xem đã có payment đặt cọc chưa
+            // nếu chưa có thì không được tạo payment số dư
+            Optional<Payment> existingDepositPayment = paymentRepository
+                    .findByContractAndPaymentType(contract, PaymentType.DEPOSIT);
+            if (existingDepositPayment.isEmpty()
+                    || (!existingDepositPayment.get().getStatus().equals(PaymentStatus.COMPLETED))) {
+                throw new AppException(ErrorCode.DEPOSIT_PAYMENT_NOT_COMPLETED);
+            }
             // Kiểm tra xem đã có payment thanh toán số dư chưa
             Optional<Payment> existingBalancePayment = paymentRepository
                     .findByContractAndPaymentType(contract, PaymentType.BALANCE);
-            if (existingBalancePayment.isPresent() && !existingBalancePayment.get().getStatus().equals(PaymentStatus.CANCELLED)) {
+            if (existingBalancePayment.isPresent()
+                    && !existingBalancePayment.get().getStatus().equals(PaymentStatus.CANCELLED)
+                    && !existingBalancePayment.get().getStatus().equals(PaymentStatus.DRAFT)) {
                 throw new AppException(ErrorCode.BALANCE_PAYMENT_ALREADY_EXISTS);
             }
         }
