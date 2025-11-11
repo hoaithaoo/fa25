@@ -27,16 +27,34 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public StoreDto createStore(StoreDto storeDto) {
-        if (storeRepository.existsByStoreName(storeDto.getStoreName())) {
-            throw new AppException(ErrorCode.STORE_EXISTED);
+        // check store name đã tồn tại chưa
+//        if (storeRepository.existsByStoreName(storeDto.getStoreName())) {
+//            throw new AppException(ErrorCode.STORE_EXISTED);
+//        }
+
+        // ngày bắt đầu không được trước ngày hiện tại
+        if (storeDto.getContractStartDate().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INVALID_START_DATE_TIME);
         }
 
+        // ngày kết thúc phải sau ngày bắt đầu
         if (storeDto.getContractEndDate().isBefore(storeDto.getContractStartDate())) {
             throw new AppException(ErrorCode.INVALID_END_DATE);
         }
 
+        // ngày kết thúc phải sau ngày hiện tại
         if (storeDto.getContractEndDate().isBefore(LocalDateTime.now())) {
             throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
+        }
+
+        // check status dựa trên ngày hợp đồng
+        LocalDateTime now = LocalDateTime.now();
+        StoreStatus status;
+        // nếu ngày bắt đầu hợp đồng > now hoặc ngày kết thúc < now thì inactive
+        if (now.isBefore(storeDto.getContractStartDate()) || now.isAfter(storeDto.getContractEndDate())) {
+            status = StoreStatus.INACTIVE;
+        } else {
+            status = StoreStatus.ACTIVE;
         }
 
         Store store = Store.builder()
@@ -45,7 +63,7 @@ public class StoreServiceImpl implements StoreService {
                 .phone(storeDto.getPhone())
                 .provinceName(storeDto.getProvinceName())
                 .ownerName(storeDto.getOwnerName())
-                .status(StoreStatus.ACTIVE)
+                .status(status)
                 .imagePath(storeDto.getImagePath())
                 .contractStartDate(storeDto.getContractStartDate())
                 .contractEndDate(storeDto.getContractEndDate())
