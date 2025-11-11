@@ -20,7 +20,7 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int storeId;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)", unique = true)
+    @Column(nullable = false, columnDefinition = "nvarchar(255)")
     private String storeName;
 
     @Column(nullable = false, columnDefinition = "nvarchar(255)")

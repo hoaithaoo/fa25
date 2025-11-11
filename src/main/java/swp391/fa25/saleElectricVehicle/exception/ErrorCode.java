@@ -63,7 +63,8 @@ public enum ErrorCode {
     BALANCE_PAYMENT_ALREADY_EXISTS(1047, "Đã tồn tại khoản thanh toán số dư cho hợp đồng này", HttpStatus.BAD_REQUEST),
     ORDER_NOT_IN_CONFIRMED_STATUS(1048, "Đơn hàng không ở trạng thái đã xác nhận, không thể tạo hợp đồng", HttpStatus.BAD_REQUEST),
     CONTRACT_NOT_SIGNED(1049, "Hợp đồng chưa được ký, không thể thanh toán", HttpStatus.BAD_REQUEST),
-    ORDER_NO_ITEMS(1050, "Đơn hàng không có danh sách sản phẩm nào, không thể xác nhận", HttpStatus.BAD_REQUEST)
+    ORDER_NO_ITEMS(1050, "Đơn hàng không có danh sách sản phẩm nào, không thể xác nhận", HttpStatus.BAD_REQUEST),
+    INVALID_START_DATE_TIME(1051, "Ngày bắt đầu không được trước ngày hiện tại", HttpStatus.BAD_REQUEST)
     ;
 
     private final int code;
