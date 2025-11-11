@@ -238,8 +238,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         if (request.isIncludeLicensePlateService()) {
             // Khách chọn dịch vụ đăng ký biển số
             licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(quantity)); // Default 200K/vehicle * tổng số xe
-            if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh")
-                    || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
+            if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
+                    || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
                 licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(quantity)); // 20M/vehicle * tổng số xe
             }
             registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(quantity));
