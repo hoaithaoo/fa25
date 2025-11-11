@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.payload.dto;
 import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter @Setter
@@ -18,6 +19,6 @@ public class StoreDto {
     private String ownerName;
     private StoreStatus status;
     private String imagePath;
-    private LocalDateTime contractStartDate;
-    private LocalDateTime contractEndDate;
+    private LocalDate contractStartDate;
+    private LocalDate contractEndDate;
 }

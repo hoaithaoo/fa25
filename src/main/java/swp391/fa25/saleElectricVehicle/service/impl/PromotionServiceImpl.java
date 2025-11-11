@@ -107,16 +107,16 @@ public class PromotionServiceImpl implements PromotionService {
         // Tạo promotion cho mỗi model
         for (Model model : allModels) {
             // Tạo promotion name unique bằng cách thêm model name
-            String uniquePromotionName = promotionDto.getPromotionName() + " - " + model.getModelName();
+            // String uniquePromotionName = promotionDto.getPromotionName() + " - " + model.getModelName();
             
-            // Kiểm tra promotion name đã tồn tại chưa
-            if (promotionRepository.existsByPromotionNameIgnoreCase(uniquePromotionName)) {
-                logger.warn("Promotion name '{}' already exists, skipping model {}", uniquePromotionName, model.getModelName());
-                continue;
-            }
+            // // Kiểm tra promotion name đã tồn tại chưa
+            // if (promotionRepository.existsByPromotionNameIgnoreCase(uniquePromotionName)) {
+            //     logger.warn("Promotion name '{}' already exists, skipping model {}", uniquePromotionName, model.getModelName());
+            //     continue;
+            // }
 
             Promotion newPromotion = Promotion.builder()
-                    .promotionName(uniquePromotionName)
+                    .promotionName(promotionDto.getPromotionName())
                     .description(promotionDto.getDescription())
                     .promotionType(promotionDto.getPromotionType())
                     .amount(promotionDto.getAmount())
@@ -132,7 +132,7 @@ public class PromotionServiceImpl implements PromotionService {
             createdPromotions.add(mapToDto(savedPromotion));
         }
 
-        logger.info("Created {} promotions for all models ({} models)", createdPromotions.size(), allModels.size());
+        // logger.info("Created {} promotions for all models ({} models)", createdPromotions.size(), allModels.size());
         return createdPromotions;
     }
 

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,10 +42,10 @@ public class Store {
     private StoreStatus status;
 
     @Column(nullable = false)
-    private LocalDateTime contractStartDate;
+    private LocalDate contractStartDate;
 
     @Column(nullable = false)
-    private LocalDateTime contractEndDate;
+    private LocalDate contractEndDate;
 
     @Column
     private String imagePath;

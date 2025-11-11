@@ -21,9 +21,9 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public ModelDto createModel(ModelDto modelDto) {
-        if (modelRepository.existsModelByModelName(modelDto.getModelName())) {
-            throw new AppException(ErrorCode.MODEL_EXISTED);
-        }
+//        if (modelRepository.existsModelByModelName(modelDto.getModelName())) {
+//            throw new AppException(ErrorCode.MODEL_EXISTED);
+//        }
 
         if (modelDto.getModelYear() <= 0) {
             throw new AppException(ErrorCode.INVALID_NUMBER);
@@ -119,8 +119,8 @@ public class ModelServiceImpl implements ModelService {
         }
         if (modelDto.getModelName() != null
                 && !modelDto.getModelName().trim().isEmpty()
-                && !modelDto.getModelName().equals(existingModel.getModelName())
-                && modelRepository.existsModelByModelName(modelDto.getModelName())) {
+                && !modelDto.getModelName().equals(existingModel.getModelName())) {
+//                && modelRepository.existsModelByModelName(modelDto.getModelName())) {
             throw new AppException(ErrorCode.MODEL_EXISTED);
         }
         existingModel.setModelName(modelDto.getModelName());
