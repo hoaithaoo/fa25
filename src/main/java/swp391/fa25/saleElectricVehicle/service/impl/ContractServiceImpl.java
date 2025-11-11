@@ -135,8 +135,21 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Contract getContractEntityById(int id) {
-        return contractRepository.findById(id)
+        Contract contract = contractRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+
+        // Kiểm tra contract có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+
+        int contractStoreId = contract.getOrder().getUser().getStore().getStoreId();
+        if (contractStoreId != currentUser.getStore().getStoreId()) {
+            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
+        }
+
+        return contract;
     }
 
     @Override
@@ -150,12 +163,14 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public ContractDto getContractById(int id) {
+        // getContractEntityById đã có authorization check
         Contract contract = getContractEntityById(id);
         return mapToDto(contract);
     }
 
     @Override
     public GetContractDetailResponse getContractDetailById(int id) {
+        // getContractEntityById đã có authorization check
         Contract contract = getContractEntityById(id);
         Order order = contract.getOrder();
         Customer customer = order.getCustomer();
@@ -244,8 +259,8 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public ContractDto addFileUrlContract(int id, String fileUrl) {
-        Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+        // getContractEntityById đã có authorization check
+        Contract contract = getContractEntityById(id);
 
         // Validate contractFileUrl unique
         if (contractRepository.existsByContractFileUrl(fileUrl)) {
@@ -268,7 +283,14 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public List<GetContractResponse> getAllContracts() {
-        List<Contract> contracts = contractRepository.findAll();
+        // Lấy user hiện tại và store của user
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        
+        int storeId = currentUser.getStore().getStoreId();
+        List<Contract> contracts = contractRepository.findByOrder_User_Store_StoreId(storeId);
         return contracts.stream().map(contract -> GetContractResponse.builder()
                         .contractId(contract.getContractId())
                         .contractCode(contract.getContractCode())
