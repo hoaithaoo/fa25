@@ -37,7 +37,7 @@ public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
 //            "/users/**",
             "/auth/**",
-            "/model-colors", // cho phép truy cập để hiển thị model ở home page
+            "/model-colors/all", // cho phép truy cập để hiển thị model ở home page
             "/stores/all", // cho phép truy cập để hiển thị store ở home page
             "/payment/vnpay/ipn"
     };
