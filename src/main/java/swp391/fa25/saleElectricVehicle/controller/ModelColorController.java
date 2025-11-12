@@ -70,7 +70,7 @@ public class ModelColorController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<ModelColorDto>>> getAllModelColors() {
         List<ModelColorDto> modelColors = modelColorService.getAllModelColors();
         ApiResponse<List<ModelColorDto>> response = ApiResponse.<List<ModelColorDto>>builder()
