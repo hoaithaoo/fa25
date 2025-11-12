@@ -20,6 +20,7 @@ public class InventoryTransactionDto {
     private BigDecimal dept;
     private LocalDateTime transactionDate;
     private LocalDateTime deliveryDate;
+    private String imageUrl; // URL biên lai thanh toán
     private InventoryTransactionStatus status;
     private int storeStockId;
     private Integer promotionId; // Promotion của hãng được áp dụng (nếu có)
