@@ -24,4 +24,5 @@ public class PromotionDto {
     private Integer storeId; // null nếu là promotion của hãng
     private String storeName;
     private boolean isManufacturerPromotion;
+    private LocalDateTime createdAt;
 }

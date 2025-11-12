@@ -179,6 +179,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
                 .identificationNumber(customer.getIdentificationNumber())
+                .createdAt(customer.getCreatedAt())
 //                .storeId(store.getStoreId())
 //                .storeName(store.getStoreName())
                 .build();

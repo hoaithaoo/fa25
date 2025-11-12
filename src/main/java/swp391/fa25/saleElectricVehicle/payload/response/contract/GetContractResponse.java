@@ -26,4 +26,5 @@ public class GetContractResponse {
 
     private int customerId;
     private String customerName;
+    private LocalDateTime createdAt;
 }

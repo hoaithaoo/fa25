@@ -31,4 +31,5 @@ public class ContractDto {
 //    private String createdAt;
 //    private String updatedAt;
     private int orderId; // Chỉ trả về orderId thay vì toàn bộ Order object
+    private java.time.LocalDateTime createdAt;
 }
