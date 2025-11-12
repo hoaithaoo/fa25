@@ -2,25 +2,19 @@ package swp391.fa25.saleElectricVehicle.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.payload.dto.OrderDetailDto;
-import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderDetailsRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderWithItemsRequest;
-import swp391.fa25.saleElectricVehicle.payload.request.stock.StockValidationRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.*;
-import swp391.fa25.saleElectricVehicle.payload.response.stock.StockValidationResponse;
 import swp391.fa25.saleElectricVehicle.repository.*;
 import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -161,6 +155,10 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     modelColor.getModelColorId()
             );
 
+            // ✅ Validate stock availability (available = quantity - reservedQuantity)
+            int availableStock = stock.getQuantity() - stock.getReservedQuantity();
+            validateStockAvailability(stock, itemReq.getQuantity(), availableStock);
+
             // tính toán tổng số lượng xe trong đơn
             quantity += itemReq.getQuantity();
 
@@ -171,24 +169,26 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
 
 
-            if (request.isIncludeLicensePlateService()) {
-                // Khách chọn dịch vụ đăng ký biển số
-                licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
-                if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh")
-                        || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
-                    licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-                }
-                registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-            }
-            // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
-
-            totalTax = totalTax.add(licensePlateFee).add(registrationFee);
+//            if (request.isIncludeLicensePlateService()) {
+//                // Khách chọn dịch vụ đăng ký biển số
+//                licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
+//                if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh")
+//                        || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
+//                    licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+//                }
+//                registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+//            }
+//            // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
+//
+//            totalTax = totalTax.add(licensePlateFee).add(registrationFee);
 
             // Calculate discount amount
             Promotion promotion = null;
             BigDecimal discountAmount = BigDecimal.ZERO;
             if (itemReq.getPromotionId() > 0) {
-                promotion = promotionService.getPromotionEntityById(itemReq.getPromotionId());
+                // Chỉ lấy promotion của đại lý (không phải hãng) và còn active
+                promotion = promotionService.getStorePromotionEntityById(itemReq.getPromotionId());
+                
                 // Giả sử promotion là giảm giá theo phần trăm
                 if (promotion.getPromotionType().toString().equals("PERCENTAGE")) {
                     discountAmount = stock.getPriceOfStore()
@@ -235,18 +235,18 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             orderDetails.add(saved);
         }
 
-//        if (request.isIncludeLicensePlateService()) {
-//            // Khách chọn dịch vụ đăng ký biển số
-//            licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(quantity)); // Default 200K/vehicle * tổng số xe
-//            if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
-//                    || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
-//                licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(quantity)); // 20M/vehicle * tổng số xe
-//            }
-//            registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(quantity));
-//        }
-//        // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
-//
-//        totalTax = totalTax.add(licensePlateFee).add(registrationFee);
+        if (request.isIncludeLicensePlateService()) {
+            // Khách chọn dịch vụ đăng ký biển số
+            licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(quantity)); // Default 200K/vehicle * tổng số xe
+            if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
+                    || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
+                licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(quantity)); // 20M/vehicle * tổng số xe
+            }
+            registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(quantity));
+        }
+        // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
+
+        totalTax = totalTax.add(licensePlateFee).add(registrationFee);
 
         // cập nhật order khi có order details
         order.setTotalPrice(totalOrderPrice);
@@ -276,7 +276,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 .build()
                         ).toList())
                 .totalPrice(order.getTotalPrice())
-                .totalTaxPrice(order.getTotalTaxPrice())
+                .totalLicensePlateFee(licensePlateFee)
+                .totalRegistrationFee(registrationFee)
                 .totalPromotionAmount(order.getTotalPromotionAmount())
                 .totalPayment(order.getTotalPayment())
                 .status(order.getStatus().name())
@@ -402,14 +403,13 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 //
 //    // =============== VALIDATION ===============
 
-    private void validateStockAvailability(StoreStock stock, int requestedQuantity) {
-        if (stock.getQuantity() < requestedQuantity) {
-
+    private void validateStockAvailability(StoreStock stock, int requestedQuantity, int availableStock) {
+        if (availableStock < requestedQuantity) {
             // Throw exception với thông tin chi tiết
             throw new AppException(ErrorCode.INSUFFICIENT_STOCK, String.format(
                     ". Sản phẩm %s không đủ hàng. Còn %d, yêu cầu %d",
                     stock.getModelColor().getModel().getModelName(),
-                    stock.getQuantity(),
+                    availableStock,
                     requestedQuantity));
         }
     }
@@ -419,12 +419,15 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 //                                          BigDecimal vatAmount,
                                            BigDecimal licensePlateFee,
                                            BigDecimal registrationFee, BigDecimal discountAmount) {
-        return priceOfStore.add(priceOfStore.multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)))
+        BigDecimal totalPrice = priceOfStore.add(priceOfStore.multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)))
                 .multiply(BigDecimal.valueOf(quantity))
 //                .add(vatAmount)
                 .add(licensePlateFee)
                 .add(registrationFee)
                 .subtract(discountAmount);
+        
+        // Đảm bảo totalPrice không bao giờ âm (nếu âm thì set = 0)
+        return totalPrice.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : totalPrice;
     }
 
     private GetOrderDetailsResponse mapToDto(OrderDetail od) {

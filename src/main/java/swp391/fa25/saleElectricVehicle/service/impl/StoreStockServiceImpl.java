@@ -101,7 +101,11 @@ public class StoreStockServiceImpl implements StoreStockService {
         User user = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(user.getUserId());
         StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(store.getStoreId(), modelColor.getModelColorId());
-        return storeStock.getQuantity();
+        if (storeStock == null) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
+        // ✅ Trả về availableStock thay vì quantity
+        return storeStock.getQuantity() - storeStock.getReservedQuantity();
     }
 
     // update giá bán của cửa hàng
@@ -144,6 +148,12 @@ public class StoreStockServiceImpl implements StoreStockService {
         return mapToDto(storeStock);
     }
 
+    // Update StoreStock entity (dùng nội bộ cho các service khác)
+    @Override
+    public void updateStoreStock(StoreStock storeStock) {
+        storeStockRepository.save(storeStock);
+    }
+
 //    @Override
 //    public void deleteStoreStock(int stockId) {
 //        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
@@ -154,6 +164,9 @@ public class StoreStockServiceImpl implements StoreStockService {
 //    }
 
     private StoreStockDto mapToDto(StoreStock storeStock) {
+        // ✅ Tính availableStock = quantity - reservedQuantity
+        int availableStock = storeStock.getQuantity() - storeStock.getReservedQuantity();
+        
         return StoreStockDto.builder()
                 .stockId(storeStock.getStockId())
                 .storeId(storeStock.getStore().getStoreId())
@@ -164,6 +177,7 @@ public class StoreStockServiceImpl implements StoreStockService {
                 .colorName(storeStock.getModelColor().getColor().getColorName())
                 .priceOfStore(storeStock.getPriceOfStore())
                 .quantity(storeStock.getQuantity())
+                .availableStock(availableStock)
                 .build();
     }
 }

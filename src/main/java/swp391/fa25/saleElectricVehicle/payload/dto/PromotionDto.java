@@ -21,6 +21,7 @@ public class PromotionDto {
     private boolean isActive;
     private int modelId;
     private String modelName;
-    private int storeId;
+    private Integer storeId; // null nếu là promotion của hãng
     private String storeName;
+    private boolean isManufacturerPromotion;
 }

@@ -130,4 +130,64 @@ public class InventoryTransactionController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/accept/{inventoryId}")
+    public ResponseEntity<ApiResponse<InventoryTransactionDto>> acceptRequest(
+            @PathVariable int inventoryId) {
+
+        InventoryTransactionDto accepted = inventoryTransactionService.acceptRequest(inventoryId);
+
+        ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Request accepted successfully")
+                .data(accepted)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/reject/{inventoryId}")
+    public ResponseEntity<ApiResponse<InventoryTransactionDto>> rejectRequest(
+            @PathVariable int inventoryId) {
+
+        InventoryTransactionDto rejected = inventoryTransactionService.rejectRequest(inventoryId);
+
+        ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Request rejected successfully")
+                .data(rejected)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/start-shipping/{inventoryId}")
+    public ResponseEntity<ApiResponse<InventoryTransactionDto>> startShipping(
+            @PathVariable int inventoryId) {
+
+        InventoryTransactionDto started = inventoryTransactionService.startShipping(inventoryId);
+
+        ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Shipping started successfully")
+                .data(started)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/confirm-delivery/{inventoryId}")
+    public ResponseEntity<ApiResponse<InventoryTransactionDto>> confirmDelivery(
+            @PathVariable int inventoryId) {
+
+        InventoryTransactionDto confirmed = inventoryTransactionService.confirmDelivery(inventoryId);
+
+        ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Delivery confirmed successfully. Stock updated.")
+                .data(confirmed)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 }

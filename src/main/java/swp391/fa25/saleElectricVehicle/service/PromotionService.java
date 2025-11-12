@@ -21,4 +21,12 @@ public interface PromotionService {
     PromotionDto updatePromotion(int promotionId, PromotionDto promotionDto);
 
     void deletePromotion(int promotionId);
+
+    PromotionDto createManufacturerPromotion(PromotionDto promotionDto);
+
+    List<PromotionDto> getManufacturerPromotionsByModelId(int modelId);
+
+    List<PromotionDto> getAllManufacturerPromotions();
+
+    Promotion getStorePromotionEntityById(int promotionId);
 }

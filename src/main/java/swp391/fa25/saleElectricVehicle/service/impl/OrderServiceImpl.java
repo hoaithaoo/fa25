@@ -2,8 +2,10 @@ package swp391.fa25.saleElectricVehicle.service.impl;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
@@ -17,7 +19,6 @@ import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,6 +36,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     StoreService storeService;
+
+    @Autowired
+    StoreStockService storeStockService;
 
     @Override
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
@@ -186,12 +190,30 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void updateOrderStatus(Order order, OrderStatus status) {
+        // ✅ Khi order được DELIVERED, trừ stock thực tế và unlock reserved
+        if (status == OrderStatus.DELIVERED && order.getStatus() != OrderStatus.DELIVERED) {
+            for (OrderDetail orderDetail : order.getOrderDetails()) {
+                StoreStock stock = orderDetail.getStoreStock();
+                
+                // Trừ số lượng thực tế
+                stock.setQuantity(stock.getQuantity() - orderDetail.getQuantity());
+                
+                // Unlock reserved quantity
+                stock.setReservedQuantity(Math.max(0, stock.getReservedQuantity() - orderDetail.getQuantity()));
+                
+                storeStockService.updateStoreStock(stock);
+            }
+        }
+        
         order.setStatus(status);
+        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
 
     @Override
+    @Transactional
     public GetOrderResponse confirmOrder(int orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
@@ -202,12 +224,34 @@ public class OrderServiceImpl implements OrderService {
         if (order.getOrderDetails().isEmpty()) {
             throw new AppException(ErrorCode.ORDER_NO_ITEMS);
         }
+
+        // ✅ Reserve stock cho tất cả order details
+        for (OrderDetail orderDetail : order.getOrderDetails()) {
+            StoreStock stock = orderDetail.getStoreStock();
+            int availableStock = stock.getQuantity() - stock.getReservedQuantity();
+
+            if (availableStock < orderDetail.getQuantity()) {
+                throw new AppException(ErrorCode.INSUFFICIENT_STOCK,
+                    String.format("Sản phẩm %s không đủ hàng để xác nhận đơn. Còn %d, yêu cầu %d",
+                        stock.getModelColor().getModel().getModelName(),
+                        availableStock,
+                        orderDetail.getQuantity()));
+            }
+
+            // Reserve stock
+            stock.setReservedQuantity(stock.getReservedQuantity() + orderDetail.getQuantity());
+            storeStockService.updateStoreStock(stock);
+        }
+
         updateOrderStatus(order, OrderStatus.CONFIRMED);
+        order.setUpdatedAt(LocalDateTime.now()); // Cập nhật thời gian để track timeout
+        orderRepository.save(order);
         return mapToDto(order);
     }
 
     // không xóa được đơn hàng đã ký hợp đồng, đã thanh toán đặt cọc, đã thanh toán đầy đủ, đã giao hàng
     @Override
+    @Transactional
     public void deleteOrder(int orderId) {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
@@ -221,7 +265,26 @@ public class OrderServiceImpl implements OrderService {
                 || order.getStatus() == OrderStatus.DELIVERED) {
             throw new AppException(ErrorCode.ORDER_NOT_EDITABLE);
         }
+
+        // ✅ Unlock stock nếu order đã được CONFIRMED
+        if (order.getStatus() == OrderStatus.CONFIRMED) {
+            unlockStockForOrder(order);
+        }
+
         orderRepository.delete(order);
+    }
+
+    // ✅ Method để unlock stock khi order bị hủy
+    private void unlockStockForOrder(Order order) {
+        for (OrderDetail orderDetail : order.getOrderDetails()) {
+            StoreStock stock = orderDetail.getStoreStock();
+            int currentReserved = stock.getReservedQuantity();
+            int unlockAmount = orderDetail.getQuantity();
+
+            // Đảm bảo không unlock quá số đã reserve
+            stock.setReservedQuantity(Math.max(0, currentReserved - unlockAmount));
+            storeStockService.updateStoreStock(stock);
+        }
     }
 
 //    @Override
@@ -349,5 +412,57 @@ public class OrderServiceImpl implements OrderService {
                 .storeName(order.getUser().getStore() != null ? order.getUser().getStore().getStoreName() : null)
                 .orderDate(order.getOrderDate())
                 .build();
+    }
+
+    // ✅ Auto-cancel DRAFT orders sau 24 giờ
+    @Scheduled(fixedRate = 3600000) // Chạy mỗi giờ
+    @Transactional
+    public void autoCancelExpiredDraftOrders() {
+        LocalDateTime expiryTime = LocalDateTime.now().minusHours(24); // 24 giờ
+
+        List<Order> expiredOrders = orderRepository.findByStatusAndOrderDateBefore(
+            OrderStatus.DRAFT,
+            expiryTime
+        );
+
+        for (Order order : expiredOrders) {
+            // DRAFT orders chưa reserve stock nên không cần unlock
+            order.setStatus(OrderStatus.CANCELLED);
+            order.setUpdatedAt(LocalDateTime.now());
+            orderRepository.save(order);
+        }
+    }
+
+    // ✅ Auto-cancel CONFIRMED orders không thanh toán đặt cọc sau 48 giờ
+    @Scheduled(fixedRate = 3600000) // Mỗi giờ
+    @Transactional
+    public void autoCancelUnpaidConfirmedOrders() {
+        LocalDateTime expiryTime = LocalDateTime.now().minusHours(48); // 48 giờ sau khi CONFIRMED
+
+        List<Order> unpaidOrders = orderRepository.findByStatusAndUpdatedAtBefore(
+            OrderStatus.CONFIRMED,
+            expiryTime
+        );
+
+        for (Order order : unpaidOrders) {
+            // Kiểm tra xem đã có payment deposit chưa
+            boolean hasDepositPayment = false;
+            if (order.getContract() != null) {
+                // Kiểm tra contract status
+                if (order.getContract().getStatus() == ContractStatus.DEPOSIT_PAID
+                        || order.getContract().getStatus() == ContractStatus.FULLY_PAID
+                        || order.getContract().getStatus() == ContractStatus.COMPLETED) {
+                    hasDepositPayment = true;
+                }
+            }
+
+            // Nếu chưa có deposit payment thì hủy và unlock stock
+            if (!hasDepositPayment) {
+                unlockStockForOrder(order);
+                order.setStatus(OrderStatus.CANCELLED);
+                order.setUpdatedAt(LocalDateTime.now());
+                orderRepository.save(order);
+            }
+        }
     }
 }

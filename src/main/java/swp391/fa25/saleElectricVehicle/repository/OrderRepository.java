@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
-import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,4 +40,10 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findOrdersByUser_Store_StoreId(int storeId);
 
     List<Order> findByCustomer_CustomerIdAndUser_Store_StoreId(int customerId, int storeId);
+
+    // Find expired DRAFT orders
+    List<Order> findByStatusAndOrderDateBefore(OrderStatus status, LocalDateTime date);
+
+    // Find expired CONFIRMED orders
+    List<Order> findByStatusAndUpdatedAtBefore(OrderStatus status, LocalDateTime date);
 }

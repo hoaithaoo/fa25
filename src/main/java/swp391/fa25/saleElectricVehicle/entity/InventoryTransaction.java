@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.InventoryTransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,7 +43,16 @@ public class InventoryTransaction {
     @Column
     private LocalDateTime deliveryDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private InventoryTransactionStatus status = InventoryTransactionStatus.PENDING;
+
     @ManyToOne
     @JoinColumn(name = "storeStockId", nullable = false)
     private StoreStock storeStock;
+
+    @ManyToOne
+    @JoinColumn(name = "promotionId", nullable = true)
+    private Promotion promotion; // Promotion của hãng được áp dụng (nếu có)
 }

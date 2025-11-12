@@ -25,6 +25,10 @@ public class StoreStock {
     @Column(nullable = false)
     private int quantity;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private int reservedQuantity = 0; // Số lượng đã được reserve bởi các orders CONFIRMED
+
     @ManyToOne
     @JoinColumn(name = "storeId")
     private Store store;
@@ -33,9 +37,11 @@ public class StoreStock {
     @JoinColumn(name = "modelColorId")
     private ModelColor modelColor;
 
+    @Builder.Default
     @OneToMany(mappedBy = "storeStock", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryTransaction> inventoryTransactions = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "storeStock", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 }

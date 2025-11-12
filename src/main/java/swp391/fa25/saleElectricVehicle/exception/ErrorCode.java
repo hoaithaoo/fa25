@@ -71,6 +71,18 @@ public enum ErrorCode {
     INVALID_START_DATE(1055, "Ngày bắt đầu không được trước ngày hiện tại", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED_CREATE_PROMOTION(1056, "Chỉ quản lý cửa hàng mới được tạo khuyến mãi cho store của mình", HttpStatus.FORBIDDEN),
     DEPOSIT_PAYMENT_NOT_COMPLETED(1057, "Chưa hoàn tất thanh toán đặt cọc, không thể thanh toán số dư", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_DELIVERED(1058, "Chỉ có thể tạo feedback khi đơn hàng đã được giao hàng (DELIVERED)", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_FEEDBACK_ACCESS(1059, "Không có quyền truy cập feedback này", HttpStatus.FORBIDDEN),
+    ORDER_EXPIRED(1060, "Đơn hàng đã hết hạn và bị tự động hủy", HttpStatus.BAD_REQUEST),
+    ORDER_TIMEOUT(1061, "Đơn hàng đã quá thời hạn thanh toán", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_ALREADY_DELIVERED(1062, "Giao dịch tồn kho đã được giao hàng, không thể chỉnh sửa hoặc xóa", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_NOT_DELIVERED(1063, "Giao dịch tồn kho chưa được giao hàng", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_UPDATE(1064, "Không thể cập nhật giao dịch tồn kho đã được giao hàng hoặc đã hủy", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_DELETE(1065, "Không thể xóa giao dịch tồn kho đã được giao hàng hoặc đã hủy", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_CONFIRM(1066, "Chỉ có thể xác nhận giao dịch tồn kho ở trạng thái chờ xử lí", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_REJECT(1067, "Chỉ có thể từ chối giao dịch tồn kho ở trạng thái chờ xử lí", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_DELIVER(1068, "Chỉ có thể đánh dấu giao dịch tồn kho là đã giao hàng khi ở trạng thái đang giao hàng", HttpStatus.BAD_REQUEST),
+    MANUFACTURER_PROMOTION_NOT_ALLOWED_FOR_ORDER(1069, "Không được sử dụng khuyến mãi của hãng cho đơn hàng của khách. Chỉ được dùng cho request lên hãng", HttpStatus.BAD_REQUEST)
     ;
 
     private final int code;

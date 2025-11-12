@@ -29,6 +29,10 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
     List<Promotion> findByModel(Model model);
     List<Promotion> findByStore_StoreIdAndModel(int storeId, Model model);
     
+    // Find manufacturer promotions
+    List<Promotion> findByIsManufacturerPromotionTrueAndIsActiveTrue();
+    List<Promotion> findByIsManufacturerPromotionTrueAndModelAndIsActiveTrue(Model model);
+    
     // Deactivate expired promotions
     @Modifying
     @Query("UPDATE Promotion p " +

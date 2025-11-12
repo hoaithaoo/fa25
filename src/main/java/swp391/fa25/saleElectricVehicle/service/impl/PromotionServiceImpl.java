@@ -83,6 +83,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .isActive(isActive)
                 .model(model)
                 .store(store)
+                .isManufacturerPromotion(false) // Promotion của đại lý
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -207,9 +208,16 @@ public class PromotionServiceImpl implements PromotionService {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
         
-        // Kiểm tra promotion có thuộc store của user hiện tại không
+        // Nếu là promotion của hãng, cho phép lấy
+        if (promotion.isManufacturerPromotion()) {
+            return promotion;
+        }
+        
+        // Nếu là promotion của đại lý, kiểm tra promotion có thuộc store của user hiện tại không
         User currentUser = userService.getCurrentUserEntity();
-        if (currentUser.getStore() == null || promotion.getStore().getStoreId() != currentUser.getStore().getStoreId()) {
+        if (currentUser.getStore() == null || 
+            promotion.getStore() == null ||
+            promotion.getStore().getStoreId() != currentUser.getStore().getStoreId()) {
             throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
         }
         
@@ -228,8 +236,12 @@ public class PromotionServiceImpl implements PromotionService {
         
         int storeId = currentUser.getStore().getStoreId();
         Model model = modelService.getModelEntityById(modelId);
+        // Chỉ lấy promotion của đại lý (không phải hãng) và còn active
         List<Promotion> promotions = promotionRepository.findByStore_StoreIdAndModel(storeId, model);
-        return promotions.stream().map(this::mapToDto).toList();
+        return promotions.stream()
+                .filter(p -> !p.isManufacturerPromotion() && p.isActive()) // Chỉ lấy promotion của đại lý và active
+                .map(this::mapToDto)
+                .toList();
     }
 
     @Override
@@ -331,6 +343,95 @@ public class PromotionServiceImpl implements PromotionService {
         promotionRepository.delete(promotion);
     }
 
+    @Override
+    public PromotionDto createManufacturerPromotion(PromotionDto promotionDto) {
+        // Kiểm tra quyền: chỉ hãng (Nhân viên hãng xe hoặc Admin) mới được tạo promotion
+        // User currentUser = userService.getCurrentUserEntity();
+        // String roleName = currentUser.getRole().getRoleName();
+        
+        // if (!roleName.equalsIgnoreCase("Nhân viên hãng xe") && 
+        //     !roleName.equalsIgnoreCase("Quản trị viên")) {
+        //     throw new AppException(ErrorCode.UNAUTHORIZED_CREATE_PROMOTION);
+        // }
+        
+        Model model = modelService.getModelEntityById(promotionDto.getModelId());
+
+        if (promotionDto.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_AMOUNT);
+        }
+
+        if (promotionDto.getEndDate().isBefore(promotionDto.getStartDate())) {
+            throw new AppException(ErrorCode.INVALID_END_DATE);
+        }
+
+        // Khuyến mãi chỉ active nếu thời gian hiện tại nằm trong khoảng startDate và endDate
+        LocalDateTime now = LocalDateTime.now();
+        boolean isActive =
+                (promotionDto.getStartDate().isBefore(now) || promotionDto.getStartDate().isEqual(now)) &&
+                        (promotionDto.getEndDate().isAfter(now) || promotionDto.getEndDate().isEqual(now));
+
+        Promotion newPromotion = Promotion.builder()
+                .promotionName(promotionDto.getPromotionName())
+                .description(promotionDto.getDescription())
+                .promotionType(promotionDto.getPromotionType())
+                .amount(promotionDto.getAmount())
+                .startDate(promotionDto.getStartDate())
+                .endDate(promotionDto.getEndDate())
+                .isActive(isActive)
+                .model(model)
+                .store(null) // Promotion của hãng không có store
+                .isManufacturerPromotion(true) // Đánh dấu là promotion của hãng
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        Promotion saved = promotionRepository.save(newPromotion);
+        return mapToDto(saved);
+    }
+
+    @Override
+    public List<PromotionDto> getManufacturerPromotionsByModelId(int modelId) {
+        Model model = modelService.getModelEntityById(modelId);
+        List<Promotion> promotions = promotionRepository.findByIsManufacturerPromotionTrueAndModelAndIsActiveTrue(model);
+        return promotions.stream().map(this::mapToDto).toList();
+    }
+
+    @Override
+    public List<PromotionDto> getAllManufacturerPromotions() {
+        List<Promotion> promotions = promotionRepository.findByIsManufacturerPromotionTrueAndIsActiveTrue();
+        return promotions.stream().map(this::mapToDto).toList();
+    }
+
+    @Override
+    public Promotion getStorePromotionEntityById(int promotionId) {
+        Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
+        if (promotion == null) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+        
+        // Không cho phép lấy promotion của hãng
+        if (promotion.isManufacturerPromotion()) {
+            throw new AppException(ErrorCode.MANUFACTURER_PROMOTION_NOT_ALLOWED_FOR_ORDER);
+        }
+        
+        // Kiểm tra promotion có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+        
+        if (promotion.getStore() == null ||
+            promotion.getStore().getStoreId() != currentUser.getStore().getStoreId()) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+        
+        // Kiểm tra promotion có active không
+        if (!promotion.isActive()) {
+            throw new AppException(ErrorCode.PROMOTION_EXPIRED);
+        }
+        
+        return promotion;
+    }
+
     private PromotionDto mapToDto(Promotion promotion) {
         return PromotionDto.builder()
                 .promotionId(promotion.getPromotionId())
@@ -343,8 +444,9 @@ public class PromotionServiceImpl implements PromotionService {
                 .isActive(promotion.isActive())
                 .modelId(promotion.getModel().getModelId())
                 .modelName(promotion.getModel().getModelName())
-                .storeId(promotion.getStore().getStoreId())
-                .storeName(promotion.getStore().getStoreName())
+                .storeId(promotion.getStore() != null ? promotion.getStore().getStoreId() : null)
+                .storeName(promotion.getStore() != null ? promotion.getStore().getStoreName() : null)
+                .isManufacturerPromotion(promotion.isManufacturerPromotion())
                 .build();
     }
 

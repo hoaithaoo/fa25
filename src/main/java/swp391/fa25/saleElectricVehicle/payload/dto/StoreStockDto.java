@@ -16,5 +16,6 @@ public class StoreStockDto {
     private int colorId;
     private String colorName;
     private BigDecimal priceOfStore;
-    private int quantity;
+    private int quantity; // Tổng số lượng trong kho
+    private int availableStock; // Số lượng có thể bán = quantity - reservedQuantity (cho khách hàng)
 }

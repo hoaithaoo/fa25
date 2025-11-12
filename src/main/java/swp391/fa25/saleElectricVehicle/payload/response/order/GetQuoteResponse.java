@@ -17,7 +17,9 @@ public class GetQuoteResponse {
     private List<GetOrderDetailsResponse> getOrderDetailsResponses;
 
     private BigDecimal totalPrice;
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalLicensePlateFee;
+    private BigDecimal totalRegistrationFee;
+//    private BigDecimal totalTaxPrice;
     private BigDecimal totalPromotionAmount;
     private BigDecimal totalPayment;
     private String status;
