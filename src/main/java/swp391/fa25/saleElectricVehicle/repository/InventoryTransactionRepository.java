@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface InventoryTransactionRepository extends JpaRepository<InventoryTransaction, Integer> {
     // Truy vấn mở rộng ví dụ: lấy các transaction trong một khoảng ngày
-    List<InventoryTransaction> findByTransactionDateBetween(LocalDateTime start, LocalDateTime end);
+//    List<InventoryTransaction> findByTransactionDateBetween(LocalDateTime start, LocalDateTime end);
 
     // Truy vấn mở rộng ví dụ: lấy transaction theo storeStockId
     List<InventoryTransaction> findByStoreStock_StockId(int storeStockId);
