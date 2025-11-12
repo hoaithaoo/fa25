@@ -21,4 +21,5 @@ public class StoreDto {
     private String imagePath;
     private LocalDate contractStartDate;
     private LocalDate contractEndDate;
+    private LocalDateTime createdAt;
 }

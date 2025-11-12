@@ -13,6 +13,7 @@ public class CustomerDto {
     private String email;
     private String phone;
     private String identificationNumber;
+    private java.time.LocalDateTime createdAt;
 
     // trả về thông tin store để track customer của store nào
 //    private int storeId;

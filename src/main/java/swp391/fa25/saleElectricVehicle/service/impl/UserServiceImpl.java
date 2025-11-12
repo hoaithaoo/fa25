@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import swp391.fa25.saleElectricVehicle.entity.Role;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.User;
@@ -134,6 +135,7 @@ public class UserServiceImpl implements UserService {
                 .storeName(u.getStore() != null ? u.getStore().getStoreName() : null)
                 .roleId(u.getRole().getRoleId())
                 .roleName(u.getRole().getRoleName())
+                .createdAt(u.getCreatedAt())
                 .build()).toList();
     }
 
@@ -149,6 +151,7 @@ public class UserServiceImpl implements UserService {
                 .storeName(u.getStore() != null ? u.getStore().getStoreName() : null)
                 .roleId(u.getRole().getRoleId())
                 .roleName(u.getRole().getRoleName())
+                .createdAt(u.getCreatedAt())
                 .build()).toList();
     }
 
@@ -176,44 +179,57 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    //update profile of current user
     @Override
+    @Transactional
     public UpdateUserProfileResponse updateOwnProfile(UpdateOwnProfileUserRequest updateOwnProfileRequest) {
         // Lấy user hiện tại từ SecurityContext
         User user = getCurrentUserEntity();
+
+        boolean hasChanges = false;
 
         // Cập nhật fullName
         if (updateOwnProfileRequest.getFullName() != null
                 && !updateOwnProfileRequest.getFullName().trim().isEmpty()
                 && !updateOwnProfileRequest.getFullName().equals(user.getFullName())) {
-            user.setFullName(updateOwnProfileRequest.getFullName());
+            user.setFullName(updateOwnProfileRequest.getFullName().trim());
+            hasChanges = true;
         }
 
         // Cập nhật email (kiểm tra trùng lặp)
         if (updateOwnProfileRequest.getEmail() != null
                 && !updateOwnProfileRequest.getEmail().trim().isEmpty()) {
-            if (!user.getEmail().equals(updateOwnProfileRequest.getEmail())
-                    && userRepository.existsByEmail(updateOwnProfileRequest.getEmail())) {
-                throw new AppException(ErrorCode.USER_EXISTED);
-            } else if (!user.getEmail().equals(updateOwnProfileRequest.getEmail())) {
-                user.setEmail(updateOwnProfileRequest.getEmail());
+            String newEmail = updateOwnProfileRequest.getEmail().trim().toLowerCase();
+            if (!user.getEmail().equals(newEmail)) {
+                if (userRepository.existsByEmail(newEmail)) {
+                    throw new AppException(ErrorCode.USER_EXISTED);
+                }
+                user.setEmail(newEmail);
+                hasChanges = true;
             }
         }
 
         // Cập nhật phone (kiểm tra trùng lặp)
         if (updateOwnProfileRequest.getPhone() != null
                 && !updateOwnProfileRequest.getPhone().trim().isEmpty()) {
-            if (!user.getPhone().equals(updateOwnProfileRequest.getPhone())
-                    && userRepository.existsByPhone(updateOwnProfileRequest.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_EXISTED);
-            } else if (!user.getPhone().equals(updateOwnProfileRequest.getPhone())) {
-                user.setPhone(updateOwnProfileRequest.getPhone());
+            String newPhone = updateOwnProfileRequest.getPhone().trim();
+            if (!user.getPhone().equals(newPhone)) {
+                if (userRepository.existsByPhone(newPhone)) {
+                    throw new AppException(ErrorCode.PHONE_EXISTED);
+                }
+                user.setPhone(newPhone);
+                hasChanges = true;
             }
         }
 
-        user.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(user);
+        // Chỉ cập nhật updatedAt nếu có thay đổi
+        if (hasChanges) {
+            user.setUpdatedAt(LocalDateTime.now());
+            userRepository.save(user);
+        }
 
         return UpdateUserProfileResponse.builder()
+                .userId(user.getUserId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
@@ -291,6 +307,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         return UpdateUserProfileResponse.builder()
+                .userId(user.getUserId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .phone(user.getPhone())

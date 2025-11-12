@@ -237,6 +237,7 @@ public class StoreServiceImpl implements StoreService {
                 .imagePath(store.getImagePath())
                 .contractStartDate(store.getContractStartDate())
                 .contractEndDate(store.getContractEndDate())
+                .createdAt(store.getCreatedAt())
                 .build();
     }
 

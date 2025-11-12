@@ -185,6 +185,7 @@ public class ContractServiceImpl implements ContractService {
                 .email(customer.getEmail())
                 .phone(customer.getPhone())
                 .identificationNumber(customer.getIdentificationNumber())
+                .createdAt(customer.getCreatedAt())
                 .build();
         
         // Map order details
@@ -305,6 +306,7 @@ public class ContractServiceImpl implements ContractService {
                         .orderCode(contract.getOrder().getOrderCode())
                         .customerId(contract.getOrder().getCustomer().getCustomerId())
                         .customerName(contract.getOrder().getCustomer().getFullName())
+                        .createdAt(contract.getCreatedAt())
                         .build())
                 .toList();
     }
@@ -440,6 +442,7 @@ public class ContractServiceImpl implements ContractService {
 //                .createdAt(contract.getCreatedAt().toString())
 //                .updatedAt(contract.getUpdatedAt().toString())
                 .orderId(contract.getOrder().getOrderId())
+                .createdAt(contract.getCreatedAt())
                 .build();
     }
 }

@@ -17,4 +17,5 @@ public class GetUserResponse {
     private String storeName;
     private int roleId;
     private String roleName;
+    private java.time.LocalDateTime createdAt;
 }

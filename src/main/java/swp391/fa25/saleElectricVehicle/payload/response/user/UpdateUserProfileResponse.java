@@ -8,6 +8,7 @@ import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 @AllArgsConstructor
 @Builder
 public class UpdateUserProfileResponse {
+    private int userId;
     private String fullName;
     private String email;
     private String phone;

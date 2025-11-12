@@ -82,7 +82,9 @@ public enum ErrorCode {
     INVENTORY_TRANSACTION_CANNOT_CONFIRM(1066, "Chỉ có thể xác nhận giao dịch tồn kho ở trạng thái chờ xử lí", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_REJECT(1067, "Chỉ có thể từ chối giao dịch tồn kho ở trạng thái chờ xử lí", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_DELIVER(1068, "Chỉ có thể đánh dấu giao dịch tồn kho là đã giao hàng khi ở trạng thái đang giao hàng", HttpStatus.BAD_REQUEST),
-    MANUFACTURER_PROMOTION_NOT_ALLOWED_FOR_ORDER(1069, "Không được sử dụng khuyến mãi của hãng cho đơn hàng của khách. Chỉ được dùng cho request lên hãng", HttpStatus.BAD_REQUEST)
+    MANUFACTURER_PROMOTION_NOT_ALLOWED_FOR_ORDER(1069, "Không được sử dụng khuyến mãi của hãng cho đơn hàng của khách. Chỉ được dùng cho request lên hãng", HttpStatus.BAD_REQUEST),
+//    INVALID_EMAIL_FORMAT(1070, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
+//    INVALID_PHONE_FORMAT(1071, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;
 
     private final int code;

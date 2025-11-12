@@ -447,6 +447,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .storeId(promotion.getStore() != null ? promotion.getStore().getStoreId() : null)
                 .storeName(promotion.getStore() != null ? promotion.getStore().getStoreName() : null)
                 .isManufacturerPromotion(promotion.isManufacturerPromotion())
+                .createdAt(promotion.getCreatedAt())
                 .build();
     }
 

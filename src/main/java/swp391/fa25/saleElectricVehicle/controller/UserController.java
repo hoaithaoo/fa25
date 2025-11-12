@@ -92,6 +92,7 @@ public class UserController {
                 .storeName(currentUser.getStore() != null ? currentUser.getStore().getStoreName() : null)
                 .roleId(currentUser.getRole().getRoleId())
                 .roleName(currentUser.getRole().getRoleName())
+                .createdAt(currentUser.getCreatedAt())
                 .build();
         
         ApiResponse<GetUserResponse> response = ApiResponse.<GetUserResponse>builder()
