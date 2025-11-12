@@ -93,37 +93,4 @@ public class PromotionController {
                 .build();
         return ResponseEntity.ok(response);
     }
-
-    @PostMapping("/manufacturer/create")
-    public ResponseEntity<ApiResponse<PromotionDto>> createManufacturerPromotion(@RequestBody PromotionDto promotionDto) {
-        PromotionDto createdPromotion = promotionService.createManufacturerPromotion(promotionDto);
-        ApiResponse<PromotionDto> response = ApiResponse.<PromotionDto>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("Manufacturer promotion created successfully")
-                .data(createdPromotion)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @GetMapping("/manufacturer/all")
-    public ResponseEntity<ApiResponse<List<PromotionDto>>> getAllManufacturerPromotions() {
-        List<PromotionDto> promotions = promotionService.getAllManufacturerPromotions();
-        ApiResponse<List<PromotionDto>> response = ApiResponse.<List<PromotionDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Manufacturer promotions retrieved successfully")
-                .data(promotions)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/manufacturer/model/{modelId}")
-    public ResponseEntity<ApiResponse<List<PromotionDto>>> getManufacturerPromotionsByModelId(@PathVariable int modelId) {
-        List<PromotionDto> promotions = promotionService.getManufacturerPromotionsByModelId(modelId);
-        ApiResponse<List<PromotionDto>> response = ApiResponse.<List<PromotionDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Manufacturer promotions by model retrieved successfully")
-                .data(promotions)
-                .build();
-        return ResponseEntity.ok(response);
-    }
 }

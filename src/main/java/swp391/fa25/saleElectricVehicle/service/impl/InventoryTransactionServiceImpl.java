@@ -28,8 +28,6 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     private StoreStockService storeStockService;
 
     @Autowired
-    private PromotionService promotionService;
-    @Autowired
     private ModelService modelService;
     @Autowired
     private ColorService colorService;
@@ -82,46 +80,6 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
             totalPrice = baseAmount.subtract(discountAmount);
         }
 
-        // Nếu có promotionId, áp dụng promotion của hãng
-//        if (dto.getPromotionId() != null && dto.getPromotionId() > 0) {
-//            promotion = promotionService.getPromotionEntityById(dto.getPromotionId());
-//
-//            // Kiểm tra promotion có phải của hãng không
-//            if (!promotion.isManufacturerPromotion()) {
-//                throw new AppException(ErrorCode.PROMOTION_NOT_EXIST,
-//                        "Chỉ có thể áp dụng promotion của hãng cho inventory transaction");
-//            }
-//
-//            // Kiểm tra promotion có active không
-//            if (!promotion.isActive()) {
-//                throw new AppException(ErrorCode.PROMOTION_EXPIRED,
-//                        "Promotion không còn hiệu lực");
-//            }
-//
-//            // Tính discount dựa trên promotion
-//            if (promotion.getPromotionType() == PromotionType.PERCENTAGE) {
-//                discountAmount = baseAmount
-//                        .multiply(promotion.getAmount())
-//                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-//                discountPercentage = promotion.getAmount().intValue();
-//            } else if (promotion.getPromotionType() == PromotionType.FIXED_AMOUNT) {
-//                discountAmount = promotion.getAmount().multiply(BigDecimal.valueOf(dto.getImportQuantity()));
-//                // Tính discountPercentage từ fixed amount
-//                if (baseAmount.compareTo(BigDecimal.ZERO) > 0) {
-//                    discountPercentage = discountAmount
-//                            .multiply(BigDecimal.valueOf(100))
-//                            .divide(baseAmount, 2, RoundingMode.HALF_UP)
-//                            .intValue();
-//                }
-//            }
-//        } else {
-//            // Nếu không có promotion, dùng discountPercentage từ DTO
-//            discountAmount = baseAmount
-//                    .multiply(BigDecimal.valueOf(dto.getDiscountPercentage()))
-//                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-//        }
-
-//        BigDecimal totalPrice = baseAmount.subtract(discountAmount);
         
         // Đảm bảo totalPrice không bao giờ âm (nếu âm thì set = 0)
         if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
@@ -137,13 +95,9 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .importQuantity(request.getImportQuantity())
                 .discountPercentage(discountPercentage)
                 .totalPrice(totalPrice)
-//                .deposit(dto.getDeposit())
-//                .dept(dept)
                 .orderDate(LocalDateTime.now())
-//                .deliveryDate(dto.getDeliveryDate())
                 .storeStock(storeStock)
                 .status(InventoryTransactionStatus.PENDING)
-//                .promotion(promotion)
                 .build();
 
         InventoryTransaction saved = inventoryTransactionRepository.save(inventoryTransaction);
