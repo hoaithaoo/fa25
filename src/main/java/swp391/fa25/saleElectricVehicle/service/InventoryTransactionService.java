@@ -22,8 +22,8 @@ public interface InventoryTransactionService {
     List<InventoryTransactionDto> getInventoryTransactionsByDateRange(
             LocalDateTime start, LocalDateTime end);
 
-    InventoryTransactionDto updateInventoryTransaction(
-            int inventoryId, InventoryTransactionDto dto);
+//    InventoryTransactionDto updateInventoryTransaction(
+//            int inventoryId, InventoryTransactionDto dto);
 
     void deleteInventoryTransaction(int inventoryId);
 

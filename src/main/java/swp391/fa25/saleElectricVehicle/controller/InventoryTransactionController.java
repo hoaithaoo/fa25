@@ -110,23 +110,23 @@ public class InventoryTransactionController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update/{inventoryId}")
-    public ResponseEntity<ApiResponse<InventoryTransactionDto>> updateInventoryTransaction(
-            @PathVariable int inventoryId,
-            @Valid @RequestBody InventoryTransactionDto dto) {
-
-        InventoryTransactionDto updated =
-                inventoryTransactionService.updateInventoryTransaction(inventoryId, dto);
-
-        ApiResponse<InventoryTransactionDto> response =
-                ApiResponse.<InventoryTransactionDto>builder()
-                        .code(HttpStatus.OK.value())
-                        .message("Inventory transaction updated successfully")
-                        .data(updated)
-                        .build();
-
-        return ResponseEntity.ok(response);
-    }
+//    @PutMapping("/update/{inventoryId}")
+//    public ResponseEntity<ApiResponse<InventoryTransactionDto>> updateInventoryTransaction(
+//            @PathVariable int inventoryId,
+//            @Valid @RequestBody InventoryTransactionDto dto) {
+//
+//        InventoryTransactionDto updated =
+//                inventoryTransactionService.updateInventoryTransaction(inventoryId, dto);
+//
+//        ApiResponse<InventoryTransactionDto> response =
+//                ApiResponse.<InventoryTransactionDto>builder()
+//                        .code(HttpStatus.OK.value())
+//                        .message("Inventory transaction updated successfully")
+//                        .data(updated)
+//                        .build();
+//
+//        return ResponseEntity.ok(response);
+//    }
 
     @DeleteMapping("/delete/{inventoryId}")
     public ResponseEntity<ApiResponse<Void>> deleteInventoryTransaction(@PathVariable int inventoryId) {

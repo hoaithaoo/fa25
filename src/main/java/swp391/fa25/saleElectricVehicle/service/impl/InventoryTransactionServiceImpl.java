@@ -108,6 +108,15 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Override
     public InventoryTransactionDto getInventoryTransactionById(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
+        
         return mapToDto(transaction);
     }
 
@@ -119,7 +128,12 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     @Override
     public List<InventoryTransactionDto> getAllInventoryTransactions() {
-        return inventoryTransactionRepository.findAll().stream()
+        // Lấy store của user hiện tại
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        // Chỉ lấy transactions của store hiện tại
+        return inventoryTransactionRepository.findByStoreStock_Store_StoreId(currentStore.getStoreId()).stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
@@ -127,7 +141,15 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Override
     public List<InventoryTransactionDto> getInventoryTransactionsByStoreStock(int storeStockId) {
         // Kiểm tra StoreStock tồn tại
-        storeStockService.getStoreStockEntityById(storeStockId);
+        StoreStock storeStock = storeStockService.getStoreStockEntityById(storeStockId);
+        
+        // Kiểm tra StoreStock có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (storeStock.getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        }
 
         return inventoryTransactionRepository.findByStoreStock_StockId(storeStockId).stream()
                 .map(this::mapToDto)
@@ -137,72 +159,86 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Override
     public List<InventoryTransactionDto> getInventoryTransactionsByDateRange(
             LocalDateTime start, LocalDateTime end) {
-
-        return inventoryTransactionRepository.findByTransactionDateBetween(start, end).stream()
+        
+        // Lấy store của user hiện tại
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        // Chỉ lấy transactions của store hiện tại trong khoảng ngày
+        return inventoryTransactionRepository.findByStoreStock_Store_StoreIdAndOrderDateBetween(
+                currentStore.getStoreId(), start, end).stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Transactional
-    public InventoryTransactionDto updateInventoryTransaction(
-            int inventoryId, InventoryTransactionDto dto) {
-
-        InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
-
-        // Chỉ cho phép update khi status là PENDING
-        if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
-            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_UPDATE);
-        }
-
-        // Cập nhật các field nếu có trong DTO (khác null)
-        if (dto.getUnitBasePrice() != null) {
-            transaction.setUnitBasePrice(dto.getUnitBasePrice());
-        }
-
-        if (dto.getImportQuantity() != 0) {
-            transaction.setImportQuantity(dto.getImportQuantity());
-        }
-
-        if (dto.getDiscountPercentage() != 0) {
-            transaction.setDiscountPercentage(dto.getDiscountPercentage());
-        }
-
-        if (dto.getDeliveryDate() != null) {
-            transaction.setDeliveryDate(dto.getDeliveryDate());
-        }
-
-        // Không cho phép đổi StoreStock sau khi đã tạo transaction
-        // if (dto.getStoreStockId() != 0) {
-        //     StoreStock newStoreStock = storeStockService.getStoreStockEntityById(dto.getStoreStockId());
-        //     transaction.setStoreStock(newStoreStock);
-        // }
-
-        // Tính lại totalPrice
-        BigDecimal baseAmount = transaction.getUnitBasePrice()
-                .multiply(BigDecimal.valueOf(transaction.getImportQuantity()));
-
-        BigDecimal discountAmount = baseAmount
-                .multiply(BigDecimal.valueOf(transaction.getDiscountPercentage()))
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-        BigDecimal totalPrice = baseAmount.subtract(discountAmount);
-        
-        // Đảm bảo totalPrice không bao giờ âm (nếu âm thì set = 0)
-        if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
-            totalPrice = BigDecimal.ZERO;
-        }
-        
-        transaction.setTotalPrice(totalPrice);
-
-        InventoryTransaction updated = inventoryTransactionRepository.save(transaction);
-        return mapToDto(updated);
-    }
+//    @Override
+//    @Transactional
+//    public InventoryTransactionDto updateInventoryTransaction(
+//            int inventoryId, CreateInventoryTransactionRequest dto) {
+//
+//        InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+//
+//        // Chỉ cho phép update khi status là PENDING
+//        if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
+//            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_UPDATE);
+//        }
+//
+//        // Cập nhật các field nếu có trong DTO (khác null)
+//        if (dto.getUnitBasePrice() != null) {
+//            transaction.setUnitBasePrice(dto.getUnitBasePrice());
+//        }
+//
+//        if (dto.getImportQuantity() != 0) {
+//            transaction.setImportQuantity(dto.getImportQuantity());
+//        }
+//
+//        if (dto.getDiscountPercentage() != 0) {
+//            transaction.setDiscountPercentage(dto.getDiscountPercentage());
+//        }
+//
+//        if (dto.getDeliveryDate() != null) {
+//            transaction.setDeliveryDate(dto.getDeliveryDate());
+//        }
+//
+//        // Không cho phép đổi StoreStock sau khi đã tạo transaction
+//        // if (dto.getStoreStockId() != 0) {
+//        //     StoreStock newStoreStock = storeStockService.getStoreStockEntityById(dto.getStoreStockId());
+//        //     transaction.setStoreStock(newStoreStock);
+//        // }
+//
+//        // Tính lại totalPrice
+//        BigDecimal baseAmount = transaction.getUnitBasePrice()
+//                .multiply(BigDecimal.valueOf(transaction.getImportQuantity()));
+//
+//        BigDecimal discountAmount = baseAmount
+//                .multiply(BigDecimal.valueOf(transaction.getDiscountPercentage()))
+//                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+//
+//        BigDecimal totalPrice = baseAmount.subtract(discountAmount);
+//
+//        // Đảm bảo totalPrice không bao giờ âm (nếu âm thì set = 0)
+//        if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
+//            totalPrice = BigDecimal.ZERO;
+//        }
+//
+//        transaction.setTotalPrice(totalPrice);
+//
+//        InventoryTransaction updated = inventoryTransactionRepository.save(transaction);
+//        return mapToDto(updated);
+//    }
 
     @Override
     @Transactional
     public void deleteInventoryTransaction(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
 
         // Chỉ cho phép xóa khi status là PENDING
         if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
@@ -216,6 +252,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto acceptRequest(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
 
         // Chỉ cho phép accept khi status là PENDING
         if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
@@ -233,6 +277,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto rejectRequest(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
 
         // Chỉ cho phép reject khi status là PENDING
         if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
@@ -250,6 +302,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto startShipping(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
 
         // Chỉ cho phép start shipping khi status là PAYMENT_CONFIRMED
         if (transaction.getStatus() != InventoryTransactionStatus.PAYMENT_CONFIRMED) {
@@ -267,6 +327,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto confirmDelivery(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
 
         // Chỉ cho phép confirm delivery khi status là IN_TRANSIT
         if (transaction.getStatus() != InventoryTransactionStatus.IN_TRANSIT) {
@@ -291,6 +359,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto uploadReceipt(int inventoryId, String imageUrl) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
 
         // Chỉ cho phép upload receipt khi status là CONFIRMED
         if (transaction.getStatus() != InventoryTransactionStatus.CONFIRMED) {
@@ -309,6 +385,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto confirmPayment(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
 
         // Chỉ cho phép confirm payment khi status là FILE_UPLOADED
         if (transaction.getStatus() != InventoryTransactionStatus.FILE_UPLOADED) {
@@ -326,6 +410,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto cancelRequest(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
 
         // Chỉ cho phép cancel khi status là PENDING
         if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
@@ -341,20 +433,27 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     // Helper method: Map Entity sang DTO
     private InventoryTransactionDto mapToDto(InventoryTransaction transaction) {
+        BigDecimal totalBasePrice = transaction.getUnitBasePrice()
+                .multiply(BigDecimal.valueOf(transaction.getImportQuantity()));
         return InventoryTransactionDto.builder()
                 .inventoryId(transaction.getInventoryId())
                 .unitBasePrice(transaction.getUnitBasePrice())
                 .importQuantity(transaction.getImportQuantity())
+                .totalBasePrice(totalBasePrice)
                 .discountPercentage(transaction.getDiscountPercentage())
+                .discountAmount(totalBasePrice.multiply(BigDecimal.valueOf(transaction.getDiscountPercentage())))
                 .totalPrice(transaction.getTotalPrice())
-                .deposit(0) // Field không còn trong entity, set default
-                .dept(null) // Field không còn trong entity, set null
-                .transactionDate(transaction.getOrderDate()) // Sử dụng orderDate thay vì transactionDate
+//                .deposit(0) // Field không còn trong entity, set default
+//                .dept(null) // Field không còn trong entity, set null
+                .orderDate(transaction.getOrderDate()) // Sử dụng orderDate thay vì transactionDate
                 .deliveryDate(transaction.getDeliveryDate())
                 .imageUrl(transaction.getImageUrl())
                 .status(transaction.getStatus())
-                .storeStockId(transaction.getStoreStock().getStockId())
-                .promotionId(null) // Field không còn trong entity, set null
+                .modelId(transaction.getStoreStock().getModelColor().getModel().getModelId())
+                .modelName(transaction.getStoreStock().getModelColor().getModel().getModelName())
+                .colorId(transaction.getStoreStock().getModelColor().getColor().getColorId())
+                .colorName(transaction.getStoreStock().getModelColor().getColor().getColorName())
+//                .storeStockId(transaction.getStoreStock().getStockId())
                 .build();
     }
 }
