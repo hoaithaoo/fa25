@@ -2,13 +2,14 @@ package swp391.fa25.saleElectricVehicle.service;
 
 import swp391.fa25.saleElectricVehicle.entity.InventoryTransaction;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionDto;
+import swp391.fa25.saleElectricVehicle.payload.request.inventory.CreateInventoryTransactionRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface InventoryTransactionService {
 
-    InventoryTransactionDto createInventoryTransaction(InventoryTransactionDto dto);
+    InventoryTransactionDto createInventoryTransaction(CreateInventoryTransactionRequest request);
 
     InventoryTransactionDto getInventoryTransactionById(int inventoryId);
 
@@ -21,8 +22,8 @@ public interface InventoryTransactionService {
     List<InventoryTransactionDto> getInventoryTransactionsByDateRange(
             LocalDateTime start, LocalDateTime end);
 
-    InventoryTransactionDto updateInventoryTransaction(
-            int inventoryId, InventoryTransactionDto dto);
+//    InventoryTransactionDto updateInventoryTransaction(
+//            int inventoryId, InventoryTransactionDto dto);
 
     void deleteInventoryTransaction(int inventoryId);
 
@@ -33,4 +34,10 @@ public interface InventoryTransactionService {
     InventoryTransactionDto startShipping(int inventoryId);
 
     InventoryTransactionDto confirmDelivery(int inventoryId);
+
+    InventoryTransactionDto uploadReceipt(int inventoryId, String imageUrl);
+
+    InventoryTransactionDto confirmPayment(int inventoryId);
+
+    InventoryTransactionDto cancelRequest(int inventoryId);
 }

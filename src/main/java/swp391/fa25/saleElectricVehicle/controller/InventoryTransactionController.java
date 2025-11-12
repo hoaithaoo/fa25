@@ -1,13 +1,20 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionDto;
+import swp391.fa25.saleElectricVehicle.payload.request.inventory.CreateInventoryTransactionRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.InventoryTransactionService;
 
 import java.time.LocalDateTime;
@@ -20,11 +27,14 @@ public class InventoryTransactionController {
     @Autowired
     private InventoryTransactionService inventoryTransactionService;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<InventoryTransactionDto>> createInventoryTransaction(
-            @Valid @RequestBody InventoryTransactionDto dto) {
+            @Valid @RequestBody CreateInventoryTransactionRequest request) {
 
-        InventoryTransactionDto created = inventoryTransactionService.createInventoryTransaction(dto);
+        InventoryTransactionDto created = inventoryTransactionService.createInventoryTransaction(request);
 
         ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
                 .code(HttpStatus.CREATED.value())
@@ -100,23 +110,23 @@ public class InventoryTransactionController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/update/{inventoryId}")
-    public ResponseEntity<ApiResponse<InventoryTransactionDto>> updateInventoryTransaction(
-            @PathVariable int inventoryId,
-            @Valid @RequestBody InventoryTransactionDto dto) {
-
-        InventoryTransactionDto updated =
-                inventoryTransactionService.updateInventoryTransaction(inventoryId, dto);
-
-        ApiResponse<InventoryTransactionDto> response =
-                ApiResponse.<InventoryTransactionDto>builder()
-                        .code(HttpStatus.OK.value())
-                        .message("Inventory transaction updated successfully")
-                        .data(updated)
-                        .build();
-
-        return ResponseEntity.ok(response);
-    }
+//    @PutMapping("/update/{inventoryId}")
+//    public ResponseEntity<ApiResponse<InventoryTransactionDto>> updateInventoryTransaction(
+//            @PathVariable int inventoryId,
+//            @Valid @RequestBody InventoryTransactionDto dto) {
+//
+//        InventoryTransactionDto updated =
+//                inventoryTransactionService.updateInventoryTransaction(inventoryId, dto);
+//
+//        ApiResponse<InventoryTransactionDto> response =
+//                ApiResponse.<InventoryTransactionDto>builder()
+//                        .code(HttpStatus.OK.value())
+//                        .message("Inventory transaction updated successfully")
+//                        .data(updated)
+//                        .build();
+//
+//        return ResponseEntity.ok(response);
+//    }
 
     @DeleteMapping("/delete/{inventoryId}")
     public ResponseEntity<ApiResponse<Void>> deleteInventoryTransaction(@PathVariable int inventoryId) {
@@ -186,6 +196,61 @@ public class InventoryTransactionController {
                 .code(HttpStatus.OK.value())
                 .message("Delivery confirmed successfully. Stock updated.")
                 .data(confirmed)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(
+            value = "/{inventoryId}/upload-receipt",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ApiResponse<InventoryTransactionDto>> uploadReceipt(
+            @PathVariable int inventoryId,
+            @Parameter(description = "Biên lai thanh toán", required = true,
+                    content = @Content(schema = @Schema(type = "string", format = "binary")))
+            @RequestPart("file") MultipartFile file) {
+
+        // Upload file lên Cloudinary
+        String fileUrl = cloudinaryService.uploadFile(file, "inventory-receipts");
+        
+        // Cập nhật transaction với imageUrl và status
+        InventoryTransactionDto updated = inventoryTransactionService.uploadReceipt(inventoryId, fileUrl);
+
+        ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Biên lai đã được upload thành công")
+                .data(updated)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{inventoryId}/confirm-payment")
+    public ResponseEntity<ApiResponse<InventoryTransactionDto>> confirmPayment(
+            @PathVariable int inventoryId) {
+
+        InventoryTransactionDto confirmed = inventoryTransactionService.confirmPayment(inventoryId);
+
+        ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Thanh toán đã được xác nhận thành công")
+                .data(confirmed)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{inventoryId}/cancel")
+    public ResponseEntity<ApiResponse<InventoryTransactionDto>> cancelRequest(
+            @PathVariable int inventoryId) {
+
+        InventoryTransactionDto cancelled = inventoryTransactionService.cancelRequest(inventoryId);
+
+        ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Request đã được hủy thành công")
+                .data(cancelled)
                 .build();
 
         return ResponseEntity.ok(response);
