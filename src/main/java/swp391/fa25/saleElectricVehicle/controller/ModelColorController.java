@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelColorDto;
 import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelColorRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.model.UpdateModelColorPriceRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.ModelColorService;
@@ -109,6 +110,17 @@ public class ModelColorController {
         ApiResponse<ModelColorDto> response = ApiResponse.<ModelColorDto>builder()
                 .code(HttpStatus.OK.value())
                 .message("Model color updated successfully")
+                .data(updatedModelColor)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/update-price")
+    public ResponseEntity<ApiResponse<ModelColorDto>> updateModelColorPrice(@PathVariable int id, @RequestBody UpdateModelColorPriceRequest request) {
+        ModelColorDto updatedModelColor = modelColorService.updateModelColorPrice(id, request);
+        ApiResponse<ModelColorDto> response = ApiResponse.<ModelColorDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Model color price updated successfully")
                 .data(updatedModelColor)
                 .build();
         return ResponseEntity.ok(response);
