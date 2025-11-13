@@ -9,11 +9,13 @@ import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.ModelColorDto;
 import swp391.fa25.saleElectricVehicle.payload.request.model.CreateModelColorRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.model.UpdateModelColorPriceRequest;
 import swp391.fa25.saleElectricVehicle.repository.ModelColorRepository;
 import swp391.fa25.saleElectricVehicle.service.ColorService;
 import swp391.fa25.saleElectricVehicle.service.ModelColorService;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -143,6 +145,26 @@ public class ModelColorServiceImpl implements ModelColorService {
 //            existingModelColor.setColor(color);
 //        }
 
+        modelColorRepository.save(existingModelColor);
+        return mapToDto(existingModelColor);
+    }
+
+    @Override
+    public ModelColorDto updateModelColorPrice(int id, UpdateModelColorPriceRequest request) {
+        ModelColor existingModelColor = modelColorRepository.findById(id).orElse(null);
+        if (existingModelColor == null) {
+            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
+        }
+
+        if (request.getPrice() == null) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        if (request.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new AppException(ErrorCode.INVALID_NUMBER);
+        }
+
+        existingModelColor.setPrice(request.getPrice());
         modelColorRepository.save(existingModelColor);
         return mapToDto(existingModelColor);
     }

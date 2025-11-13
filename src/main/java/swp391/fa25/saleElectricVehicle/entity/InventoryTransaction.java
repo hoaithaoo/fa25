@@ -31,28 +31,30 @@ public class InventoryTransaction {
     @Column(nullable = false)
     private BigDecimal totalPrice;
 
-    @Column(nullable = false)
-    private int deposit;
+//    @Column(nullable = false)
+//    private int deposit;
+//
+//    @Column
+//    private BigDecimal dept;
 
-    @Column
-    private BigDecimal dept;
-
     @Column(nullable = false)
-    private LocalDateTime transactionDate;
+    private LocalDateTime orderDate;
 
     @Column
     private LocalDateTime deliveryDate;
 
+    @Column
+    private String imageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
-    private InventoryTransactionStatus status = InventoryTransactionStatus.PENDING;
+    private InventoryTransactionStatus status;
 
     @ManyToOne
     @JoinColumn(name = "storeStockId", nullable = false)
     private StoreStock storeStock;
 
-    @ManyToOne
-    @JoinColumn(name = "promotionId", nullable = true)
-    private Promotion promotion; // Promotion của hãng được áp dụng (nếu có)
+//    @ManyToOne
+//    @JoinColumn(name = "promotionId", nullable = true)
+//    private Promotion promotion; // Promotion của hãng được áp dụng (nếu có)
 }

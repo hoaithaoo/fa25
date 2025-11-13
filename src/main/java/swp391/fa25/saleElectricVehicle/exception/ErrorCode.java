@@ -82,9 +82,12 @@ public enum ErrorCode {
     INVENTORY_TRANSACTION_CANNOT_CONFIRM(1066, "Chỉ có thể xác nhận giao dịch tồn kho ở trạng thái chờ xử lí", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_REJECT(1067, "Chỉ có thể từ chối giao dịch tồn kho ở trạng thái chờ xử lí", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_DELIVER(1068, "Chỉ có thể đánh dấu giao dịch tồn kho là đã giao hàng khi ở trạng thái đang giao hàng", HttpStatus.BAD_REQUEST),
-    MANUFACTURER_PROMOTION_NOT_ALLOWED_FOR_ORDER(1069, "Không được sử dụng khuyến mãi của hãng cho đơn hàng của khách. Chỉ được dùng cho request lên hãng", HttpStatus.BAD_REQUEST),
-//    INVALID_EMAIL_FORMAT(1070, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
-//    INVALID_PHONE_FORMAT(1071, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
+    INVENTORY_TRANSACTION_CANNOT_UPLOAD_RECEIPT(1070, "Chỉ có thể upload biên lai khi giao dịch đã được hãng xác nhận (CONFIRMED)", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_CONFIRM_PAYMENT(1071, "Chỉ có thể xác nhận thanh toán khi đại lý đã upload biên lai (FILE_UPLOADED)", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_CANCEL(1072, "Chỉ có thể hủy request khi ở trạng thái chờ xử lí (PENDING)", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_START_SHIPPING(1073, "Chỉ có thể bắt đầu giao hàng khi hãng đã xác nhận thanh toán (PAYMENT_CONFIRMED)", HttpStatus.BAD_REQUEST),
+//    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
+//    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;
 
     private final int code;

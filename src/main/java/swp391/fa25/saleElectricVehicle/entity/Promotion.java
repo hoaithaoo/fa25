@@ -54,11 +54,7 @@ public class Promotion {
 
     @ManyToOne
     @JoinColumn(name = "storeId")
-    private Store store; // null nếu là promotion của hãng
-
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean isManufacturerPromotion = false; // true nếu là promotion của hãng
+    private Store store;
 
     @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();

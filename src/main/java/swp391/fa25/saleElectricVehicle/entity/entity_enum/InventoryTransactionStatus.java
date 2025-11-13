@@ -4,6 +4,8 @@ public enum InventoryTransactionStatus {
     PENDING,      // Đại lý tạo request, chờ hãng xử lý
     CONFIRMED,    // Hãng đã chấp nhận request
     REJECTED,     // Hãng đã từ chối request
+    FILE_UPLOADED, // Biên lai than toán đã được tải lên, chờ xác nhận
+    PAYMENT_CONFIRMED, // Hãng đã xác nhận thanh toán
     IN_TRANSIT,   // Đang giao hàng (sau khi CONFIRMED)
     DELIVERED,    // Đại lý xác nhận đã nhận hàng, cập nhật tồn kho
     CANCELLED     // Đại lý hủy request
