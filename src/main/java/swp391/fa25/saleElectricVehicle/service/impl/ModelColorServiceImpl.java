@@ -62,6 +62,15 @@ public class ModelColorServiceImpl implements ModelColorService {
     }
 
     @Override
+    public ModelColor getModelColorEntityById(int id) {
+        ModelColor modelColor = modelColorRepository.findById(id).orElse(null);
+        if (modelColor == null) {
+            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
+        }
+        return modelColor;
+    }
+
+    @Override
     public ModelColorDto getModelColorById(int id) {
         ModelColor modelColor = modelColorRepository.findById(id).orElse(null);
         if (modelColor == null) {

@@ -20,16 +20,16 @@ public class StoreStockController {
     @Autowired
     private StoreStockService storeStockService;
 
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<StoreStockDto>> createStoreStock(@RequestBody CreateStoreStockRequest createStoreStock) {
-        StoreStockDto storeStockDto = storeStockService.createStoreStock(createStoreStock);
-        ApiResponse<StoreStockDto> response = ApiResponse.<StoreStockDto>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("Store stock created successfully")
-                .data(storeStockDto)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+//    @PostMapping("/create")
+//    public ResponseEntity<ApiResponse<StoreStockDto>> createStoreStock(@RequestBody CreateStoreStockRequest createStoreStock) {
+//        StoreStockDto storeStockDto = storeStockService.createStoreStock(createStoreStock);
+//        ApiResponse<StoreStockDto> response = ApiResponse.<StoreStockDto>builder()
+//                .code(HttpStatus.CREATED.value())
+//                .message("Store stock created successfully")
+//                .data(storeStockDto)
+//                .build();
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//    }
 
     @GetMapping("quantity")
     public ResponseEntity<ApiResponse<Integer>> getQuantityByStoreId(@RequestBody int modelId, @RequestBody int colorId) {

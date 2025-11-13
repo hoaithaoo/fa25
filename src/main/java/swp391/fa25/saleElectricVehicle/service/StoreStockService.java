@@ -8,7 +8,8 @@ import swp391.fa25.saleElectricVehicle.payload.request.stock.UpdatePriceOfStoreR
 import java.util.List;
 
 public interface StoreStockService {
-    StoreStockDto createStoreStock(CreateStoreStockRequest createStoreStock);
+//    StoreStockDto createStoreStock(CreateStoreStockRequest createStoreStock);
+    StoreStockDto createStoreStock(int modelColorId);
     List<StoreStockDto> getAllStoreStockByStoreId();
     StoreStock getStoreStockEntityById(int stockId);
     StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelColorId);

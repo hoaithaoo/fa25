@@ -36,12 +36,13 @@ public class StoreStockServiceImpl implements StoreStockService {
     private UserService userService;
 
     @Override
-    public StoreStockDto createStoreStock(CreateStoreStockRequest request) {
+    public StoreStockDto createStoreStock(int modelColorId) {
         User user = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(user.getUserId());
-        Model model = modelService.getModelEntityById(request.getModelId());
-        Color color = colorService.getColorEntityById(request.getColorId());
-        ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
+        ModelColor modelColor = modelColorService.getModelColorEntityById(modelColorId);
+//        Model model = modelService.getModelEntityById(request.getModelId());
+//        Color color = colorService.getColorEntityById(request.getColorId());
+//        ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
 
         StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(store.getStoreId(), modelColor.getModelColorId());
         if (storeStock != null) {
@@ -51,8 +52,8 @@ public class StoreStockServiceImpl implements StoreStockService {
         storeStock = storeStockRepository.save(StoreStock.builder()
                 .store(store)
                 .modelColor(modelColor)
-                .priceOfStore(request.getPriceOfStore())
-                .quantity(request.getQuantity())
+                .priceOfStore(BigDecimal.ZERO) // default 0, phải update sau
+                .quantity(0) // default 0, phải cộng khi có nhập kho
                 .build());
 
         return mapToDto(storeStock);
@@ -79,7 +80,7 @@ public class StoreStockServiceImpl implements StoreStockService {
     public StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelColorId) {
         StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(storeId, modelColorId);
         if (storeStock == null) {
-            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+            createStoreStock(modelColorId);
         }
         return storeStock;
     }
