@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface StoreStockService {
 //    StoreStockDto createStoreStock(CreateStoreStockRequest createStoreStock);
-    StoreStockDto createStoreStock(int modelColorId);
+    StoreStock createStoreStock(int modelColorId);
     List<StoreStockDto> getAllStoreStockByStoreId();
     StoreStock getStoreStockEntityById(int stockId);
     StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelColorId);

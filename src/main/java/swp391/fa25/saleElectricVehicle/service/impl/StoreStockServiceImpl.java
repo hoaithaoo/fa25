@@ -36,7 +36,7 @@ public class StoreStockServiceImpl implements StoreStockService {
     private UserService userService;
 
     @Override
-    public StoreStockDto createStoreStock(int modelColorId) {
+    public StoreStock createStoreStock(int modelColorId) {
         User user = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(user.getUserId());
         ModelColor modelColor = modelColorService.getModelColorEntityById(modelColorId);
@@ -56,7 +56,7 @@ public class StoreStockServiceImpl implements StoreStockService {
                 .quantity(0) // default 0, phải cộng khi có nhập kho
                 .build());
 
-        return mapToDto(storeStock);
+        return storeStock;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class StoreStockServiceImpl implements StoreStockService {
     public StoreStock getStoreStockByStoreIdAndModelColorId(int storeId, int modelColorId) {
         StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(storeId, modelColorId);
         if (storeStock == null) {
-            createStoreStock(modelColorId);
+            storeStock = createStoreStock(modelColorId);
         }
         return storeStock;
     }
