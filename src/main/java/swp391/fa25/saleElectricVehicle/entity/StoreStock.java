@@ -19,13 +19,13 @@ public class StoreStock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int stockId;
 
-    @Column(nullable = false)
+    @Column
     private BigDecimal priceOfStore;
 
     @Column(nullable = false)
     private int quantity;
 
-    @Column(nullable = false)
+    @Column
     @Builder.Default
     private int reservedQuantity = 0; // Số lượng đã được reserve bởi các orders CONFIRMED
 
