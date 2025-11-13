@@ -39,7 +39,8 @@ public class SecurityConfig {
             "/auth/**",
             "/model-colors/all", // cho phép truy cập để hiển thị model ở home page
             "/stores/all", // cho phép truy cập để hiển thị store ở home page
-            "/payment/vnpay/ipn"
+            "/payment/vnpay/ipn",
+//            "/uploads/**" // cho phép truy cập public vào các file ảnh đã upload
     };
 
     @Bean
