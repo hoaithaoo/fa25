@@ -169,18 +169,18 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
 
 
-//            if (request.isIncludeLicensePlateService()) {
-//                // Khách chọn dịch vụ đăng ký biển số
-//                licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
-//                if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh")
-//                        || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
-//                    licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-//                }
-//                registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-//            }
-//            // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
-//
-//            totalTax = totalTax.add(licensePlateFee).add(registrationFee);
+            if (request.isIncludeLicensePlateService()) {
+                // Khách chọn dịch vụ đăng ký biển số
+                licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
+                if (store.getProvinceName().equalsIgnoreCase("TP. Hồ Chí Minh")
+                        || store.getProvinceName().equalsIgnoreCase("Hà Nội")) {
+                    licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                }
+                registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+            }
+            // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
+
+            totalTax = totalTax.add(licensePlateFee).add(registrationFee);
 
             // Calculate discount amount
             Promotion promotion = null;
@@ -235,18 +235,18 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             orderDetails.add(saved);
         }
 
-        if (request.isIncludeLicensePlateService()) {
-            // Khách chọn dịch vụ đăng ký biển số
-            licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(quantity)); // Default 200K/vehicle * tổng số xe
-            if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
-                    || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
-                licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(quantity)); // 20M/vehicle * tổng số xe
-            }
-            registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(quantity));
-        }
-        // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
-
-        totalTax = totalTax.add(licensePlateFee).add(registrationFee);
+//        if (request.isIncludeLicensePlateService()) {
+//            // Khách chọn dịch vụ đăng ký biển số
+//            licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(quantity)); // Default 200K/vehicle * tổng số xe
+//            if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
+//                    || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
+//                licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(quantity)); // 20M/vehicle * tổng số xe
+//            }
+//            registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(quantity));
+//        }
+//        // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
+//
+//        totalTax = totalTax.add(licensePlateFee).add(registrationFee);
 
         // cập nhật order khi có order details
         order.setTotalPrice(totalOrderPrice);
