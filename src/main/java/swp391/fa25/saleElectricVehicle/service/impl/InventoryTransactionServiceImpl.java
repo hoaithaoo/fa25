@@ -54,8 +54,8 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
         User staff = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(staff.getUserId());
 
-        // Kiểm tra StoreStock tồn tại
-        StoreStock storeStock = storeStockService.getStoreStockByStoreIdAndModelColorId(store.getStoreId(), model.getModelId());
+        // Kiểm tra StoreStock tồn tại - phải dùng modelColorId, không phải modelId
+        StoreStock storeStock = storeStockService.getStoreStockByStoreIdAndModelColorId(store.getStoreId(), modelColor.getModelColorId());
 
         // Tính base amount
         BigDecimal baseAmount = modelColor.getPrice().multiply(BigDecimal.valueOf(request.getImportQuantity()));
