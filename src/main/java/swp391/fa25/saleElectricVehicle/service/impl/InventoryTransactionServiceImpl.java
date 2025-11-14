@@ -122,6 +122,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     @Override
     public InventoryTransaction getInventoryTransactionEntityById(int inventoryId) {
+        User currentUser = userService.getCurrentUserEntity();
+        // Nếu không phải evm staff thì chỉ lấy transactions của store hiện tại
+        if (currentUser.getRole().getRoleId() != 2) {
+            Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+            // Chỉ lấy transactions của store hiện tại
+            return inventoryTransactionRepository.findInventoryTransactionByStoreStock_Store_StoreId(currentStore.getStoreId());
+        }
+        // Nếu là evm staff thì lấy tất cả transactions
         return inventoryTransactionRepository.findById(inventoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND));
     }
@@ -130,10 +138,15 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     public List<InventoryTransactionDto> getAllInventoryTransactions() {
         // Lấy store của user hiện tại
         User currentUser = userService.getCurrentUserEntity();
-        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        
-        // Chỉ lấy transactions của store hiện tại
-        return inventoryTransactionRepository.findByStoreStock_Store_StoreId(currentStore.getStoreId()).stream()
+        if (currentUser.getRole().getRoleId() != 2) {
+            Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+            // Chỉ lấy transactions của store hiện tại
+            return inventoryTransactionRepository.findByStoreStock_Store_StoreId(currentStore.getStoreId()).stream()
+                    .map(this::mapToDto)
+                    .collect(Collectors.toList());
+        }
+        // Nếu là evm staff thì lấy tất cả transactions
+        return inventoryTransactionRepository.findAll().stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }

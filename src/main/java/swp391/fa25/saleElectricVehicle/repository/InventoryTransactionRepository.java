@@ -21,5 +21,7 @@ public interface InventoryTransactionRepository extends JpaRepository<InventoryT
     // Lấy transaction theo storeId và khoảng ngày
     List<InventoryTransaction> findByStoreStock_Store_StoreIdAndOrderDateBetween(int storeId, LocalDateTime start, LocalDateTime end);
 
+    InventoryTransaction findInventoryTransactionByStoreStock_Store_StoreId(int storeStockStoreStoreId);
+
     // Có thể bổ sung các hàm query dạng Spring Data khi cần!
 }
