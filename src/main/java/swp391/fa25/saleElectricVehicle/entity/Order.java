@@ -56,6 +56,21 @@ public class Order {
     @JoinColumn(name = "staff_id", nullable = false)
     private User user;
 
+    // Store snapshot - lưu store tại thời điểm tạo order
+    // Store luôn được set từ user.store khi tạo order (validation ở service layer)
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
+
+    // Tự động set store từ user.store trước khi persist (đảm bảo consistency)
+    // Luôn override store bằng user.store để tránh inconsistency
+    @PrePersist
+    private void setStoreFromUser() {
+        if (this.user != null && this.user.getStore() != null) {
+            this.store = this.user.getStore();
+        }
+    }
+
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Feedback feedback;
 

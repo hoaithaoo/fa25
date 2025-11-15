@@ -144,7 +144,7 @@ public class ContractServiceImpl implements ContractService {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
-        int contractStoreId = contract.getOrder().getUser().getStore().getStoreId();
+        int contractStoreId = contract.getOrder().getStore().getStoreId();
         if (contractStoreId != currentUser.getStore().getStoreId()) {
             throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
         }
@@ -175,7 +175,7 @@ public class ContractServiceImpl implements ContractService {
         Order order = contract.getOrder();
         Customer customer = order.getCustomer();
         User staff = order.getUser();
-        Store store = staff.getStore();
+        Store store = order.getStore(); // Lấy store từ order thay vì từ staff
         
         // Map customer
         CustomerDto customerDto = CustomerDto.builder()
@@ -291,7 +291,7 @@ public class ContractServiceImpl implements ContractService {
         }
         
         int storeId = currentUser.getStore().getStoreId();
-        List<Contract> contracts = contractRepository.findByOrder_User_Store_StoreId(storeId);
+        List<Contract> contracts = contractRepository.findByOrder_Store_StoreId(storeId);
         return contracts.stream().map(contract -> GetContractResponse.builder()
                         .contractId(contract.getContractId())
                         .contractCode(contract.getContractCode())

@@ -44,13 +44,15 @@ public class OrderServiceImpl implements OrderService {
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
         Customer customer = customerService.getCustomerEntityById(request.getCustomerId());
         User staff = userService.getCurrentUserEntity();
-//        // ✅ TẠM THỜI: Hard-code userId = 1 (hoặc userId nào có trong database)
-//        User staff = userService.getUserEntityById(1);
         Store store = storeService.getCurrentStoreEntity(staff.getUserId());
-//        // ✅ TẠM THỜI: Hard-code storeId = 1 (hoặc storeId nào có trong database)
-//        Store store = storeService.getStoreEntityById(1);
 
-        Order savedOrder = orderRepository.save(Order.builder()
+        // Validation: Đảm bảo staff có store
+        if (staff.getStore() == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST, "Staff phải thuộc một store");
+        }
+
+        // Tạo order - store sẽ được tự động set từ user.store bởi @PrePersist
+        Order newOrder = Order.builder()
                 .totalPrice(BigDecimal.ZERO)
                 .totalTaxPrice(BigDecimal.ZERO)
                 .totalPromotionAmount(BigDecimal.ZERO)
@@ -59,7 +61,10 @@ public class OrderServiceImpl implements OrderService {
                 .orderDate(LocalDateTime.now())
                 .customer(customer)
                 .user(staff)
-                .build());
+                .build();
+        
+        // @PrePersist sẽ tự động set store = staff.getStore()
+        Order savedOrder = orderRepository.save(newOrder);
         String orderCode = "ORD" + String.format("%06d", savedOrder.getOrderId());
         savedOrder.setOrderCode(orderCode);
         savedOrder = orderRepository.save(savedOrder);
@@ -86,8 +91,7 @@ public class OrderServiceImpl implements OrderService {
     public GetOrderResponse getOrderById(int orderId) {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        Order order = orderRepository.findOrderByUser_Store_StoreIdAndOrderId((store.getStoreId()), orderId);
-//        Order order = orderRepository.findById(orderId).orElse(null);
+        Order order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
@@ -100,10 +104,6 @@ public class OrderServiceImpl implements OrderService {
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
-
-        // Lấy store từ user hiện tại
-        User currentUser = userService.getCurrentUserEntity();
-        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
 
         List<OrderDetail> list = order.getOrderDetails();
         int count = 0;
@@ -142,9 +142,9 @@ public class OrderServiceImpl implements OrderService {
                 .customerName(order.getCustomer().getFullName())
                 .staffId(order.getUser().getUserId())
                 .staffName(order.getUser().getFullName())
-                .storeId(store.getStoreId())
-                .storeName(store.getStoreName())
-                .storeAddress(store.getAddress())
+                .storeId(order.getStore().getStoreId())
+                .storeName(order.getStore().getStoreName())
+                .storeAddress(order.getStore().getAddress())
                 .build();
     }
 
@@ -152,7 +152,7 @@ public class OrderServiceImpl implements OrderService {
     public List<GetOrderResponse> getAllOrdersByStore() {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        List<Order> order = orderRepository.findOrdersByUser_Store_StoreId(store.getStoreId());
+        List<Order> order = orderRepository.findByStore_StoreId(store.getStoreId());
         return order.stream()
                 .map(this::mapToDto)
                 .toList();
@@ -259,7 +259,7 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrder(int orderId) {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        Order order = orderRepository.findOrderByUser_Store_StoreIdAndOrderId((store.getStoreId()), orderId);
+        Order order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
@@ -308,7 +308,7 @@ public class OrderServiceImpl implements OrderService {
     public List<GetOrderResponse> getOrdersByCustomerId(int customerId) {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        List<Order> orders = orderRepository.findByCustomer_CustomerIdAndUser_Store_StoreId(customerId, store.getStoreId());
+        List<Order> orders = orderRepository.findByCustomer_CustomerIdAndStore_StoreId(customerId, store.getStoreId());
         return orders.stream()
                 .map(this::mapToDto)
                 .toList();
@@ -412,8 +412,8 @@ public class OrderServiceImpl implements OrderService {
                 .feedbackId(order.getFeedback() != null ? order.getFeedback().getFeedbackId() : 0)
                 .staffId(order.getUser().getUserId())
                 .staffName(order.getUser().getFullName())
-                .storeId(order.getUser().getStore() != null ? order.getUser().getStore().getStoreId() : 0)
-                .storeName(order.getUser().getStore() != null ? order.getUser().getStore().getStoreName() : null)
+                .storeId(order.getStore().getStoreId())
+                .storeName(order.getStore().getStoreName())
                 .orderDate(order.getOrderDate())
                 .build();
     }

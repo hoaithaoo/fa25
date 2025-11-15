@@ -112,7 +112,7 @@ public class PaymentServiceImpl implements PaymentService {
     public GetPaymentResponse getPaymentById(int paymentId) {
         User user = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(user.getUserId());
-        Payment payment = paymentRepository.findPaymentByPaymentIdAndContract_Order_User_Store(paymentId, store);
+        Payment payment = paymentRepository.findPaymentByPaymentIdAndContract_Order_Store(paymentId, store);
         if (payment == null) {
             throw new AppException(ErrorCode.PAYMENT_NOT_EXISTED);
         }
@@ -135,7 +135,7 @@ public class PaymentServiceImpl implements PaymentService {
     public List<GetPaymentResponse> getAllPaymentsByStore() {
         User user = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(user.getUserId());
-        List<Payment> payments = paymentRepository.findPaymentsByContract_Order_User_Store(store);
+        List<Payment> payments = paymentRepository.findPaymentsByContract_Order_Store(store);
         return payments.stream()
                 .map(this::mapToDto)
                 .toList();

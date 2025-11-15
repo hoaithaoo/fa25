@@ -41,6 +41,13 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     List<Order> findByCustomer_CustomerIdAndUser_Store_StoreId(int customerId, int storeId);
 
+    // New methods using order.store instead of order.user.store
+    Order findByStore_StoreIdAndOrderId(int storeId, int orderId);
+
+    List<Order> findByStore_StoreId(int storeId);
+
+    List<Order> findByCustomer_CustomerIdAndStore_StoreId(int customerId, int storeId);
+
     // Find expired DRAFT orders
     List<Order> findByStatusAndOrderDateBefore(OrderStatus status, LocalDateTime date);
 

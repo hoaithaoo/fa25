@@ -358,7 +358,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public List<GetOrderDetailsResponse> getOrderDetailsByOrderId(int orderId) {
         User currentUser = userService.getCurrentUserEntity();
         Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        List<OrderDetail> orderDetails = orderDetailRepository.findByOrder_OrderIdAndOrder_User_Store_StoreId(orderId, currentStore.getStoreId());
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrder_OrderIdAndOrder_Store_StoreId(orderId, currentStore.getStoreId());
         return orderDetails.stream().map(this::mapToDto).toList();
     }
     //

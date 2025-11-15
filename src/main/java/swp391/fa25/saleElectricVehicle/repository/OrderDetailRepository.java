@@ -86,4 +86,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     List<OrderDetail> findByOrder_OrderIdAndOrder_User_UserId(int orderOrderId, int orderUserUserId);
 
     List<OrderDetail> findByOrder_OrderIdAndOrder_User_Store_StoreId(int orderOrderId, int orderUserStoreStoreId);
+
+    // New method using order.store instead of order.user.store
+    List<OrderDetail> findByOrder_OrderIdAndOrder_Store_StoreId(int orderOrderId, int orderStoreStoreId);
 }
