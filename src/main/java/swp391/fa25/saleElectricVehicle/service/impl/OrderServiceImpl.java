@@ -101,6 +101,10 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
 
+        // Lấy store từ user hiện tại
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+
         List<OrderDetail> list = order.getOrderDetails();
         int count = 0;
         BigDecimal totalUnitPrice = BigDecimal.ZERO;
@@ -138,9 +142,9 @@ public class OrderServiceImpl implements OrderService {
                 .customerName(order.getCustomer().getFullName())
                 .staffId(order.getUser().getUserId())
                 .staffName(order.getUser().getFullName())
-                .storeId(order.getUser().getStore().getStoreId())
-                .storeName(order.getUser().getStore().getStoreName())
-                .storeAddress(order.getUser().getStore().getAddress())
+                .storeId(store.getStoreId())
+                .storeName(store.getStoreName())
+                .storeAddress(store.getAddress())
                 .build();
     }
 
