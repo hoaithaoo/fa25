@@ -365,6 +365,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
         // Cập nhật status thành DELIVERED
         transaction.setStatus(InventoryTransactionStatus.DELIVERED);
+        transaction.setDeliveryDate(LocalDateTime.now());
 
         // Cập nhật tồn kho: tăng quantity bằng importQuantity
         StoreStock storeStock = transaction.getStoreStock();
