@@ -292,11 +292,6 @@ public class UserServiceImpl implements UserService {
             user.setFullName(updateUserProfileRequest.getFullName());
         }
 
-        if (updateUserProfileRequest.getStatus() != null
-                && updateUserProfileRequest.getStatus() != user.getStatus()) {
-            user.setStatus(updateUserProfileRequest.getStatus());
-        }
-
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
