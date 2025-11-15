@@ -53,4 +53,14 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     // Find expired CONFIRMED orders
     List<Order> findByStatusAndUpdatedAtBefore(OrderStatus status, LocalDateTime date);
+
+    // Find orders by store, status and date range (for revenue calculation)
+    @Query("SELECT o FROM Order o WHERE o.store.storeId = :storeId " +
+           "AND o.status = :status " +
+           "AND o.orderDate >= :startDate AND o.orderDate < :endDate")
+    List<Order> findByStoreIdAndStatusAndOrderDateBetween(
+            @Param("storeId") int storeId,
+            @Param("status") OrderStatus status,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 }

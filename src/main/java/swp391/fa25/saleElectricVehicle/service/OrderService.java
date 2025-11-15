@@ -8,6 +8,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderRespons
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface OrderService {
@@ -28,6 +29,9 @@ public interface OrderService {
     List<GetOrderResponse> getOrdersByCustomerId(int customerId);
     List<GetOrderResponse> getOrdersByStaffId(int staffId);
     List<GetOrderResponse> getOrdersByCurrentStaff();
+    
+    // Get orders by store, status and date range (for revenue calculation)
+    List<Order> getOrdersByStoreIdAndStatusAndDateRange(int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate);
 //    List<GetOrderResponse> getOrdersByStatus(OrderStatus status);
 //    List<GetOrderResponse> getOrdersByDateRange(LocalDate startDate, LocalDate endDate);
 //    List<OrderDto> searchOrdersByCustomerPhone(String phone);

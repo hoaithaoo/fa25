@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.store.StoreMonthlyRevenueResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.StoreService;
 
@@ -109,6 +110,17 @@ public class StoreController {
                 .code(HttpStatus.OK.value())
                 .message("Store deleted successfully")
                 .data(null)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/revenue/monthly")
+    public ResponseEntity<ApiResponse<List<StoreMonthlyRevenueResponse>>> getMonthlyRevenueForAllStores() {
+        List<StoreMonthlyRevenueResponse> revenues = storeService.getMonthlyRevenueForAllStores();
+        ApiResponse<List<StoreMonthlyRevenueResponse>> response = ApiResponse.<List<StoreMonthlyRevenueResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Monthly revenue for all stores retrieved successfully")
+                .data(revenues)
                 .build();
         return ResponseEntity.ok(response);
     }

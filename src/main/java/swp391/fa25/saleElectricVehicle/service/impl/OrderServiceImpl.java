@@ -329,6 +329,11 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
     }
 
+    @Override
+    public List<Order> getOrdersByStoreIdAndStatusAndDateRange(int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate) {
+        return orderRepository.findByStoreIdAndStatusAndOrderDateBetween(storeId, status, startDate, endDate);
+    }
+
 //    @Override
 //    public List<GetOrderResponse> getOrdersByStatus(OrderStatus status) {
 //        return orderRepository.findByStatus(OrderStatus.valueOf(status.toUpperCase())).stream()

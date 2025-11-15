@@ -6,17 +6,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.entity.Store;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
+import swp391.fa25.saleElectricVehicle.payload.response.store.StoreMonthlyRevenueResponse;
 import swp391.fa25.saleElectricVehicle.repository.StoreRepository;
+import swp391.fa25.saleElectricVehicle.service.OrderService;
 import swp391.fa25.saleElectricVehicle.service.StoreService;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StoreServiceImpl implements StoreService {
@@ -25,6 +32,9 @@ public class StoreServiceImpl implements StoreService {
 
     @Autowired
     private StoreRepository storeRepository;
+
+    @Autowired
+    private OrderService orderService;
 
     @Override
     public StoreDto createStore(StoreDto storeDto) {
@@ -223,6 +233,43 @@ public class StoreServiceImpl implements StoreService {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
         storeRepository.delete(store);
+    }
+
+    @Override
+    public List<StoreMonthlyRevenueResponse> getMonthlyRevenueForAllStores() {
+        // Lấy tháng hiện tại
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime startOfNextMonth = currentMonth.plusMonths(1).atDay(1).atStartOfDay();
+
+        // Lấy tất cả stores
+        List<Store> stores = storeRepository.findAll();
+
+        // Tính doanh thu cho từng store
+        return stores.stream()
+                .map(store -> {
+                    // Lấy tất cả orders FULLY_PAID trong tháng hiện tại của store này
+                    List<Order> fullyPaidOrders = orderService.getOrdersByStoreIdAndStatusAndDateRange(
+                            store.getStoreId(),
+                            OrderStatus.FULLY_PAID,
+                            startOfMonth,
+                            startOfNextMonth
+                    );
+
+                    // Tính tổng doanh thu (totalPayment của các orders)
+                    BigDecimal monthlyRevenue = fullyPaidOrders.stream()
+                            .map(Order::getTotalPayment)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    return StoreMonthlyRevenueResponse.builder()
+                            .storeId(store.getStoreId())
+                            .storeName(store.getStoreName())
+                            .address(store.getAddress())
+                            .monthlyRevenue(monthlyRevenue)
+                            .orderCount(fullyPaidOrders.size())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     private StoreDto mapTodo(Store store) {
