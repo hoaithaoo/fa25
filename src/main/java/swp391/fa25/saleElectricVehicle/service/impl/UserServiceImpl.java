@@ -191,19 +191,6 @@ public class UserServiceImpl implements UserService {
             hasChanges = true;
         }
 
-        // Cập nhật email (kiểm tra trùng lặp)
-        if (updateOwnProfileRequest.getEmail() != null
-                && !updateOwnProfileRequest.getEmail().trim().isEmpty()) {
-            String newEmail = updateOwnProfileRequest.getEmail().trim().toLowerCase();
-            if (!user.getEmail().equals(newEmail)) {
-                if (userRepository.existsByEmail(newEmail)) {
-                    throw new AppException(ErrorCode.USER_EXISTED);
-                }
-                user.setEmail(newEmail);
-                hasChanges = true;
-            }
-        }
-
         // Cập nhật phone (kiểm tra trùng lặp)
         if (updateOwnProfileRequest.getPhone() != null
                 && !updateOwnProfileRequest.getPhone().trim().isEmpty()) {
@@ -242,16 +229,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
-        }
-
-        if (updateUserProfileRequest.getEmail() != null
-                && !updateUserProfileRequest.getEmail().trim().isEmpty()) {
-            if (!user.getEmail().equals(updateUserProfileRequest.getEmail())
-                    && userRepository.existsByEmail(updateUserProfileRequest.getEmail())) {
-                throw new AppException(ErrorCode.USER_EXISTED);
-            } else {
-                user.setEmail(updateUserProfileRequest.getEmail());
-            }
         }
 
         if (updateUserProfileRequest.getPhone() != null
