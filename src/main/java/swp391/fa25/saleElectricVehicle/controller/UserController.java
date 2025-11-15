@@ -5,9 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.entity.User;
+import jakarta.validation.Valid;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateOwnProfileUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserStatusRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
@@ -64,6 +66,19 @@ public class UserController {
         ApiResponse<UpdateUserProfileResponse> response = ApiResponse.<UpdateUserProfileResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message("User updated successfully")
+                .data(updatedUser)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{userId}/status")
+    public ResponseEntity<ApiResponse<UpdateUserProfileResponse>> updateUserStatus
+            (@PathVariable int userId, @Valid @RequestBody UpdateUserStatusRequest updateUserStatusRequest) {
+        UpdateUserProfileResponse updatedUser = userService.updateUserStatus(userId, updateUserStatusRequest);
+
+        ApiResponse<UpdateUserProfileResponse> response = ApiResponse.<UpdateUserProfileResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("User status updated successfully")
                 .data(updatedUser)
                 .build();
         return ResponseEntity.ok(response);

@@ -1,6 +1,5 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
-import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,15 +12,12 @@ import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.jwt.Jwt;
 import swp391.fa25.saleElectricVehicle.payload.dto.UserDto;
 import swp391.fa25.saleElectricVehicle.payload.request.ChangePasswordRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.CreateUserRequest;
-import swp391.fa25.saleElectricVehicle.payload.request.IntrospectRequest;
-import swp391.fa25.saleElectricVehicle.payload.request.LoginRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateOwnProfileUserRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserProfileRequest;
-import swp391.fa25.saleElectricVehicle.payload.response.*;
+import swp391.fa25.saleElectricVehicle.payload.request.user.UpdateUserStatusRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ChangePasswordResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
@@ -31,7 +27,6 @@ import swp391.fa25.saleElectricVehicle.service.RoleService;
 import swp391.fa25.saleElectricVehicle.service.StoreService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -305,6 +300,35 @@ public class UserServiceImpl implements UserService {
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepository.save(user);
+
+        return UpdateUserProfileResponse.builder()
+                .userId(user.getUserId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .status(user.getStatus())
+                .storeId(user.getStore() != null ? user.getStore().getStoreId() : 0)
+                .storeName(user.getStore() != null ? user.getStore().getStoreName() : null)
+                .roleId(user.getRole().getRoleId())
+                .roleName(user.getRole().getRoleName())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public UpdateUserProfileResponse updateUserStatus(int userId, UpdateUserStatusRequest updateUserStatusRequest) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+
+        // Cập nhật status
+        if (updateUserStatusRequest.getStatus() != null
+                && updateUserStatusRequest.getStatus() != user.getStatus()) {
+            user.setStatus(updateUserStatusRequest.getStatus());
+            user.setUpdatedAt(LocalDateTime.now());
+            userRepository.save(user);
+        }
 
         return UpdateUserProfileResponse.builder()
                 .userId(user.getUserId())
