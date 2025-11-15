@@ -45,31 +45,33 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         if (request.getPaymentType() == PaymentType.DEPOSIT) {
-            // Kiểm tra xem đã có payment đặt cọc chưa
-            Optional<Payment> existingDepositPayment = paymentRepository
-                    .findByContractAndPaymentType(contract, PaymentType.DEPOSIT);
-            // nếu đã có và chưa bị hủy thì không được tạo nữa
-            // bị hủy khi khách thanh toán không thành công và tự hủy giao dịch
-            if (existingDepositPayment.isPresent()
-                    && !existingDepositPayment.get().getStatus().equals(PaymentStatus.CANCELLED)
-                    && !existingDepositPayment.get().getStatus().equals(PaymentStatus.DRAFT)) {
+            // Kiểm tra xem đã có payment đặt cọc active (không phải CANCELLED hoặc DRAFT) chưa
+            List<Payment> existingDepositPayments = paymentRepository
+                    .findActivePaymentsByContractAndPaymentType(
+                            contract, PaymentType.DEPOSIT, 
+                            PaymentStatus.CANCELLED, PaymentStatus.DRAFT);
+            // nếu đã có payment active thì không được tạo nữa
+            if (!existingDepositPayments.isEmpty()) {
                 throw new AppException(ErrorCode.DEPOSIT_PAYMENT_ALREADY_EXISTS);
             }
         } else if (request.getPaymentType() == PaymentType.BALANCE) {
-            // kiểm tra xem đã có payment đặt cọc chưa
+            // kiểm tra xem đã có payment đặt cọc completed chưa
             // nếu chưa có thì không được tạo payment số dư
-            Optional<Payment> existingDepositPayment = paymentRepository
-                    .findByContractAndPaymentType(contract, PaymentType.DEPOSIT);
-            if (existingDepositPayment.isEmpty()
-                    || (!existingDepositPayment.get().getStatus().equals(PaymentStatus.COMPLETED))) {
+            List<Payment> existingDepositPayments = paymentRepository
+                    .findActivePaymentsByContractAndPaymentType(
+                            contract, PaymentType.DEPOSIT, 
+                            PaymentStatus.CANCELLED, PaymentStatus.DRAFT);
+            boolean hasCompletedDeposit = existingDepositPayments.stream()
+                    .anyMatch(p -> p.getStatus().equals(PaymentStatus.COMPLETED));
+            if (!hasCompletedDeposit) {
                 throw new AppException(ErrorCode.DEPOSIT_PAYMENT_NOT_COMPLETED);
             }
-            // Kiểm tra xem đã có payment thanh toán số dư chưa
-            Optional<Payment> existingBalancePayment = paymentRepository
-                    .findByContractAndPaymentType(contract, PaymentType.BALANCE);
-            if (existingBalancePayment.isPresent()
-                    && !existingBalancePayment.get().getStatus().equals(PaymentStatus.CANCELLED)
-                    && !existingBalancePayment.get().getStatus().equals(PaymentStatus.DRAFT)) {
+            // Kiểm tra xem đã có payment thanh toán số dư active chưa
+            List<Payment> existingBalancePayments = paymentRepository
+                    .findActivePaymentsByContractAndPaymentType(
+                            contract, PaymentType.BALANCE, 
+                            PaymentStatus.CANCELLED, PaymentStatus.DRAFT);
+            if (!existingBalancePayments.isEmpty()) {
                 throw new AppException(ErrorCode.BALANCE_PAYMENT_ALREADY_EXISTS);
             }
         }

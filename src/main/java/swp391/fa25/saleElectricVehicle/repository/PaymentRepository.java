@@ -7,6 +7,9 @@ import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +17,17 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     Payment findPaymentByPaymentCode(String paymentCode);
 
-    Optional<Payment> findByContractAndPaymentType(Contract contract, PaymentType paymentType);
+    // Find all payments by contract and payment type (may return multiple)
+    List<Payment> findByContractAndPaymentType(Contract contract, PaymentType paymentType);
+    
+    // Find the latest active payment (not CANCELLED or DRAFT) by contract and payment type
+    @Query("SELECT p FROM Payment p WHERE p.contract = :contract AND p.paymentType = :paymentType " +
+           "AND p.status NOT IN (:cancelledStatus, :draftStatus) ORDER BY p.createdAt DESC")
+    List<Payment> findActivePaymentsByContractAndPaymentType(
+            @Param("contract") Contract contract, 
+            @Param("paymentType") PaymentType paymentType,
+            @Param("cancelledStatus") PaymentStatus cancelledStatus,
+            @Param("draftStatus") PaymentStatus draftStatus);
 
     List<Payment> findPaymentsByContract_Order_User_Store(Store contractOrderUserStore);
 
