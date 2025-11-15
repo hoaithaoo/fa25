@@ -317,13 +317,14 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        // Cập nhật status
-        if (updateUserStatusRequest.getStatus() != null
-                && updateUserStatusRequest.getStatus() != user.getStatus()) {
-            user.setStatus(updateUserStatusRequest.getStatus());
-            user.setUpdatedAt(LocalDateTime.now());
-            userRepository.save(user);
+        // Toggle status: ACTIVE -> DISABLED, DISABLED -> ACTIVE
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            user.setStatus(UserStatus.DISABLED);
+        } else if (user.getStatus() == UserStatus.DISABLED) {
+            user.setStatus(UserStatus.ACTIVE);
         }
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
 
         return UpdateUserProfileResponse.builder()
                 .userId(user.getUserId())
