@@ -96,6 +96,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .discountPercentage(discountPercentage)
                 .totalPrice(totalPrice)
                 .orderDate(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .storeStock(storeStock)
                 .status(InventoryTransactionStatus.PENDING)
                 .build();
@@ -287,6 +288,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
         // Cập nhật status thành CONFIRMED
         transaction.setStatus(InventoryTransactionStatus.CONFIRMED);
+        transaction.setUpdatedAt(LocalDateTime.now());
 
         InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
         return mapToDto(saved);
@@ -313,6 +315,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
         // Cập nhật status thành REJECTED
         transaction.setStatus(InventoryTransactionStatus.REJECTED);
+        transaction.setUpdatedAt(LocalDateTime.now());
 
         InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
         return mapToDto(saved);
@@ -339,6 +342,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
         // Cập nhật status thành IN_TRANSIT
         transaction.setStatus(InventoryTransactionStatus.IN_TRANSIT);
+        transaction.setUpdatedAt(LocalDateTime.now());
 
         InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
         return mapToDto(saved);
@@ -366,6 +370,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
         // Cập nhật status thành DELIVERED
         transaction.setStatus(InventoryTransactionStatus.DELIVERED);
         transaction.setDeliveryDate(LocalDateTime.now());
+        transaction.setUpdatedAt(LocalDateTime.now());
 
         // Cập nhật tồn kho: tăng quantity bằng importQuantity
         StoreStock storeStock = transaction.getStoreStock();
@@ -400,6 +405,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
         // Cập nhật imageUrl và status thành FILE_UPLOADED
         transaction.setImageUrl(imageUrl);
         transaction.setStatus(InventoryTransactionStatus.FILE_UPLOADED);
+        transaction.setUpdatedAt(LocalDateTime.now());
 
         InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
         return mapToDto(saved);
@@ -426,6 +432,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
         // Cập nhật status thành PAYMENT_CONFIRMED
         transaction.setStatus(InventoryTransactionStatus.PAYMENT_CONFIRMED);
+        transaction.setUpdatedAt(LocalDateTime.now());
 
         InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
         return mapToDto(saved);
@@ -452,6 +459,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
         // Cập nhật status thành CANCELLED
         transaction.setStatus(InventoryTransactionStatus.CANCELLED);
+        transaction.setUpdatedAt(LocalDateTime.now());
 
         InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
         return mapToDto(saved);
@@ -474,6 +482,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .orderDate(transaction.getOrderDate()) // Sử dụng orderDate thay vì transactionDate
                 .deliveryDate(transaction.getDeliveryDate())
                 .imageUrl(transaction.getImageUrl())
+                .updatedAt(transaction.getUpdatedAt())
                 .status(transaction.getStatus())
                 .modelId(transaction.getStoreStock().getModelColor().getModel().getModelId())
                 .modelName(transaction.getStoreStock().getModelColor().getModel().getModelName())

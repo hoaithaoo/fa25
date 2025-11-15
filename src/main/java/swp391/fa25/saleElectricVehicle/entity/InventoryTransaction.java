@@ -46,6 +46,9 @@ public class InventoryTransaction {
     @Column
     private String imageUrl;
 
+    @Column
+    private LocalDateTime updatedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InventoryTransactionStatus status;

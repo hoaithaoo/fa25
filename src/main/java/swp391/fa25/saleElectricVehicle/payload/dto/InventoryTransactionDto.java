@@ -26,6 +26,7 @@ public class InventoryTransactionDto {
     private LocalDateTime orderDate;
     private LocalDateTime deliveryDate; // ngày giao hàng
     private String imageUrl; // URL biên lai thanh toán
+    private LocalDateTime updatedAt;
     private InventoryTransactionStatus status;
 
     private int modelId;
