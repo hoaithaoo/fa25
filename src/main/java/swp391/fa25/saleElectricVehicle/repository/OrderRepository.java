@@ -20,12 +20,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByUser_UserId(int staffId);
 
     // Find by staff and date range (for monthly orders)
-    @Query("SELECT o FROM Order o WHERE o.user.userId = :staffId " +
-           "AND o.orderDate >= :startDate AND o.orderDate < :endDate")
-    List<Order> findByUser_UserIdAndOrderDateBetween(
-            @Param("staffId") int staffId,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
+    List<Order> findByUser_UserIdAndOrderDateBetween(int staffId, LocalDateTime startDate, LocalDateTime endDate);
 
     // Find by status
     List<Order> findByStatus(OrderStatus status);
@@ -63,12 +58,15 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByStatusAndUpdatedAtBefore(OrderStatus status, LocalDateTime date);
 
     // Find orders by store, status and date range (for revenue calculation)
-    @Query("SELECT o FROM Order o WHERE o.store.storeId = :storeId " +
-           "AND o.status = :status " +
-           "AND o.orderDate >= :startDate AND o.orderDate < :endDate")
-    List<Order> findByStoreIdAndStatusAndOrderDateBetween(
-            @Param("storeId") int storeId,
-            @Param("status") OrderStatus status,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
+//    @Query("SELECT o FROM Order o WHERE o.store.storeId = :storeId " +
+//           "AND o.status = :status " +
+//           "AND o.orderDate >= :startDate AND o.orderDate < :endDate")
+    List<Order> findByStore_StoreIdAndStatusAndOrderDateBetween(
+            int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate);
+
+    // Find orders by store and user (for staff filtering)
+    List<Order> findByStore_StoreIdAndUser_UserId(int storeId, int userId);
+
+    // Find order by store, user and orderId (for staff filtering)
+    Order findByStore_StoreIdAndUser_UserIdAndOrderId(int storeId, int userId, int orderId);
 }

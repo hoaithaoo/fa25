@@ -284,12 +284,12 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 .build();
     }
 
-    @Override
-    public GetOrderDetailsResponse getOrderDetailById(int id) {
-        OrderDetail orderDetail = orderDetailRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
-        return mapToDto(orderDetail);
-    }
+//    @Override
+//    public GetOrderDetailsResponse getOrderDetailById(int id) {
+//        OrderDetail orderDetail = orderDetailRepository.findById(id)
+//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
+//        return mapToDto(orderDetail);
+//    }
 
 //    @Override
 //    public List<OrderDetailDto> getAllOrderDetails() {

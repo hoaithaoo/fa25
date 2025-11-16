@@ -114,7 +114,18 @@ public class PaymentServiceImpl implements PaymentService {
     public GetPaymentResponse getPaymentById(int paymentId) {
         User user = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(user.getUserId());
-        Payment payment = paymentRepository.findPaymentByPaymentIdAndContract_Order_Store(paymentId, store);
+        boolean isManager = user.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        Payment payment;
+        if (isManager) {
+            // Manager: chỉ check store
+            payment = paymentRepository.findPaymentByPaymentIdAndContract_Order_Store(paymentId, store);
+        } else {
+            // Staff: check cả store và userId
+            payment = paymentRepository.findByContract_Order_Store_StoreIdAndContract_Order_User_UserIdAndPaymentId(
+                    store.getStoreId(), user.getUserId(), paymentId);
+        }
+        
         if (payment == null) {
             throw new AppException(ErrorCode.PAYMENT_NOT_EXISTED);
         }
@@ -137,7 +148,18 @@ public class PaymentServiceImpl implements PaymentService {
     public List<GetPaymentResponse> getAllPaymentsByStore() {
         User user = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(user.getUserId());
-        List<Payment> payments = paymentRepository.findPaymentsByContract_Order_Store(store);
+        boolean isManager = user.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        List<Payment> payments;
+        if (isManager) {
+            // Manager: xem tất cả payments trong store
+            payments = paymentRepository.findPaymentsByContract_Order_Store(store);
+        } else {
+            // Staff: chỉ xem payments của chính họ trong store
+            payments = paymentRepository.findByContract_Order_Store_StoreIdAndContract_Order_User_UserId(
+                    store.getStoreId(), user.getUserId());
+        }
+        
         return payments.stream()
                 .map(this::mapToDto)
                 .toList();

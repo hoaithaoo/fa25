@@ -93,7 +93,18 @@ public class OrderServiceImpl implements OrderService {
     public GetOrderResponse getOrderById(int orderId) {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        Order order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        Order order;
+        if (isManager) {
+            // Manager: chỉ cần check store
+            order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
+        } else {
+            // Staff: check cả store và userId
+            order = orderRepository.findByStore_StoreIdAndUser_UserIdAndOrderId(
+                    store.getStoreId(), currentUser.getUserId(), orderId);
+        }
+        
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
@@ -154,8 +165,18 @@ public class OrderServiceImpl implements OrderService {
     public List<GetOrderResponse> getAllOrdersByStore() {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        List<Order> order = orderRepository.findByStore_StoreId(store.getStoreId());
-        return order.stream()
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        List<Order> orders;
+        if (isManager) {
+            // Manager: xem tất cả orders trong store
+            orders = orderRepository.findByStore_StoreId(store.getStoreId());
+        } else {
+            // Staff: chỉ xem orders của chính họ trong store
+            orders = orderRepository.findByStore_StoreIdAndUser_UserId(store.getStoreId(), currentUser.getUserId());
+        }
+        
+        return orders.stream()
                 .map(this::mapToDto)
                 .toList();
     }
@@ -354,7 +375,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getOrdersByStoreIdAndStatusAndDateRange(int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate) {
-        return orderRepository.findByStoreIdAndStatusAndOrderDateBetween(storeId, status, startDate, endDate);
+        return orderRepository.findByStore_StoreIdAndStatusAndOrderDateBetween(storeId, status, startDate, endDate);
     }
 
 //    @Override

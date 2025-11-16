@@ -135,18 +135,31 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Contract getContractEntityById(int id) {
-        Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
-
-        // Kiểm tra contract có thuộc store của user hiện tại không
         User currentUser = userService.getCurrentUserEntity();
         if (currentUser.getStore() == null) {
             throw new AppException(ErrorCode.STORE_NOT_EXIST);
         }
 
-        int contractStoreId = contract.getOrder().getStore().getStoreId();
-        if (contractStoreId != currentUser.getStore().getStoreId()) {
-            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        int storeId = currentUser.getStore().getStoreId();
+
+        Contract contract;
+        if (isManager) {
+            // Manager: chỉ check store
+            contract = contractRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
+            
+            int contractStoreId = contract.getOrder().getStore().getStoreId();
+            if (contractStoreId != storeId) {
+                throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
+            }
+        } else {
+            // Staff: check cả store và userId
+            contract = contractRepository.findByOrder_Store_StoreIdAndOrder_User_UserIdAndContractId(
+                    storeId, currentUser.getUserId(), id);
+            if (contract == null) {
+                throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
+            }
         }
 
         return contract;
@@ -291,7 +304,18 @@ public class ContractServiceImpl implements ContractService {
         }
         
         int storeId = currentUser.getStore().getStoreId();
-        List<Contract> contracts = contractRepository.findByOrder_Store_StoreId(storeId);
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        List<Contract> contracts;
+        if (isManager) {
+            // Manager: xem tất cả contracts trong store
+            contracts = contractRepository.findByOrder_Store_StoreId(storeId);
+        } else {
+            // Staff: chỉ xem contracts của chính họ trong store
+            contracts = contractRepository.findByOrder_Store_StoreIdAndOrder_User_UserId(
+                    storeId, currentUser.getUserId());
+        }
+        
         return contracts.stream().map(contract -> GetContractResponse.builder()
                         .contractId(contract.getContractId())
                         .contractCode(contract.getContractCode())

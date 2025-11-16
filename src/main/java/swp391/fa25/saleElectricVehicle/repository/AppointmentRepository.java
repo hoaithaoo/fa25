@@ -17,4 +17,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
     List<Appointment> findByModel_ModelId(int modelId);
     List<Appointment> findByStatus(Appointment.AppointmentStatus status);
 
+    // Find appointments by store and user (for staff filtering)
+    List<Appointment> findByStore_StoreIdAndUser_UserId(int storeId, int userId);
+
+    // Find appointment by store, user and appointmentId (for staff filtering)
+    Appointment findByStore_StoreIdAndUser_UserIdAndAppointmentId(int storeId, int userId, int appointmentId);
 }

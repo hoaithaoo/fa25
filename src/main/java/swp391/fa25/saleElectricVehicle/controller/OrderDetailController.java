@@ -52,16 +52,16 @@ public class OrderDetailController {
 //    }
 
 //    // READ - Get by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<GetOrderDetailsResponse>> getOrderDetailById(@PathVariable int id) {
-        GetOrderDetailsResponse orderDetail = orderDetailService.getOrderDetailById(id);
-        ApiResponse<GetOrderDetailsResponse> response = ApiResponse.<GetOrderDetailsResponse>builder()
-                .code(HttpStatus.OK.value())
-                .message("Order detail retrieved successfully")
-                .data(orderDetail)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ApiResponse<GetOrderDetailsResponse>> getOrderDetailById(@PathVariable int id) {
+//        GetOrderDetailsResponse orderDetail = orderDetailService.getOrderDetailById(id);
+//        ApiResponse<GetOrderDetailsResponse> response = ApiResponse.<GetOrderDetailsResponse>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Order detail retrieved successfully")
+//                .data(orderDetail)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 
 //
 //    // UPDATE

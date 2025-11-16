@@ -1,6 +1,8 @@
 package swp391.fa25.saleElectricVehicle.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
 
@@ -14,6 +16,12 @@ public interface ContractRepository extends JpaRepository<Contract, Integer> {
 
     // New method using order.store instead of order.user.store
     List<Contract> findByOrder_Store_StoreId(int storeId);
+
+    // Find contracts by store and user (for staff filtering)
+    List<Contract> findByOrder_Store_StoreIdAndOrder_User_UserId(int storeId, int userId);
+
+    // Find contract by store, user and contractId (for staff filtering)
+    Contract findByOrder_Store_StoreIdAndOrder_User_UserIdAndContractId(int storeId, int userId, int contractId);
 //    boolean existsByContractCode(String contractCode);
 //    Contract findByContractFileUrl(String contractFileUrl);
 //    List<Contract> findByStatus(Contract.ContractStatus status);

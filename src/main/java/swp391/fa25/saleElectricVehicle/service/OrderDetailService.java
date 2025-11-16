@@ -18,7 +18,7 @@ public interface OrderDetailService {
 
     //    // =============== CRUD OPERATIONS ===============
     GetQuoteResponse createQuote(CreateOrderWithItemsRequest request);
-    GetOrderDetailsResponse getOrderDetailById(int id);
+//    GetOrderDetailsResponse getOrderDetailById(int id);
     //    OrderDetailDto getOrderDetailById(int id);
 //    List<OrderDetailDto> getAllOrderDetails();
 //    OrderDetailDto updateOrderDetail(int id, OrderDetailDto orderDetailDto);

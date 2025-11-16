@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder; // ✅ T
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Feedback;
 import swp391.fa25.saleElectricVehicle.entity.Order;
+import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.FeedbackStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
@@ -16,6 +17,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.feedback.UpdateFeedbackRe
 import swp391.fa25.saleElectricVehicle.repository.FeedbackRepository;
 import swp391.fa25.saleElectricVehicle.service.FeedbackService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
+import swp391.fa25.saleElectricVehicle.service.StoreService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.time.LocalDateTime;
@@ -36,6 +38,9 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private StoreService storeService;
 
     // ✅ THAY ĐỔI: Dùng CreateFeedbackRequest thay vì FeedbackDto
     // tạo draft feedback
@@ -63,14 +68,48 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public FeedbackDto getFeedbackById(int feedbackId) {
-        Feedback feedback = feedbackRepository.findById(feedbackId)
-                .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        Feedback feedback;
+        if (isManager) {
+            // Manager: chỉ check store
+            feedback = feedbackRepository.findById(feedbackId)
+                    .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
+            
+            if (feedback.getOrder().getStore().getStoreId() != store.getStoreId()) {
+                throw new AppException(ErrorCode.FEEDBACK_NOT_FOUND);
+            }
+        } else {
+            // Staff: check cả store và userId
+            feedback = feedbackRepository.findByOrder_Store_StoreIdAndOrder_User_UserIdAndFeedbackId(
+                    store.getStoreId(), currentUser.getUserId(), feedbackId);
+            if (feedback == null) {
+                throw new AppException(ErrorCode.FEEDBACK_NOT_FOUND);
+            }
+        }
+        
         return mapToDto(feedback);
     }
 
     @Override
     public List<FeedbackDto> getAllFeedbacks() {
-        return feedbackRepository.findAll().stream()
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        List<Feedback> feedbacks;
+        if (isManager) {
+            // Manager: xem tất cả feedbacks trong store
+            feedbacks = feedbackRepository.findByOrder_Store_StoreId(store.getStoreId());
+        } else {
+            // Staff: chỉ xem feedbacks của chính họ trong store
+            feedbacks = feedbackRepository.findByOrder_Store_StoreIdAndOrder_User_UserId(
+                    store.getStoreId(), currentUser.getUserId());
+        }
+        
+        return feedbacks.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }

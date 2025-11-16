@@ -90,14 +90,47 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentDto getAppointmentById(int id) {
-        Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        Appointment appointment;
+        if (isManager) {
+            // Manager: chỉ check store
+            appointment = appointmentRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+            
+            if (appointment.getStore().getStoreId() != store.getStoreId()) {
+                throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
+            }
+        } else {
+            // Staff: check cả store và userId
+            appointment = appointmentRepository.findByStore_StoreIdAndUser_UserIdAndAppointmentId(
+                    store.getStoreId(), currentUser.getUserId(), id);
+            if (appointment == null) {
+                throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
+            }
+        }
+        
         return mapToDto(appointment);
     }
 
     @Override
     public List<AppointmentDto> getAllAppointments() {
-        List<Appointment> appointments = appointmentRepository.findAll();
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        List<Appointment> appointments;
+        if (isManager) {
+            // Manager: xem tất cả appointments trong store
+            appointments = appointmentRepository.findByStore_StoreId(store.getStoreId());
+        } else {
+            // Staff: chỉ xem appointments của chính họ trong store
+            appointments = appointmentRepository.findByStore_StoreIdAndUser_UserId(
+                    store.getStoreId(), currentUser.getUserId());
+        }
+        
         return appointments.stream().map(this::mapToDto).toList();
     }
 
