@@ -46,7 +46,7 @@ public class StoreServiceImpl implements StoreService {
 //        }
 
         LocalDate nowDate = LocalDate.now();
-        // ngày bắt đầu không được trước ngày hiện tại
+        // ngày bắt đầu có thể là ngày hôm nay hoặc sau, không được trước ngày hiện tại
         if (storeDto.getContractStartDate().isBefore(nowDate)) {
             throw new AppException(ErrorCode.INVALID_START_DATE);
         }
@@ -165,7 +165,7 @@ public class StoreServiceImpl implements StoreService {
 //        }
 
         LocalDate nowDate = LocalDate.now();
-        // ngày bắt đầu không được trước ngày hiện tại
+        // ngày bắt đầu có thể là ngày hôm nay hoặc sau, không được trước ngày hiện tại
         if (storeDto.getContractStartDate() != null
                 && !storeDto.getContractStartDate().isEqual(store.getContractStartDate())) {
             if (storeDto.getContractStartDate().isBefore(nowDate)) {
@@ -177,13 +177,30 @@ public class StoreServiceImpl implements StoreService {
         // ngày kết thúc phải sau ngày bắt đầu và sau ngày hiện tại
         if (storeDto.getContractEndDate() != null
                 && !storeDto.getContractEndDate().isEqual(store.getContractEndDate())) {
-            if (storeDto.getContractEndDate().isBefore(storeDto.getContractStartDate())) {
+            // Lấy contractStartDate sau khi update (nếu có) hoặc từ store hiện tại
+            LocalDate contractStartDate = store.getContractStartDate();
+            if (contractStartDate == null && storeDto.getContractStartDate() != null) {
+                contractStartDate = storeDto.getContractStartDate();
+            }
+            if (contractStartDate != null && storeDto.getContractEndDate().isBefore(contractStartDate)) {
                 throw new AppException(ErrorCode.INVALID_END_DATE);
             }
             if (storeDto.getContractEndDate().isBefore(nowDate)) {
                 throw new AppException(ErrorCode.INVALID_END_DATE_TIME);
             }
             store.setContractEndDate(storeDto.getContractEndDate());
+        }
+
+        // Luôn tự động cập nhật status dựa trên ngày hợp đồng, không cho phép cập nhật thủ công
+        LocalDate contractStartDate = store.getContractStartDate();
+        LocalDate contractEndDate = store.getContractEndDate();
+        // nếu ngày bắt đầu hợp đồng > now hoặc ngày kết thúc < now thì inactive
+        if (contractStartDate != null && contractEndDate != null) {
+            if (nowDate.isBefore(contractStartDate) || nowDate.isAfter(contractEndDate)) {
+                store.setStatus(StoreStatus.INACTIVE);
+            } else {
+                store.setStatus(StoreStatus.ACTIVE);
+            }
         }
 
         if (storeDto.getStoreName() != null
@@ -208,11 +225,6 @@ public class StoreServiceImpl implements StoreService {
                 && !storeDto.getOwnerName().trim().isEmpty()
                 && !store.getOwnerName().equals(storeDto.getOwnerName())) {
             store.setOwnerName(storeDto.getOwnerName());
-        }
-
-        if (storeDto.getStatus() != null
-                && store.getStatus() != storeDto.getStatus()) {
-            store.setStatus(storeDto.getStatus());
         }
 
         if (storeDto.getImagePath() != null
