@@ -26,6 +26,7 @@ public class GetOrderResponse {
 
     private int contractId;
     private String contractCode; // For display
+    private String urlContractFile;
 
     private int customerId;
     private String customerName;  // For display

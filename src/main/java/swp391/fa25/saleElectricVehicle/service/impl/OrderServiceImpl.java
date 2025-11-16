@@ -455,6 +455,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(order.getStatus().name())
                 .contractId(order.getContract() != null ? order.getContract().getContractId() : 0)
                 .contractCode(order.getContract() != null ? order.getContract().getContractCode() : null)
+                .urlContractFile(order.getContract() != null ? order.getContract().getContractFileUrl() : null)
                 .customerId(order.getCustomer().getCustomerId())
                 .customerName(order.getCustomer().getFullName())
                 .customerPhone(order.getCustomer().getPhone())
