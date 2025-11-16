@@ -9,6 +9,8 @@ import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.ContractDto;
@@ -232,6 +234,9 @@ public class ContractServiceImpl implements ContractService {
                         .build())
                 .toList();
         
+        // Tính số tiền còn lại phải trả
+        BigDecimal remainingAmountToPay = calculateRemainingAmountToPay(contract);
+        
         return GetContractDetailResponse.builder()
                 // Contract info
                 .contractId(contract.getContractId())
@@ -241,6 +246,7 @@ public class ContractServiceImpl implements ContractService {
                 .depositPrice(contract.getDepositPrice())
                 .totalPayment(contract.getTotalPayment())
                 .remainPrice(contract.getRemainPrice())
+                .remainingAmountToPay(remainingAmountToPay)
                 .terms(contract.getTerms())
                 .contractFileUrl(contract.getContractFileUrl())
                 .uploadedBy(contract.getUploadedBy())
@@ -316,22 +322,26 @@ public class ContractServiceImpl implements ContractService {
                     storeId, currentUser.getUserId());
         }
         
-        return contracts.stream().map(contract -> GetContractResponse.builder()
-                        .contractId(contract.getContractId())
-                        .contractCode(contract.getContractCode())
-                        .contractDate(contract.getContractDate())
-                        .contractFileUrl(contract.getContractFileUrl())
-                        .status(contract.getStatus().name())
-                        .depositPrice(contract.getDepositPrice())
-                        .totalPayment(contract.getTotalPayment())
-                        .remainPrice(contract.getRemainPrice())
+        return contracts.stream().map(contract -> {
+                    BigDecimal remainingAmountToPay = calculateRemainingAmountToPay(contract);
+                    return GetContractResponse.builder()
+                            .contractId(contract.getContractId())
+                            .contractCode(contract.getContractCode())
+                            .contractDate(contract.getContractDate())
+                            .contractFileUrl(contract.getContractFileUrl())
+                            .status(contract.getStatus().name())
+                            .depositPrice(contract.getDepositPrice())
+                            .totalPayment(contract.getTotalPayment())
+                            .remainPrice(contract.getRemainPrice())
+                            .remainingAmountToPay(remainingAmountToPay)
 //                        .terms(contract.getTerms())
-                        .orderId(contract.getOrder().getOrderId())
-                        .orderCode(contract.getOrder().getOrderCode())
-                        .customerId(contract.getOrder().getCustomer().getCustomerId())
-                        .customerName(contract.getOrder().getCustomer().getFullName())
-                        .createdAt(contract.getCreatedAt())
-                        .build())
+                            .orderId(contract.getOrder().getOrderId())
+                            .orderCode(contract.getOrder().getOrderCode())
+                            .customerId(contract.getOrder().getCustomer().getCustomerId())
+                            .customerName(contract.getOrder().getCustomer().getFullName())
+                            .createdAt(contract.getCreatedAt())
+                            .build();
+                })
                 .toList();
     }
 
@@ -451,6 +461,37 @@ public class ContractServiceImpl implements ContractService {
 //        return mapToDto(contract);
 //    }
 //
+    /**
+     * Tính số tiền còn lại phải trả dựa trên payment status
+     * - Nếu chưa trả cọc (deposit) lẫn balance: remainingAmountToPay = totalPayment
+     * - Nếu đã trả cọc nhưng chưa trả balance: remainingAmountToPay = remainPrice (balance)
+     * - Nếu đã trả cả 2: remainingAmountToPay = 0
+     */
+    private BigDecimal calculateRemainingAmountToPay(Contract contract) {
+        List<swp391.fa25.saleElectricVehicle.entity.Payment> payments = contract.getPayments();
+        
+        // Kiểm tra xem có payment DEPOSIT completed chưa
+        boolean hasCompletedDeposit = payments.stream()
+                .anyMatch(p -> p.getPaymentType() == PaymentType.DEPOSIT 
+                        && p.getStatus() == PaymentStatus.COMPLETED);
+        
+        // Kiểm tra xem có payment BALANCE completed chưa
+        boolean hasCompletedBalance = payments.stream()
+                .anyMatch(p -> p.getPaymentType() == PaymentType.BALANCE 
+                        && p.getStatus() == PaymentStatus.COMPLETED);
+        
+        if (!hasCompletedDeposit && !hasCompletedBalance) {
+            // Chưa trả cọc lẫn balance: còn lại toàn bộ tiền cần phải trả
+            return contract.getTotalPayment();
+        } else if (hasCompletedDeposit && !hasCompletedBalance) {
+            // Đã trả cọc nhưng chưa trả balance: còn lại là balance
+            return contract.getRemainPrice();
+        } else {
+            // Đã trả cả 2: còn lại là 0
+            return BigDecimal.ZERO;
+        }
+    }
+
     private ContractDto mapToDto(Contract contract) {
         return ContractDto.builder()
                 .contractId(contract.getContractId())

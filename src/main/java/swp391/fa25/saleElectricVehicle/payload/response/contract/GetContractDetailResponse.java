@@ -21,7 +21,8 @@ public class GetContractDetailResponse {
     private String status;
     private BigDecimal depositPrice;
     private BigDecimal totalPayment;
-    private BigDecimal remainPrice;
+    private BigDecimal remainPrice; // Số tiền balance (sau khi trả cọc)
+    private BigDecimal remainingAmountToPay; // Số tiền còn lại phải trả (dựa trên payment status)
     private String terms;
     private String contractFileUrl;
     private String uploadedBy;
