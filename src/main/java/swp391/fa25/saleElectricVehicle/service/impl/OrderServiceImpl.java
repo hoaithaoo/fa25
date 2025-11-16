@@ -353,41 +353,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public StaffMonthlyOrdersResponse getOrdersByCurrentStaff() {
-        User currentUser = userService.getCurrentUserEntity();
-        
-        // Lấy tháng hiện tại
-        YearMonth currentMonth = YearMonth.now();
-        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
-        LocalDateTime startOfNextMonth = currentMonth.plusMonths(1).atDay(1).atStartOfDay();
-        
-        // Lấy orders của staff hiện tại trong tháng hiện tại
-        List<Order> orders = orderRepository.findByUser_UserIdAndOrderDateBetween(
-                currentUser.getUserId(), startOfMonth, startOfNextMonth);
-        
-        // Convert to DTO
-        List<GetOrderResponse> orderResponses = orders.stream()
-                .map(this::mapToDto)
-                .toList();
-        
-        // Tính tổng số orders
-        int totalOrders = orders.size();
-        
-        // Tính doanh thu tháng (tổng totalPayment)
-        BigDecimal monthlyRevenue = orders.stream()
-                .map(Order::getTotalPayment)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        return StaffMonthlyOrdersResponse.builder()
-                .staffId(currentUser.getUserId())
-                .staffName(currentUser.getFullName())
-                .orders(orderResponses)
-                .totalOrders(totalOrders)
-                .monthlyRevenue(monthlyRevenue)
-                .build();
-    }
-
-    @Override
     public List<Order> getOrdersByStoreIdAndStatusAndDateRange(int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate) {
         return orderRepository.findByStoreIdAndStatusAndOrderDateBetween(storeId, status, startDate, endDate);
     }

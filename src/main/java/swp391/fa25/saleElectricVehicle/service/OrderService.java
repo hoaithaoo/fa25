@@ -29,7 +29,6 @@ public interface OrderService {
 //    OrderDto updateOrderStatus(int orderId, OrderStatus status);
     List<GetOrderResponse> getOrdersByCustomerId(int customerId);
     StaffMonthlyOrdersResponse getOrdersByStaffId(int staffId);
-    StaffMonthlyOrdersResponse getOrdersByCurrentStaff();
     
     // Get orders by store, status and date range (for revenue calculation)
     List<Order> getOrdersByStoreIdAndStatusAndDateRange(int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate);

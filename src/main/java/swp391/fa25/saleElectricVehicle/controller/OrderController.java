@@ -16,6 +16,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
 import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
+import swp391.fa25.saleElectricVehicle.service.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +30,9 @@ public class OrderController {
 
     @Autowired
     private OrderDetailService orderDetailService;
+
+    @Autowired
+    private UserService userService;
 
     // CREATE
     @PostMapping("/create/quote")
@@ -161,7 +165,8 @@ public class OrderController {
     // dành cho staff hiện tại của store
     @GetMapping("/staff")
     public ResponseEntity<ApiResponse<StaffMonthlyOrdersResponse>> getOrdersByCurrentStaff() {
-        StaffMonthlyOrdersResponse staffMonthlyOrders = orderService.getOrdersByCurrentStaff();
+        int currentUserId = userService.getCurrentUserEntity().getUserId();
+        StaffMonthlyOrdersResponse staffMonthlyOrders = orderService.getOrdersByStaffId(currentUserId);
         ApiResponse<StaffMonthlyOrdersResponse> response = ApiResponse.<StaffMonthlyOrdersResponse>builder()
                 .code(HttpStatus.OK.value())
                 .message("Current staff monthly orders retrieved successfully")
