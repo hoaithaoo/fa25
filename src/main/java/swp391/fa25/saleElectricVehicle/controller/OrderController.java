@@ -13,6 +13,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderRespons
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
 import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 
@@ -143,28 +144,28 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    // BUSINESS - Get orders by staff
+    // BUSINESS - Get orders by staff trong tháng này
     // dành cho quản lí của store
     @GetMapping("/staff/{staffId}")
-    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByStaff(@PathVariable int staffId) {
-        List<GetOrderResponse> orders = orderService.getOrdersByStaffId(staffId);
-        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
+    public ResponseEntity<ApiResponse<StaffMonthlyOrdersResponse>> getOrdersByStaff(@PathVariable int staffId) {
+        StaffMonthlyOrdersResponse staffMonthlyOrders = orderService.getOrdersByStaffId(staffId);
+        ApiResponse<StaffMonthlyOrdersResponse> response = ApiResponse.<StaffMonthlyOrdersResponse>builder()
                 .code(HttpStatus.OK.value())
-                .message("Staff orders retrieved successfully")
-                .data(orders)
+                .message("Staff monthly orders retrieved successfully")
+                .data(staffMonthlyOrders)
                 .build();
         return ResponseEntity.ok(response);
     }
 
-    // BUSINESS - Get orders by staff
+    // BUSINESS - Get orders by staff hiện tại trong tháng này
     // dành cho staff hiện tại của store
     @GetMapping("/staff")
-    public ResponseEntity<ApiResponse<List<GetOrderResponse>>> getOrdersByCurrentStaff() {
-        List<GetOrderResponse> orders = orderService.getOrdersByCurrentStaff();
-        ApiResponse<List<GetOrderResponse>> response = ApiResponse.<List<GetOrderResponse>>builder()
+    public ResponseEntity<ApiResponse<StaffMonthlyOrdersResponse>> getOrdersByCurrentStaff() {
+        StaffMonthlyOrdersResponse staffMonthlyOrders = orderService.getOrdersByCurrentStaff();
+        ApiResponse<StaffMonthlyOrdersResponse> response = ApiResponse.<StaffMonthlyOrdersResponse>builder()
                 .code(HttpStatus.OK.value())
-                .message("Staff orders retrieved successfully")
-                .data(orders)
+                .message("Current staff monthly orders retrieved successfully")
+                .data(staffMonthlyOrders)
                 .build();
         return ResponseEntity.ok(response);
     }

@@ -6,6 +6,7 @@ import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,8 +28,8 @@ public interface OrderService {
     // Business operations
 //    OrderDto updateOrderStatus(int orderId, OrderStatus status);
     List<GetOrderResponse> getOrdersByCustomerId(int customerId);
-    List<GetOrderResponse> getOrdersByStaffId(int staffId);
-    List<GetOrderResponse> getOrdersByCurrentStaff();
+    StaffMonthlyOrdersResponse getOrdersByStaffId(int staffId);
+    StaffMonthlyOrdersResponse getOrdersByCurrentStaff();
     
     // Get orders by store, status and date range (for revenue calculation)
     List<Order> getOrdersByStoreIdAndStatusAndDateRange(int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate);

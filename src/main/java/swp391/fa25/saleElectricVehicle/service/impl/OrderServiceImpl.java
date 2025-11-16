@@ -15,11 +15,13 @@ import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
 import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -315,18 +317,74 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<GetOrderResponse> getOrdersByStaffId(int staffId) {
-        return orderRepository.findByUser_UserId(staffId).stream()
+    public StaffMonthlyOrdersResponse getOrdersByStaffId(int staffId) {
+        // Validate staff exists
+        User staff = userService.getUserEntityById(staffId);
+        
+        // Lấy tháng hiện tại
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime startOfNextMonth = currentMonth.plusMonths(1).atDay(1).atStartOfDay();
+        
+        // Lấy orders của staff trong tháng hiện tại
+        List<Order> orders = orderRepository.findByUser_UserIdAndOrderDateBetween(
+                staffId, startOfMonth, startOfNextMonth);
+        
+        // Convert to DTO
+        List<GetOrderResponse> orderResponses = orders.stream()
                 .map(this::mapToDto)
                 .toList();
+        
+        // Tính tổng số orders
+        int totalOrders = orders.size();
+        
+        // Tính doanh thu tháng (tổng totalPayment)
+        BigDecimal monthlyRevenue = orders.stream()
+                .map(Order::getTotalPayment)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        return StaffMonthlyOrdersResponse.builder()
+                .staffId(staffId)
+                .staffName(staff.getFullName())
+                .orders(orderResponses)
+                .totalOrders(totalOrders)
+                .monthlyRevenue(monthlyRevenue)
+                .build();
     }
 
     @Override
-    public List<GetOrderResponse> getOrdersByCurrentStaff() {
+    public StaffMonthlyOrdersResponse getOrdersByCurrentStaff() {
         User currentUser = userService.getCurrentUserEntity();
-        return orderRepository.findByUser_UserId(currentUser.getUserId()).stream()
+        
+        // Lấy tháng hiện tại
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime startOfNextMonth = currentMonth.plusMonths(1).atDay(1).atStartOfDay();
+        
+        // Lấy orders của staff hiện tại trong tháng hiện tại
+        List<Order> orders = orderRepository.findByUser_UserIdAndOrderDateBetween(
+                currentUser.getUserId(), startOfMonth, startOfNextMonth);
+        
+        // Convert to DTO
+        List<GetOrderResponse> orderResponses = orders.stream()
                 .map(this::mapToDto)
                 .toList();
+        
+        // Tính tổng số orders
+        int totalOrders = orders.size();
+        
+        // Tính doanh thu tháng (tổng totalPayment)
+        BigDecimal monthlyRevenue = orders.stream()
+                .map(Order::getTotalPayment)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        return StaffMonthlyOrdersResponse.builder()
+                .staffId(currentUser.getUserId())
+                .staffName(currentUser.getFullName())
+                .orders(orderResponses)
+                .totalOrders(totalOrders)
+                .monthlyRevenue(monthlyRevenue)
+                .build();
     }
 
     @Override
