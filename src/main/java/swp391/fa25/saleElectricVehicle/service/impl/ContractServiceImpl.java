@@ -251,7 +251,7 @@ public class ContractServiceImpl implements ContractService {
                 .contractFileUrl(contract.getContractFileUrl())
                 .uploadedBy(contract.getUploadedBy())
                 .createdAt(contract.getCreatedAt())
-//                .updatedAt(contract.getUpdatedAt())
+                .updatedAt(contract.getUpdatedAt())
                 // Order info
                 .orderId(order.getOrderId())
                 .orderCode(order.getOrderCode())
@@ -340,6 +340,7 @@ public class ContractServiceImpl implements ContractService {
                             .customerId(contract.getOrder().getCustomer().getCustomerId())
                             .customerName(contract.getOrder().getCustomer().getFullName())
                             .createdAt(contract.getCreatedAt())
+                            .updatedAt(contract.getUpdatedAt())
                             .build();
                 })
                 .toList();
@@ -504,10 +505,9 @@ public class ContractServiceImpl implements ContractService {
                 .remainPrice(contract.getRemainPrice())
                 .terms(contract.getTerms())
 //                .uploadedBy(contract.getUploadedBy())
-//                .createdAt(contract.getCreatedAt().toString())
-//                .updatedAt(contract.getUpdatedAt().toString())
                 .orderId(contract.getOrder().getOrderId())
                 .createdAt(contract.getCreatedAt())
+                .updatedAt(contract.getUpdatedAt())
                 .build();
     }
 }

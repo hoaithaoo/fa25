@@ -1,7 +1,6 @@
 package swp391.fa25.saleElectricVehicle.payload.dto;
 
 import lombok.*;
-import swp391.fa25.saleElectricVehicle.entity.Contract;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,4 +31,5 @@ public class ContractDto {
 //    private String updatedAt;
     private int orderId; // Chỉ trả về orderId thay vì toàn bộ Order object
     private java.time.LocalDateTime createdAt;
+    private java.time.LocalDateTime updatedAt;
 }
