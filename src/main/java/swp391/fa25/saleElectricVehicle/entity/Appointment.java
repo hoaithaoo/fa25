@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.AppointmentStatus;
 
 import java.time.LocalDateTime;
 
@@ -24,18 +25,13 @@ public class Appointment {
     private LocalDateTime endTime;
 
     @Column
-    private AppointmentStatus status = AppointmentStatus.CONFIRMED;
-
-    public enum  AppointmentStatus {
-        CONFIRMED,
-        CANCELLED,
-        NO_SHOW,
-        IN_PROGRESS,
-        COMPLETED
-    }
+    private AppointmentStatus status;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "modelId", nullable = false)
@@ -52,4 +48,12 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "storeId", nullable = false)
     private Store store;
+
+    // set store dựa trên staff khi tạo mới appointment
+    @PrePersist
+    private void setStoreFromStaff() {
+        if (this.user != null && this.user.getStore() != null) {
+            this.store = this.user.getStore();
+        }
+    }
 }

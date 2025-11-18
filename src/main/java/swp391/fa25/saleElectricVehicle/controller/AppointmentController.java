@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swp391.fa25.saleElectricVehicle.entity.Appointment;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.AppointmentStatus;
 import swp391.fa25.saleElectricVehicle.payload.dto.AppointmentDto;
+import swp391.fa25.saleElectricVehicle.payload.request.appointment.CreateAppointmentRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.AppointmentService;
 
@@ -19,8 +20,8 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<AppointmentDto>> createAppointment(@RequestBody AppointmentDto appointmentDto) {
-        AppointmentDto createdAppointment = appointmentService.createAppointment(appointmentDto);
+    public ResponseEntity<ApiResponse<AppointmentDto>> createAppointment(@RequestBody CreateAppointmentRequest request) {
+        AppointmentDto createdAppointment = appointmentService.createAppointment(request);
         ApiResponse<AppointmentDto> response = ApiResponse.<AppointmentDto>builder()
                 .code(HttpStatus.CREATED.value())
                 .message("Create appointment successfully")
@@ -73,38 +74,38 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/store/{storeId}")
-    public ResponseEntity<ApiResponse<List<AppointmentDto>>> getAppointmentsByStoreId(@PathVariable int storeId) {
-        List<AppointmentDto> appointments = appointmentService.getAppointmentsByStoreId(storeId);
-        ApiResponse<List<AppointmentDto>> response = ApiResponse.<List<AppointmentDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Appointments fetched successfully by store")
-                .data(appointments)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/model/{modelId}")
-    public ResponseEntity<ApiResponse<List<AppointmentDto>>> getAppointmentsByModelId(@PathVariable int modelId) {
-        List<AppointmentDto> appointments = appointmentService.getAppointmentsByModelId(modelId);
-        ApiResponse<List<AppointmentDto>> response = ApiResponse.<List<AppointmentDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Appointments fetched successfully by model")
-                .data(appointments)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/status/{status}")
-    public ResponseEntity<ApiResponse<List<AppointmentDto>>> getAppointmentsByStatus(@PathVariable Appointment.AppointmentStatus status) {
-        List<AppointmentDto> appointments = appointmentService.getAppointmentsByStatus(status);
-        ApiResponse<List<AppointmentDto>> response = ApiResponse.<List<AppointmentDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Appointments fetched successfully by status")
-                .data(appointments)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/store/{storeId}")
+//    public ResponseEntity<ApiResponse<List<AppointmentDto>>> getAppointmentsByStoreId(@PathVariable int storeId) {
+//        List<AppointmentDto> appointments = appointmentService.getAppointmentsByStoreId(storeId);
+//        ApiResponse<List<AppointmentDto>> response = ApiResponse.<List<AppointmentDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Appointments fetched successfully by store")
+//                .data(appointments)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
+//
+//    @GetMapping("/model/{modelId}")
+//    public ResponseEntity<ApiResponse<List<AppointmentDto>>> getAppointmentsByModelId(@PathVariable int modelId) {
+//        List<AppointmentDto> appointments = appointmentService.getAppointmentsByModelId(modelId);
+//        ApiResponse<List<AppointmentDto>> response = ApiResponse.<List<AppointmentDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Appointments fetched successfully by model")
+//                .data(appointments)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
+//
+//    @GetMapping("/status/{status}")
+//    public ResponseEntity<ApiResponse<List<AppointmentDto>>> getAppointmentsByStatus(@PathVariable AppointmentStatus status) {
+//        List<AppointmentDto> appointments = appointmentService.getAppointmentsByStatus(status);
+//        ApiResponse<List<AppointmentDto>> response = ApiResponse.<List<AppointmentDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Appointments fetched successfully by status")
+//                .data(appointments)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteAppointment(@PathVariable int id) {
@@ -131,7 +132,7 @@ public class AppointmentController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<AppointmentDto>> updateAppointmentStatus(
             @PathVariable int id,
-            @RequestParam Appointment.AppointmentStatus status) {
+            @RequestParam AppointmentStatus status) {
         AppointmentDto updatedAppointment = appointmentService.updateAppointmentStatus(id, status);
         ApiResponse<AppointmentDto> response = ApiResponse.<AppointmentDto>builder()
                 .code(HttpStatus.OK.value())

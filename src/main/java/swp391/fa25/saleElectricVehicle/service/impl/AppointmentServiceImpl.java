@@ -7,14 +7,12 @@ import swp391.fa25.saleElectricVehicle.entity.Customer;
 import swp391.fa25.saleElectricVehicle.entity.Model;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.User;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.AppointmentStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.AppointmentDto;
+import swp391.fa25.saleElectricVehicle.payload.request.appointment.CreateAppointmentRequest;
 import swp391.fa25.saleElectricVehicle.repository.AppointmentRepository;
-import swp391.fa25.saleElectricVehicle.repository.CustomerRepository;
-import swp391.fa25.saleElectricVehicle.repository.ModelRepository;
-import swp391.fa25.saleElectricVehicle.repository.StoreRepository;
-import swp391.fa25.saleElectricVehicle.repository.UserRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
 import java.time.LocalDateTime;
@@ -39,49 +37,30 @@ public class AppointmentServiceImpl implements AppointmentService {
     private StoreService storeService;
 
     @Override
-    public AppointmentDto createAppointment(AppointmentDto appointmentDto) {
+    public AppointmentDto createAppointment(CreateAppointmentRequest request) {
+        // Validate exists
+        Model model = modelService.getModelEntityById(request.getModelId());
+        Customer customer = customerService.getCustomerEntityById(request.getCustomerId());
+        User staff = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(staff.getUserId());
+
         // Validate startTime and endTime
-        if (appointmentDto.getStartTime() == null || appointmentDto.getEndTime() == null) {
+        if (request.getStartTime() == null) {
             throw new AppException(ErrorCode.INVALID_TIME_RANGE);
         }
-
-        if (appointmentDto.getStartTime().isAfter(appointmentDto.getEndTime())) {
-            throw new AppException(ErrorCode.START_TIME_AFTER_END_TIME);
-        }
-
-        if (appointmentDto.getStartTime().isBefore(LocalDateTime.now())) {
+        if (request.getStartTime().isBefore(LocalDateTime.now())) {
             throw new AppException(ErrorCode.PAST_APPOINTMENT_TIME);
         }
 
-        // Validate Model exists
-        Model model = modelService.getModelEntityById(appointmentDto.getModelId());
-
-        // Validate Customer exists
-        Customer customer = customerService.getCustomerEntityById(appointmentDto.getCustomerId());
-
-        // Validate Staff (User) exists
-        User staff = userService.getUserEntityById(appointmentDto.getStaffId());
-
-        // Validate Store exists
-        Store store = storeService.getStoreEntityById(appointmentDto.getStoreId());
-
-        // Set default status if not provided
-        Appointment.AppointmentStatus status;
-        if (appointmentDto.getStatus() != null) {
-            status = appointmentDto.getStatus();
-        } else {
-            status = Appointment.AppointmentStatus.CONFIRMED;
-        }
-
         Appointment newAppointment = Appointment.builder()
-                .startTime(appointmentDto.getStartTime())
-                .endTime(appointmentDto.getEndTime())
-                .status(status)
-                .createdAt(LocalDateTime.now())
                 .model(model)
                 .customer(customer)
                 .user(staff)
                 .store(store)
+                .startTime(request.getStartTime())
+                .endTime(request.getStartTime().plusHours(1)) // Mặc định endTime là 1 giờ sau startTime
+                .status(AppointmentStatus.CONFIRMED)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         appointmentRepository.save(newAppointment);
@@ -93,13 +72,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
         boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
-        
+
         Appointment appointment;
         if (isManager) {
             // Manager: chỉ check store
             appointment = appointmentRepository.findById(id)
                     .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
-            
+
             if (appointment.getStore().getStoreId() != store.getStoreId()) {
                 throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
             }
@@ -111,7 +90,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
             }
         }
-        
+
         return mapToDto(appointment);
     }
 
@@ -120,7 +99,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
         boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
-        
+
         List<Appointment> appointments;
         if (isManager) {
             // Manager: xem tất cả appointments trong store
@@ -130,48 +109,128 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointments = appointmentRepository.findByStore_StoreIdAndUser_UserId(
                     store.getStoreId(), currentUser.getUserId());
         }
-        
+
         return appointments.stream().map(this::mapToDto).toList();
     }
 
-        @Override
-        public List<AppointmentDto> getAppointmentsByCustomerId(int customerId) {
-            // Validate customer exists
-                customerService.getCustomerEntityById(customerId);
+    @Override
+    public List<AppointmentDto> getAppointmentsByCustomerId(int customerId) {
+        // Validate customer exists
+        customerService.getCustomerEntityById(customerId);
 
-            List<Appointment> appointments = appointmentRepository.findByCustomer_CustomerId(customerId);
-            return appointments.stream().map(this::mapToDto).toList();
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+
+        List<Appointment> appointments;
+        if (isManager) {
+            // Manager: xem appointments của customer trong store
+            appointments = appointmentRepository.findByStore_StoreIdAndCustomer_CustomerId(
+                    store.getStoreId(), customerId);
+        } else {
+            // Staff: chỉ xem appointments của customer mà họ tạo trong store
+            appointments = appointmentRepository.findByStore_StoreIdAndUser_UserIdAndCustomer_CustomerId(
+                    store.getStoreId(), currentUser.getUserId(), customerId);
         }
+
+        return appointments.stream().map(this::mapToDto).toList();
+    }
 
     @Override
     public List<AppointmentDto> getAppointmentsByStaffId(int staffId) {
         // Validate staff exists
         userService.getUserEntityById(staffId);
-        List<Appointment> appointments = appointmentRepository.findByUser_UserId(staffId);
+
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+
+        List<Appointment> appointments;
+        if (isManager) {
+            // Manager: xem appointments của staff trong store
+            appointments = appointmentRepository.findByStore_StoreIdAndUser_UserId(
+                    store.getStoreId(), staffId);
+        } else {
+            // Staff: chỉ xem appointments của chính họ trong store
+            if (staffId != currentUser.getUserId()) {
+                throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
+            }
+            appointments = appointmentRepository.findByStore_StoreIdAndUser_UserId(
+                    store.getStoreId(), currentUser.getUserId());
+        }
+
         return appointments.stream().map(this::mapToDto).toList();
     }
 
-    @Override
-    public List<AppointmentDto> getAppointmentsByStoreId(int storeId) {
-        // Validate store exists
-        storeService.getStoreEntityById(storeId);
-        List<Appointment> appointments = appointmentRepository.findByStore_StoreId(storeId);
-        return appointments.stream().map(this::mapToDto).toList();
-    }
+    // @Override
+    // public List<AppointmentDto> getAppointmentsByStoreId(int storeId) {
+    //     // Validate store exists
+    //     storeService.getStoreEntityById(storeId);
 
-    @Override
-    public List<AppointmentDto> getAppointmentsByModelId(int modelId) {
-        // Validate model exists
-        modelService.getModelEntityById(modelId);
-        List<Appointment> appointments = appointmentRepository.findByModel_ModelId(modelId);
-        return appointments.stream().map(this::mapToDto).toList();
-    }
+    //     User currentUser = userService.getCurrentUserEntity();
+    //     Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+    //     boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
 
-    @Override
-    public List<AppointmentDto> getAppointmentsByStatus(Appointment.AppointmentStatus status) {
-        List<Appointment> appointments = appointmentRepository.findByStatus(status);
-        return appointments.stream().map(this::mapToDto).toList();
-    }
+    //     // Only allow viewing appointments from own store
+    //     if (storeId != currentStore.getStoreId()) {
+    //         throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
+    //     }
+
+    //     List<Appointment> appointments;
+    //     if (isManager) {
+    //         // Manager: xem tất cả appointments trong store
+    //         appointments = appointmentRepository.findByStore_StoreId(storeId);
+    //     } else {
+    //         // Staff: chỉ xem appointments của chính họ trong store
+    //         appointments = appointmentRepository.findByStore_StoreIdAndUser_UserId(
+    //                 storeId, currentUser.getUserId());
+    //     }
+
+    //     return appointments.stream().map(this::mapToDto).toList();
+    // }
+
+    // @Override
+    // public List<AppointmentDto> getAppointmentsByModelId(int modelId) {
+    //     // Validate model exists
+    //     modelService.getModelEntityById(modelId);
+
+    //     User currentUser = userService.getCurrentUserEntity();
+    //     Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+    //     boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+
+    //     List<Appointment> appointments;
+    //     if (isManager) {
+    //         // Manager: xem appointments của model trong store
+    //         appointments = appointmentRepository.findByStore_StoreIdAndModel_ModelId(
+    //                 store.getStoreId(), modelId);
+    //     } else {
+    //         // Staff: chỉ xem appointments của model mà họ tạo trong store
+    //         appointments = appointmentRepository.findByStore_StoreIdAndUser_UserIdAndModel_ModelId(
+    //                 store.getStoreId(), currentUser.getUserId(), modelId);
+    //     }
+
+    //     return appointments.stream().map(this::mapToDto).toList();
+    // }
+
+    // @Override
+    // public List<AppointmentDto> getAppointmentsByStatus(AppointmentStatus status) {
+    //     User currentUser = userService.getCurrentUserEntity();
+    //     Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+    //     boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+
+    //     List<Appointment> appointments;
+    //     if (isManager) {
+    //         // Manager: xem appointments theo status trong store
+    //         appointments = appointmentRepository.findByStore_StoreIdAndStatus(
+    //                 store.getStoreId(), status);
+    //     } else {
+    //         // Staff: chỉ xem appointments theo status mà họ tạo trong store
+    //         appointments = appointmentRepository.findByStore_StoreIdAndUser_UserIdAndStatus(
+    //                 store.getStoreId(), currentUser.getUserId(), status);
+    //     }
+
+    //     return appointments.stream().map(this::mapToDto).toList();
+    // }
 
     @Override
     public void deleteAppointmentById(int id) {
@@ -182,8 +241,28 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentDto updateAppointment(int id, AppointmentDto appointmentDto) {
-        Appointment existingAppointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+
+        // Get appointment with access control
+        Appointment existingAppointment;
+        if (isManager) {
+            // Manager: chỉ check store
+            existingAppointment = appointmentRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+
+            if (existingAppointment.getStore().getStoreId() != store.getStoreId()) {
+                throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
+            }
+        } else {
+            // Staff: check cả store và userId
+            existingAppointment = appointmentRepository.findByStore_StoreIdAndUser_UserIdAndAppointmentId(
+                    store.getStoreId(), currentUser.getUserId(), id);
+            if (existingAppointment == null) {
+                throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
+            }
+        }
 
         // Update startTime if provided
         if (appointmentDto.getStartTime() != null) {
@@ -191,21 +270,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                 throw new AppException(ErrorCode.PAST_APPOINTMENT_TIME);
             }
             existingAppointment.setStartTime(appointmentDto.getStartTime());
-        }
-
-        // Update endTime if provided
-        if (appointmentDto.getEndTime() != null) {
-            existingAppointment.setEndTime(appointmentDto.getEndTime());
-        }
-
-        // Validate startTime before endTime after updates
-        if (existingAppointment.getStartTime().isAfter(existingAppointment.getEndTime())) {
-            throw new AppException(ErrorCode.START_TIME_AFTER_END_TIME);
-        }
-
-        // Update status if provided
-        if (appointmentDto.getStatus() != null) {
-            existingAppointment.setStatus(appointmentDto.getStatus());
+            // Update endTime accordingly (1 hour after startTime)
+            existingAppointment.setEndTime(appointmentDto.getStartTime().plusHours(1));
         }
 
         // Update model if provided
@@ -215,34 +281,12 @@ public class AppointmentServiceImpl implements AppointmentService {
             existingAppointment.setModel(model);
         }
 
-        // Update customer if provided
-        if (appointmentDto.getCustomerId() > 0
-                && appointmentDto.getCustomerId() != existingAppointment.getCustomer().getCustomerId()) {
-            Customer customer = customerService.getCustomerEntityById(appointmentDto.getCustomerId());
-            existingAppointment.setCustomer(customer);
-        }
-
-        // Update staff if provided
-        if (appointmentDto.getStaffId() > 0
-                && appointmentDto.getStaffId() != existingAppointment.getUser().getUserId()) {
-            User staff = userService.getUserEntityById(appointmentDto.getStaffId());
-            existingAppointment.setUser(staff);
-
-        }
-
-        // Update store if provided
-        if (appointmentDto.getStoreId() > 0
-                && appointmentDto.getStoreId() != existingAppointment.getStore().getStoreId()) {
-            Store store = storeService.getStoreEntityById(appointmentDto.getStoreId());
-            existingAppointment.setStore(store);
-        }
-
         appointmentRepository.save(existingAppointment);
         return mapToDto(existingAppointment);
     }
 
     @Override
-    public AppointmentDto updateAppointmentStatus(int id, Appointment.AppointmentStatus status) {
+    public AppointmentDto updateAppointmentStatus(int id, AppointmentStatus status) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
 
@@ -258,10 +302,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .endTime(appointment.getEndTime())
                 .status(appointment.getStatus())
                 .createdAt(appointment.getCreatedAt())
+                .updatedAt(appointment.getUpdatedAt())
                 .modelId(appointment.getModel().getModelId())
+                .modelName(appointment.getModel().getModelName())
                 .customerId(appointment.getCustomer().getCustomerId())
+                .customerName(appointment.getCustomer().getFullName())
+                .customerPhone(appointment.getCustomer().getPhone())
                 .staffId(appointment.getUser().getUserId())
-                .storeId(appointment.getStore().getStoreId())
+                .staffName(appointment.getUser().getFullName())
                 .build();
     }
 }

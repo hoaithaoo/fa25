@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.payload.dto;
 
 import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.Appointment;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.AppointmentStatus;
 
 import java.time.LocalDateTime;
 
@@ -12,12 +13,18 @@ import java.time.LocalDateTime;
 @Builder
 public class AppointmentDto {
     private int appointmentId;
+    private int modelId;
+    private String modelName;
+    private int customerId;
+    private String customerName;
+    private String customerPhone;
+    private int staffId;
+    private String staffName;
+//    private int storeId;
+//    private String storeName;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Appointment.AppointmentStatus status;
+    private AppointmentStatus status;
     private LocalDateTime createdAt;
-    private int modelId;
-    private int customerId;
-    private int staffId;
-    private int storeId;
+    private LocalDateTime updatedAt;
 }
