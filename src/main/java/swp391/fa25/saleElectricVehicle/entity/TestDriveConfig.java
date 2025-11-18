@@ -3,7 +3,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "test_drive_configs", uniqueConstraints = {
@@ -20,19 +20,16 @@ public class TestDriveConfig {
     private Integer configId;
 
     @Column(nullable = false)
-    private int maxAppointmentsPerDay;
-
-    @Column(nullable = false)
     private int appointmentDurationMinutes;
 
     @Column(nullable = false)
-    private int maxConcurrentAppointments;
+    private int maxAppointmentsPerModelPerSlot;
 
     @Column(nullable = false)
-    private LocalDateTime startTime;
+    private LocalTime startTime;
 
     @Column(nullable = false)
-    private LocalDateTime endTime;
+    private LocalTime endTime;
 
     @OneToOne
     @JoinColumn(name = "store_Id", nullable = false)

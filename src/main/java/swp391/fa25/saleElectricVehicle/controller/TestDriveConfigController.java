@@ -9,8 +9,6 @@ import swp391.fa25.saleElectricVehicle.payload.dto.TestDriveConfigDto;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.TestDriveConfigService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/test-drive-configs")
 public class TestDriveConfigController {

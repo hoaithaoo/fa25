@@ -1,7 +1,7 @@
 package swp391.fa25.saleElectricVehicle.payload.dto;
 
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -9,10 +9,9 @@ import java.time.LocalDateTime;
 @Builder
 public class TestDriveConfigDto {
     private Integer configId;
-    private int maxAppointmentsPerDay;
     private int appointmentDurationMinutes;
-    private int maxConcurrentAppointments;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private int maxAppointmentsPerModelPerSlot;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private int storeId; // Liên kết với Store
 }

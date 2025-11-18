@@ -1,10 +1,13 @@
 package swp391.fa25.saleElectricVehicle.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import swp391.fa25.saleElectricVehicle.entity.Appointment;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.AppointmentStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -26,6 +29,31 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
     // Find appointments by store, user and customer (for staff filtering)
     List<Appointment> findByStore_StoreIdAndUser_UserIdAndCustomer_CustomerId(int storeId, int userId, int customerId);
+
+    // Đếm appointments của một model trùng thời gian với appointment hiện tại (chỉ tính CONFIRMED và IN_PROGRESS)
+    // Đếm appointments có overlap với khoảng thời gian [startTime, endTime]
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.store.storeId = :storeId " +
+           "AND a.model.modelId = :modelId " +
+           "AND a.startTime < :endTime AND a.endTime > :startTime " +
+           "AND (a.status = :confirmedStatus OR a.status = :inProgressStatus)")
+    long countAppointmentsByModelAndTimeRange(
+            @Param("storeId") int storeId,
+            @Param("modelId") int modelId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("confirmedStatus") AppointmentStatus confirmedStatus,
+            @Param("inProgressStatus") AppointmentStatus inProgressStatus);
+
+    // Tìm appointments kết thúc quá gần startTime của appointment mới (buffer 15 phút)
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.store.storeId = :storeId " +
+           "AND a.endTime <= :startTime AND a.endTime > :minStartTime " +
+           "AND (a.status = :confirmedStatus OR a.status = :inProgressStatus)")
+    long countAppointmentsEndingTooClose(
+            @Param("storeId") int storeId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("minStartTime") LocalDateTime minStartTime,
+            @Param("confirmedStatus") AppointmentStatus confirmedStatus,
+            @Param("inProgressStatus") AppointmentStatus inProgressStatus);
 
 //    // Find appointments by store and model
 //    List<Appointment> findByStore_StoreIdAndModel_ModelId(int storeId, int modelId);

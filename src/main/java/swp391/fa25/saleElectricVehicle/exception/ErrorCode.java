@@ -90,6 +90,9 @@ public enum ErrorCode {
     UNAUTHORIZED_CREATE_TEST_DRIVE_CONFIG(1075, "Chỉ quản lý cửa hàng mới được tạo cấu hình lái thử", HttpStatus.FORBIDDEN),
     UNAUTHORIZED_UPDATE_TEST_DRIVE_CONFIG(1076, "Chỉ quản lý cửa hàng mới được cập nhật cấu hình lái thử", HttpStatus.FORBIDDEN),
     UNAUTHORIZED_TEST_DRIVE_CONFIG_ACCESS(1077, "Bạn chỉ có thể tạo hoặc cập nhật cấu hình lái thử cho store của chính mình", HttpStatus.FORBIDDEN),
+    APPOINTMENT_TIME_OUT_OF_RANGE(1078, "Thời gian lịch hẹn nằm ngoài giờ làm việc", HttpStatus.BAD_REQUEST),
+    APPOINTMENTS_PER_MODEL_PER_SLOT_EXCEEDED(1079, "Số lượng lịch hẹn của model này trong khoảng thời gian này đã đạt giới hạn", HttpStatus.BAD_REQUEST),
+    APPOINTMENT_BUFFER_TIME_VIOLATED(1081, "Lịch hẹn phải cách lịch hẹn trước đó ít nhất 15 phút để tránh thời gian trả xe trễ", HttpStatus.BAD_REQUEST),
 //    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
 //    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;

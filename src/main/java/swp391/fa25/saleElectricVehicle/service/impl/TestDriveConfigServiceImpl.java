@@ -14,9 +14,6 @@ import swp391.fa25.saleElectricVehicle.service.StoreService;
 import swp391.fa25.saleElectricVehicle.service.TestDriveConfigService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class TestDriveConfigServiceImpl implements TestDriveConfigService {
 
@@ -47,9 +44,8 @@ public class TestDriveConfigServiceImpl implements TestDriveConfigService {
         }
 
         TestDriveConfig config = TestDriveConfig.builder()
-                .maxAppointmentsPerDay(dto.getMaxAppointmentsPerDay())
                 .appointmentDurationMinutes(dto.getAppointmentDurationMinutes())
-                .maxConcurrentAppointments(dto.getMaxConcurrentAppointments())
+                .maxAppointmentsPerModelPerSlot(dto.getMaxAppointmentsPerModelPerSlot())
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
                 .store(currentStore)
@@ -78,6 +74,18 @@ public class TestDriveConfigServiceImpl implements TestDriveConfigService {
         return mapToDto(config);
     }
 
+    @Override
+    public TestDriveConfig getTestDriveConfigEntity() {
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        TestDriveConfig config = testDriveConfigRepository.findByStore_StoreId(currentStore.getStoreId());
+        if (config == null) {
+            throw new AppException(ErrorCode.TEST_DRIVE_CONFIG_NOT_FOUND);
+        }
+        return config;
+    }
+
     // @Override
     // public List<TestDriveConfigDto> getAllTestDriveConfigs() {
     //     return testDriveConfigRepository.findAll().stream()
@@ -103,9 +111,8 @@ public class TestDriveConfigServiceImpl implements TestDriveConfigService {
         }
 
         // Update fields (không cho phép đổi store, storeId từ DTO sẽ bị bỏ qua)
-        if (dto.getMaxAppointmentsPerDay() != 0) config.setMaxAppointmentsPerDay(dto.getMaxAppointmentsPerDay());
         if (dto.getAppointmentDurationMinutes() != 0) config.setAppointmentDurationMinutes(dto.getAppointmentDurationMinutes());
-        if (dto.getMaxConcurrentAppointments() != 0) config.setMaxConcurrentAppointments(dto.getMaxConcurrentAppointments());
+        if (dto.getMaxAppointmentsPerModelPerSlot() != 0) config.setMaxAppointmentsPerModelPerSlot(dto.getMaxAppointmentsPerModelPerSlot());
         if (dto.getStartTime() != null) config.setStartTime(dto.getStartTime());
         if (dto.getEndTime() != null) config.setEndTime(dto.getEndTime());
         // Không cho phép đổi store - store luôn là store của manager hiện tại
@@ -160,9 +167,8 @@ public class TestDriveConfigServiceImpl implements TestDriveConfigService {
     private TestDriveConfigDto mapToDto(TestDriveConfig config) {
         return TestDriveConfigDto.builder()
                 .configId(config.getConfigId())
-                .maxAppointmentsPerDay(config.getMaxAppointmentsPerDay())
                 .appointmentDurationMinutes(config.getAppointmentDurationMinutes())
-                .maxConcurrentAppointments(config.getMaxConcurrentAppointments())
+                .maxAppointmentsPerModelPerSlot(config.getMaxAppointmentsPerModelPerSlot())
                 .startTime(config.getStartTime())
                 .endTime(config.getEndTime())
                 .storeId(config.getStore().getStoreId())
