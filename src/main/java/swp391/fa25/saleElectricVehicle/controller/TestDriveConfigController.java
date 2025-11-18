@@ -30,10 +30,9 @@ public class TestDriveConfigController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{configId}")
-    public ResponseEntity<ApiResponse<TestDriveConfigDto>> getTestDriveConfigById(
-            @PathVariable Integer configId) {
-        TestDriveConfigDto dto = testDriveConfigService.getTestDriveConfigById(configId);
+    @GetMapping("/current")
+    public ResponseEntity<ApiResponse<TestDriveConfigDto>> getTestDriveConfig() {
+        TestDriveConfigDto dto = testDriveConfigService.getTestDriveConfig();
         ApiResponse<TestDriveConfigDto> response = ApiResponse.<TestDriveConfigDto>builder()
                 .code(HttpStatus.OK.value())
                 .message("Test drive config fetched successfully")
@@ -42,21 +41,33 @@ public class TestDriveConfigController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<TestDriveConfigDto>>> getAllTestDriveConfigs() {
-        List<TestDriveConfigDto> dtos = testDriveConfigService.getAllTestDriveConfigs();
-        ApiResponse<List<TestDriveConfigDto>> response = ApiResponse.<List<TestDriveConfigDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("All test drive configs fetched successfully")
-                .data(dtos)
-                .build();
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/store/{storeId}")
+//    public ResponseEntity<ApiResponse<TestDriveConfigDto>> getTestDriveConfigByStoreId(
+//            @PathVariable Integer storeId) {
+//        TestDriveConfigDto dto = testDriveConfigService.getTestDriveConfigByStoreId(storeId);
+//        ApiResponse<TestDriveConfigDto> response = ApiResponse.<TestDriveConfigDto>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Test drive config fetched successfully by store")
+//                .data(dto)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
+//
+//    @GetMapping("/all")
+//    public ResponseEntity<ApiResponse<List<TestDriveConfigDto>>> getAllTestDriveConfigs() {
+//        List<TestDriveConfigDto> dtos = testDriveConfigService.getAllTestDriveConfigs();
+//        ApiResponse<List<TestDriveConfigDto>> response = ApiResponse.<List<TestDriveConfigDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("All test drive configs fetched successfully")
+//                .data(dtos)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 
     @PutMapping("/update/{configId}")
     public ResponseEntity<ApiResponse<TestDriveConfigDto>> updateTestDriveConfig(
             @PathVariable Integer configId,
-            @Valid @RequestBody TestDriveConfigDto dto) {
+            @RequestBody TestDriveConfigDto dto) {
         TestDriveConfigDto updated = testDriveConfigService.updateTestDriveConfig(configId, dto);
         ApiResponse<TestDriveConfigDto> response = ApiResponse.<TestDriveConfigDto>builder()
                 .code(HttpStatus.OK.value())
@@ -65,6 +76,19 @@ public class TestDriveConfigController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+//    @PutMapping("/update/store/{storeId}")
+//    public ResponseEntity<ApiResponse<TestDriveConfigDto>> updateTestDriveConfig(
+//            @PathVariable Integer storeId,
+//            @RequestBody TestDriveConfigDto dto) {
+//        TestDriveConfigDto updated = testDriveConfigService.updateTestDriveConfigByStoreId(storeId, dto);
+//        ApiResponse<TestDriveConfigDto> response = ApiResponse.<TestDriveConfigDto>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Test drive config updated successfully by store")
+//                .data(updated)
+//                .build();
+//        return ResponseEntity.ok(response);
+//    }
 
     @DeleteMapping("/delete/{configId}")
     public ResponseEntity<ApiResponse<Void>> deleteTestDriveConfig(@PathVariable Integer configId) {

@@ -86,6 +86,10 @@ public enum ErrorCode {
     INVENTORY_TRANSACTION_CANNOT_CONFIRM_PAYMENT(1071, "Chỉ có thể xác nhận thanh toán khi đại lý đã upload biên lai (FILE_UPLOADED)", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_CANCEL(1072, "Chỉ có thể hủy request khi ở trạng thái chờ xử lí (PENDING)", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_START_SHIPPING(1073, "Chỉ có thể bắt đầu giao hàng khi hãng đã xác nhận thanh toán (PAYMENT_CONFIRMED)", HttpStatus.BAD_REQUEST),
+    TEST_DRIVE_CONFIG_EXISTED(1074, "Store này đã có cấu hình lái thử. Vui lòng sử dụng chức năng cập nhật thay vì tạo mới", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_CREATE_TEST_DRIVE_CONFIG(1075, "Chỉ quản lý cửa hàng mới được tạo cấu hình lái thử", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED_UPDATE_TEST_DRIVE_CONFIG(1076, "Chỉ quản lý cửa hàng mới được cập nhật cấu hình lái thử", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED_TEST_DRIVE_CONFIG_ACCESS(1077, "Bạn chỉ có thể tạo hoặc cập nhật cấu hình lái thử cho store của chính mình", HttpStatus.FORBIDDEN),
 //    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
 //    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;

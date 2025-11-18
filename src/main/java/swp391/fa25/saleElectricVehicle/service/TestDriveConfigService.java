@@ -6,8 +6,10 @@ import java.util.List;
 
 public interface TestDriveConfigService {
     TestDriveConfigDto createTestDriveConfig(TestDriveConfigDto dto);
-    TestDriveConfigDto getTestDriveConfigById(int configId);
-    List<TestDriveConfigDto> getAllTestDriveConfigs();
+    TestDriveConfigDto getTestDriveConfig();
+//    TestDriveConfigDto getTestDriveConfigByStoreId(int storeId);
+//    List<TestDriveConfigDto> getAllTestDriveConfigs();
     TestDriveConfigDto updateTestDriveConfig(int configId, TestDriveConfigDto dto);
+//    TestDriveConfigDto updateTestDriveConfigByStoreId(int storeId, TestDriveConfigDto dto);
     void deleteTestDriveConfig(Integer configId);
 }

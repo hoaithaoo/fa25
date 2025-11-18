@@ -6,7 +6,9 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "test_drive_configs")
+@Table(name = "test_drive_configs", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "store_Id")
+})
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
