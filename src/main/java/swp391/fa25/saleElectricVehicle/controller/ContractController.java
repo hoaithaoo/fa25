@@ -24,6 +24,10 @@ import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractDeta
 import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.service.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import java.util.HashMap;
 import java.util.List;
@@ -150,6 +154,19 @@ public class ContractController {
                 .code(HttpStatus.OK.value())
                 .message("Get contract detail successfully")
                 .data(contractDetail)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<List<String>>> getContractStatus() {
+        List<String> statuses = Arrays.stream(ContractStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Contract status retrieved successfully")
+                .data(statuses)
                 .build();
         return ResponseEntity.ok(response);
     }

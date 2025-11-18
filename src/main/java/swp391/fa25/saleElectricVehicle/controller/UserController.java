@@ -15,8 +15,11 @@ import swp391.fa25.saleElectricVehicle.payload.response.user.CreateUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.GetUserResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.user.UpdateUserProfileResponse;
 import swp391.fa25.saleElectricVehicle.service.UserService;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -128,6 +131,19 @@ public class UserController {
                 .code(HttpStatus.OK.value())
                 .message("Profile updated successfully")
                 .data(updatedUser)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<List<String>>> getUserStatus() {
+        List<String> statuses = Arrays.stream(UserStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("User status retrieved successfully")
+                .data(statuses)
                 .build();
         return ResponseEntity.ok(response);
     }

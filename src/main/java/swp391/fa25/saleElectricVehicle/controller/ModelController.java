@@ -9,8 +9,11 @@ import swp391.fa25.saleElectricVehicle.payload.dto.ModelDto;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.ModelColorService;
 import swp391.fa25.saleElectricVehicle.service.ModelService;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.BodyType;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/models")
@@ -100,6 +103,19 @@ public class ModelController {
                 .code(HttpStatus.OK.value())
                 .message("Update model successfully")
                 .data(updatedModel)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/body-types")
+    public ResponseEntity<ApiResponse<List<String>>> getBodyTypes() {
+        List<String> bodyTypes = Arrays.stream(BodyType.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Body types retrieved successfully")
+                .data(bodyTypes)
                 .build();
         return ResponseEntity.ok(response);
     }

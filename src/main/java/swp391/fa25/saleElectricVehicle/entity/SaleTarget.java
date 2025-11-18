@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.SaleTargetStatus;
 
 import java.math.BigDecimal;
 
@@ -32,11 +33,6 @@ public class SaleTarget {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SaleTargetStatus status;
-
-    public enum SaleTargetStatus {
-        MET,
-        NOT_MET
-    }
 
     @ManyToOne
     @JoinColumn(name = "storeId", nullable = false)

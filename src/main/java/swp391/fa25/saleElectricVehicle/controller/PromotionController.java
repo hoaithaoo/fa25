@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.payload.dto.PromotionDto;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.PromotionService;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PromotionType;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/promotions")
@@ -90,6 +93,19 @@ public class PromotionController {
                 .code(HttpStatus.OK.value())
                 .message("Promotion deleted successfully")
                 .data(null)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/types")
+    public ResponseEntity<ApiResponse<List<String>>> getPromotionTypes() {
+        List<String> types = Arrays.stream(PromotionType.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Promotion types retrieved successfully")
+                .data(types)
                 .build();
         return ResponseEntity.ok(response);
     }

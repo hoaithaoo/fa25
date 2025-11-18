@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.AppointmentStatus;
 import swp391.fa25.saleElectricVehicle.payload.dto.AppointmentDto;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import swp391.fa25.saleElectricVehicle.payload.request.appointment.CreateAppointmentRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.AppointmentService;
@@ -138,6 +141,19 @@ public class AppointmentController {
                 .code(HttpStatus.OK.value())
                 .message("Update appointment status successfully")
                 .data(updatedAppointment)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<List<String>>> getAppointmentStatus() {
+        List<String> statuses = Arrays.stream(AppointmentStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Appointment status retrieved successfully")
+                .data(statuses)
                 .build();
         return ResponseEntity.ok(response);
     }

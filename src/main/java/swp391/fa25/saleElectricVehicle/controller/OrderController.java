@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderWithItemsRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
@@ -197,6 +200,19 @@ public class OrderController {
                 .data(list)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<List<String>>> getOrderStatus() {
+        List<String> statuses = Arrays.stream(OrderStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Order status retrieved successfully")
+                .data(statuses)
+                .build();
+        return ResponseEntity.ok(response);
     }
 //
 //    // BUSINESS - Search by customer phone

@@ -14,8 +14,11 @@ import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.store.StoreMonthlyRevenueResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.StoreService;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/stores")
@@ -121,6 +124,19 @@ public class StoreController {
                 .code(HttpStatus.OK.value())
                 .message("Monthly revenue for all stores retrieved successfully")
                 .data(revenues)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<List<String>>> getStoreStatus() {
+        List<String> statuses = Arrays.stream(StoreStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Store status retrieved successfully")
+                .data(statuses)
                 .build();
         return ResponseEntity.ok(response);
     }

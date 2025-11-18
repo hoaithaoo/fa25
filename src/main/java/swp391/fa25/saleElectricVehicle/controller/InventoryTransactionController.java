@@ -16,9 +16,12 @@ import swp391.fa25.saleElectricVehicle.payload.request.inventory.CreateInventory
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.InventoryTransactionService;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.InventoryTransactionStatus;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/inventory-transactions")
@@ -253,6 +256,19 @@ public class InventoryTransactionController {
                 .data(cancelled)
                 .build();
 
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<List<String>>> getInventoryTransactionStatus() {
+        List<String> statuses = Arrays.stream(InventoryTransactionStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Inventory transaction status retrieved successfully")
+                .data(statuses)
+                .build();
         return ResponseEntity.ok(response);
     }
 }

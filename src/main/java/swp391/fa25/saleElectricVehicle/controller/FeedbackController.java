@@ -10,8 +10,12 @@ import swp391.fa25.saleElectricVehicle.payload.request.feedback.CreateFeedbackRe
 import swp391.fa25.saleElectricVehicle.payload.request.feedback.UpdateFeedbackRequest; // ✅ THÊM MỚI
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.FeedbackService;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.FeedbackStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.FeedbackCategory;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/feedbacks")
@@ -100,6 +104,32 @@ public class FeedbackController {
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .code(HttpStatus.NO_CONTENT.value())
                 .message("Feedback deleted successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ApiResponse<List<String>>> getFeedbackStatus() {
+        List<String> statuses = Arrays.stream(FeedbackStatus.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Feedback status retrieved successfully")
+                .data(statuses)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<List<String>>> getFeedbackCategories() {
+        List<String> categories = Arrays.stream(FeedbackCategory.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        ApiResponse<List<String>> response = ApiResponse.<List<String>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Feedback categories retrieved successfully")
+                .data(categories)
                 .build();
         return ResponseEntity.ok(response);
     }
