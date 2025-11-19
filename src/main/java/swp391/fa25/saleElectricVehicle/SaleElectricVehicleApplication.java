@@ -49,7 +49,7 @@ public class SaleElectricVehicleApplication implements CommandLineRunner {
 
         if (userService.getAllUsers().isEmpty()) {
             User adminUser = new User("ADMIN", "admin@gmail.com", "123", "0356964383",
-                    LocalDateTime.now(), roleService.getRoleEntityById(1), UserStatus.ACTIVE);
+                    LocalDateTime.now(), roleService.getRoleEntityById(1), UserStatus.PENDING);
             userService.createUser(CreateUserRequest.builder()
                     .fullName(adminUser.getFullName())
                     .email(adminUser.getEmail())
