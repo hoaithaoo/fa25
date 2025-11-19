@@ -1,5 +1,6 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Appointment;
@@ -420,12 +421,49 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional
     public AppointmentDto updateAppointmentStatus(int id, AppointmentStatus status) {
-        Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
-
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        // Get appointment with access control
+        Appointment appointment;
+        if (isManager) {
+            // Manager: chỉ check store
+            appointment = appointmentRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+            
+            if (appointment.getStore().getStoreId() != store.getStoreId()) {
+                throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
+            }
+        } else {
+            // Staff: check cả store và userId
+            appointment = appointmentRepository.findByStore_StoreIdAndUser_UserIdAndAppointmentId(
+                    store.getStoreId(), currentUser.getUserId(), id);
+            if (appointment == null) {
+                throw new AppException(ErrorCode.APPOINTMENT_NOT_FOUND);
+            }
+        }
+        
+        // Validation: Không cho phép thay đổi status nếu đã COMPLETED hoặc CANCELLED
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED || 
+            appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new AppException(ErrorCode.APPOINTMENT_NOT_EDITABLE);
+        }
+        
+        // Validation: Không cho phép chuyển về CONFIRMED nếu đã COMPLETED hoặc CANCELLED
+        // (Trường hợp này đã được check ở trên, nhưng để chắc chắn)
+        if (status == AppointmentStatus.CONFIRMED && 
+            (appointment.getStatus() == AppointmentStatus.COMPLETED || 
+             appointment.getStatus() == AppointmentStatus.CANCELLED)) {
+            throw new AppException(ErrorCode.APPOINTMENT_NOT_EDITABLE);
+        }
+        
         appointment.setStatus(status);
+        appointment.setUpdatedAt(LocalDateTime.now());
         appointmentRepository.save(appointment);
+        
         return mapToDto(appointment);
     }
 
