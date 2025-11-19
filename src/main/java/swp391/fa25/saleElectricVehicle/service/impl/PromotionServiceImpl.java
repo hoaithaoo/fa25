@@ -81,6 +81,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .startDate(promotionDto.getStartDate())
                 .endDate(promotionDto.getEndDate())
                 .isActive(isActive)
+                .isManuallyDisabled(false) // Mặc định không bị tắt thủ công
                 .model(model)
                 .store(store)
                 .createdAt(LocalDateTime.now())
@@ -153,6 +154,7 @@ public class PromotionServiceImpl implements PromotionService {
                     .startDate(promotionDto.getStartDate())
                     .endDate(promotionDto.getEndDate())
                     .isActive(isActive)
+                    .isManuallyDisabled(false) // Mặc định không bị tắt thủ công
                     .model(model)
                     .store(store)
                     .createdAt(createdAt)
@@ -363,6 +365,49 @@ public class PromotionServiceImpl implements PromotionService {
         return promotion;
     }
 
+    @Override
+    @Transactional
+    public PromotionDto updatePromotionStatus(int promotionId) {
+        // Lấy user hiện tại và kiểm tra quyền
+        User currentUser = userService.getCurrentUserEntity();
+        // if (currentUser.getStore() == null) {
+        //     throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        // }
+        
+        Promotion promotion = promotionRepository.findById(promotionId).orElse(null);
+        if (promotion == null) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+
+        
+        // Kiểm tra promotion có thuộc store của user hiện tại không
+        if (promotion.getStore() == null ||
+            promotion.getStore().getStoreId() != currentUser.getStore().getStoreId()) {
+            throw new AppException(ErrorCode.PROMOTION_NOT_EXIST);
+        }
+
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        if (isManager) {
+            if (promotion.isActive()) {
+                // Tắt promotion thủ công → đánh dấu để scheduled job bỏ qua
+                promotion.setActive(false);
+                promotion.setManuallyDisabled(true);
+            } else {
+                // Bật promotion → cho phép scheduled job quản lý lại
+                promotion.setActive(true);
+                promotion.setManuallyDisabled(false);
+            }
+        } else {
+            throw new AppException(ErrorCode.UNAUTHORIZED_UPDATE_PROMOTION);
+        }
+
+        promotion.setUpdatedAt(LocalDateTime.now());
+        
+        promotionRepository.save(promotion);
+        
+        return mapToDto(promotion);
+    }
+
     private PromotionDto mapToDto(Promotion promotion) {
         return PromotionDto.builder()
                 .promotionId(promotion.getPromotionId())
@@ -373,6 +418,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .startDate(promotion.getStartDate())
                 .endDate(promotion.getEndDate())
                 .isActive(promotion.isActive())
+                .isManuallyDisabled(promotion.isManuallyDisabled())
                 .modelId(promotion.getModel().getModelId())
                 .modelName(promotion.getModel().getModelName())
                 .storeId(promotion.getStore() != null ? promotion.getStore().getStoreId() : null)

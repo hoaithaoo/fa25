@@ -97,6 +97,17 @@ public class PromotionController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{promotionId}/updateStatus")
+    public ResponseEntity<ApiResponse<PromotionDto>> togglePromotionStatus(@PathVariable int promotionId) {
+        PromotionDto updatedPromotion = promotionService.updatePromotionStatus(promotionId);
+        ApiResponse<PromotionDto> response = ApiResponse.<PromotionDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Cập nhật trạng thái khuyến mãi thành công")
+                .data(updatedPromotion)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/types")
     public ResponseEntity<ApiResponse<List<String>>> getPromotionTypes() {
         List<String> types = Arrays.stream(PromotionType.values())

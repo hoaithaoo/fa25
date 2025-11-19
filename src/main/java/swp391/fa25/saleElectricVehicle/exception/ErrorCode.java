@@ -94,6 +94,7 @@ public enum ErrorCode {
     APPOINTMENTS_PER_MODEL_PER_SLOT_EXCEEDED(1079, "Số lượng lịch hẹn của model này trong khoảng thời gian này đã đạt giới hạn", HttpStatus.BAD_REQUEST),
     APPOINTMENT_BUFFER_TIME_VIOLATED(1081, "Lịch hẹn phải cách lịch hẹn trước đó ít nhất 15 phút để tránh thời gian trả xe trễ", HttpStatus.BAD_REQUEST),
     ORDER_CANNOT_DELIVER(1082, "Chỉ có thể giao hàng khi đơn đã thanh toán đầy đủ", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED_UPDATE_PROMOTION(1083, "Chỉ quản lý cửa hàng mới được cập nhật trạng thái khuyến mãi", HttpStatus.FORBIDDEN),
 //    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
 //    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;

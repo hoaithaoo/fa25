@@ -23,4 +23,6 @@ public interface PromotionService {
     void deletePromotion(int promotionId);
 
     Promotion getStorePromotionEntityById(int promotionId);
+
+    PromotionDto updatePromotionStatus(int promotionId);
 }

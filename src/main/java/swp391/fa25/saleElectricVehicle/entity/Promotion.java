@@ -43,6 +43,9 @@ public class Promotion {
     private boolean isActive;
 
     @Column(nullable = false)
+    private boolean isManuallyDisabled; // Đánh dấu promotion đã bị tắt thủ công (scheduled job sẽ bỏ qua)
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @Column

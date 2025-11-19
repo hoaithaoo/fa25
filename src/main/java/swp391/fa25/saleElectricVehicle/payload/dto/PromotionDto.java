@@ -19,6 +19,7 @@ public class PromotionDto {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private boolean isActive;
+    private boolean isManuallyDisabled;
     private int modelId;
     private String modelName;
     private Integer storeId;

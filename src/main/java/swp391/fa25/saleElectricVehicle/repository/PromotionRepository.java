@@ -29,17 +29,18 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
     List<Promotion> findByModel(Model model);
     List<Promotion> findByStore_StoreIdAndModel(int storeId, Model model);
     
-    // Deactivate expired promotions
+    // Deactivate expired promotions (chỉ các promotion chưa bị tắt thủ công)
     @Modifying
     @Query("UPDATE Promotion p " +
             "SET p.isActive = false, p.updatedAt = :currentDate " +
-            "WHERE p.endDate < :currentDate AND p.isActive = true")
+            "WHERE p.endDate < :currentDate AND p.isActive = true AND p.isManuallyDisabled = false")
     int deactivateExpiredPromotions(@Param("currentDate") LocalDateTime currentDate);
 
-    // Activate current promotions
+    // Activate current promotions (chỉ các promotion chưa bị tắt thủ công)
     @Modifying
     @Query("UPDATE Promotion p " +
             "SET p.isActive = true, p.updatedAt = :currentDate " +
-            "WHERE p.startDate <= :currentDate AND p.endDate >= :currentDate AND p.isActive = false")
+            "WHERE p.startDate <= :currentDate AND p.endDate >= :currentDate " +
+            "AND p.isActive = false AND p.isManuallyDisabled = false")
     int activateCurrentPromotions(@Param("currentDate") LocalDateTime currentDate);
 }
