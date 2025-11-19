@@ -16,6 +16,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsRes
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.StoreMonthlyRevenueResponse;
 import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
@@ -184,6 +185,19 @@ public class OrderController {
                 .code(HttpStatus.OK.value())
                 .message("Current staff monthly orders retrieved successfully")
                 .data(staffMonthlyOrders)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    // BUSINESS - Get store monthly revenue statistics (tổng đơn hàng và doanh thu FULLY_PAID trong tháng hiện tại)
+    // dành cho manager của store
+    @GetMapping("/revenue/monthly")
+    public ResponseEntity<ApiResponse<StoreMonthlyRevenueResponse>> getStoreMonthlyRevenue() {
+        StoreMonthlyRevenueResponse revenue = orderService.getStoreMonthlyRevenue();
+        ApiResponse<StoreMonthlyRevenueResponse> response = ApiResponse.<StoreMonthlyRevenueResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Store monthly revenue statistics retrieved successfully")
+                .data(revenue)
                 .build();
         return ResponseEntity.ok(response);
     }

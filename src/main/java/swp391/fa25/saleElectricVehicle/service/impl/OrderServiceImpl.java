@@ -16,6 +16,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderRespons
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.StoreMonthlyRevenueResponse;
 import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
@@ -398,6 +399,48 @@ public class OrderServiceImpl implements OrderService {
                 .orders(orderResponses)
                 .totalOrders(totalOrders)
                 .monthlyRevenue(monthlyRevenue)
+                .build();
+    }
+
+    @Override
+    public StoreMonthlyRevenueResponse getStoreMonthlyRevenue() {
+        // Lấy user hiện tại và kiểm tra quyền
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        // Kiểm tra user có phải là manager không
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        if (!isManager) {
+            throw new AppException(ErrorCode.UNAUTHORIZED_UPDATE_PROMOTION); // Có thể tạo error code riêng sau
+        }
+        
+        // Lấy tháng hiện tại
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime startOfNextMonth = currentMonth.plusMonths(1).atDay(1).atStartOfDay();
+        
+        // Lấy tất cả orders FULLY_PAID của store trong tháng hiện tại
+        List<Order> fullyPaidOrders = orderRepository.findByStore_StoreIdAndStatusAndOrderDateBetween(
+                store.getStoreId(),
+                OrderStatus.FULLY_PAID,
+                startOfMonth,
+                startOfNextMonth
+        );
+        
+        // Tính tổng số đơn hàng
+        long totalOrders = fullyPaidOrders.size();
+        
+        // Tính tổng doanh thu (totalPayment của các orders)
+        BigDecimal totalRevenue = fullyPaidOrders.stream()
+                .map(Order::getTotalPayment)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        return StoreMonthlyRevenueResponse.builder()
+                .storeId(store.getStoreId())
+                .storeName(store.getStoreName())
+                .address(store.getAddress())
+                .totalOrders(totalOrders)
+                .totalRevenue(totalRevenue)
                 .build();
     }
 
