@@ -49,9 +49,9 @@ public class OrderServiceImpl implements OrderService {
         Store store = storeService.getCurrentStoreEntity(staff.getUserId());
 
         // Validation: Đảm bảo staff có store
-        if (staff.getStore() == null) {
-            throw new AppException(ErrorCode.STORE_NOT_EXIST, "Staff phải thuộc một store");
-        }
+//        if (staff.getStore() == null) {
+//            throw new AppException(ErrorCode.STORE_NOT_EXIST, "Staff phải thuộc một store");
+//        }
 
         // Tạo order - store sẽ được tự động set từ user.store bởi @PrePersist
         Order newOrder = Order.builder()
@@ -273,6 +273,34 @@ public class OrderServiceImpl implements OrderService {
         updateOrderStatus(order, OrderStatus.CONFIRMED);
         order.setUpdatedAt(LocalDateTime.now()); // Cập nhật thời gian để track timeout
         orderRepository.save(order);
+        return mapToDto(order);
+    }
+
+    @Override
+    @Transactional
+    public GetOrderResponse markOrderDelivered(int orderId) {
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        // boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+
+        // chỉ được giao hàng khi đơn hàng thuộc store của user hiện tại
+        Order order = orderRepository.findByStore_StoreIdAndUser_UserIdAndOrderId(store.getStoreId(), currentUser.getUserId(), orderId);
+        // if (isManager) {
+        //     order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
+        // } else {
+        //     order = orderRepository.findByStore_StoreIdAndUser_UserIdAndOrderId(
+        //             store.getStoreId(), currentUser.getUserId(), orderId);
+        // }
+
+        if (order == null) {
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
+        }
+
+        if (order.getStatus() != OrderStatus.FULLY_PAID) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_DELIVER);
+        }
+
+        updateOrderStatus(order, OrderStatus.DELIVERED);
         return mapToDto(order);
     }
 

@@ -8,7 +8,6 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderRespons
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +21,7 @@ public interface OrderService {
     void updateOrder(Order order);
     void updateOrderStatus(Order order, OrderStatus status);
     GetOrderResponse confirmOrder(int orderId);
+    GetOrderResponse markOrderDelivered(int orderId);
     void deleteOrder(int orderId);
     Order getOrderEntityById(int orderId);
 

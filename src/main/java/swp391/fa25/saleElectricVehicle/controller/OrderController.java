@@ -1,7 +1,6 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +20,6 @@ import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -71,6 +69,18 @@ public class OrderController {
                 .data(createdOrder)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // STAFF marks order as delivered
+    @PutMapping("/{orderId}/deliver")
+    public ResponseEntity<ApiResponse<GetOrderResponse>> markOrderDelivered(@PathVariable int orderId) {
+        GetOrderResponse deliveredOrder = orderService.markOrderDelivered(orderId);
+        ApiResponse<GetOrderResponse> response = ApiResponse.<GetOrderResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Đơn hàng đã được giao thành công")
+                .data(deliveredOrder)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // chỉ get order của store hiện tại
