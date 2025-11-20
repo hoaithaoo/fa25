@@ -60,16 +60,19 @@ public class Jwt {
                     .jwtID(UUID.randomUUID().toString());
 
             if (tokenType.equals("accessToken")) {
-                claimsSet.subject(userDto.getEmail())
-                        .claim("roleName", userDto.getRoleName());
+                claimsSet.subject(userDto.getEmail());
+                // Thêm roleName vào claims nếu có
+                if (userDto.getRoleName() != null && !userDto.getRoleName().isEmpty()) {
+                    claimsSet.claim("roleName", userDto.getRoleName());
+                }
             } else {
                 claimsSet.claim("userId", userDto.getUserId());
             }
 
             //gop header va claims
             SignedJWT signedJWT = new SignedJWT(header, claimsSet.build());
-            //dung MACSinger de tao chu ky
-            signedJWT.sign(new MACSigner(secretKey.getBytes()));
+            //dung MACSigner de tao chu ky (sử dụng UTF-8 encoding để đảm bảo tính nhất quán)
+            signedJWT.sign(new MACSigner(secretKey.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
 
             //chuyen thanh dinh dang header.payload.signature
             TokenInfor tokenInfor = new TokenInfor(signedJWT.serialize(), expiryTime);
@@ -85,7 +88,7 @@ public class Jwt {
 
     //verify token
         public SignedJWT verifyToken(String token) throws JOSEException, ParseException {
-            JWSVerifier verifier = new MACVerifier(secretKey.getBytes());
+            JWSVerifier verifier = new MACVerifier(secretKey.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
             SignedJWT signedJWT = SignedJWT.parse(token);
 

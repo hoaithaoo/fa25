@@ -109,6 +109,7 @@ public class UserServiceImpl implements UserService {
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .roleId(user.getRole().getRoleId())
+                .roleName(user.getRole().getRoleName())
                 .build();
     }
 
