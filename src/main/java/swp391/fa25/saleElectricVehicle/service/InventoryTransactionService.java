@@ -43,4 +43,7 @@ public interface InventoryTransactionService {
     InventoryTransactionDto cancelRequest(int inventoryId);
 
     PaymentInfoDto getPaymentInfo(int inventoryId);
+
+    // Update status to CONTRACT_SIGNED when contract is signed
+    InventoryTransactionDto updateStatusToContractSigned(int inventoryId);
 }

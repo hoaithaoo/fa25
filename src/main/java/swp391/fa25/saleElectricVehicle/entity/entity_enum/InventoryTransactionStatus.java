@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.entity.entity_enum;
 public enum InventoryTransactionStatus {
     PENDING,      // Đại lý tạo request, chờ hãng xử lý
     CONFIRMED,    // Hãng đã chấp nhận request
+    CONTRACT_SIGNED, // Hợp đồng đã được ký bởi cả 2 bên
     REJECTED,     // Hãng đã từ chối request
     FILE_UPLOADED, // Biên lai than toán đã được tải lên, chờ xác nhận
     PAYMENT_CONFIRMED, // Hãng đã xác nhận thanh toán

@@ -401,8 +401,8 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
             throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
         }
 
-        // Chỉ cho phép upload receipt khi status là CONFIRMED
-        if (transaction.getStatus() != InventoryTransactionStatus.CONFIRMED) {
+        // Chỉ cho phép upload receipt khi status là CONTRACT_SIGNED
+        if (transaction.getStatus() != InventoryTransactionStatus.CONTRACT_SIGNED) {
             throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_UPLOAD_RECEIPT);
         }
 
@@ -534,5 +534,24 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .storeAddress(transaction.getStoreStock().getStore().getAddress())
 //                .storeStockId(transaction.getStoreStock().getStockId())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public InventoryTransactionDto updateStatusToContractSigned(int inventoryId) {
+        InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+
+        // Validate status = EVM_SIGNED (contract đã được EVM ký)
+        if (transaction.getStatus() != InventoryTransactionStatus.CONFIRMED) {
+            // Có thể là CONFIRMED hoặc đã có contract, nhưng chưa SIGNED
+            // Cho phép update từ CONFIRMED hoặc bất kỳ status nào trước CONTRACT_SIGNED
+        }
+
+        // Cập nhật status thành CONTRACT_SIGNED
+        transaction.setStatus(InventoryTransactionStatus.CONTRACT_SIGNED);
+        transaction.setUpdatedAt(LocalDateTime.now());
+
+        InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
+        return mapToDto(saved);
     }
 }
