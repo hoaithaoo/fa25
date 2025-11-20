@@ -3,9 +3,16 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
 jobs:
   build_and_deploy:
     runs-on: [self-hosted]
+    # Only run if PR is merged, not just closed
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
 
     env:
       CONTAINER_NAME: myappCommandContainer
