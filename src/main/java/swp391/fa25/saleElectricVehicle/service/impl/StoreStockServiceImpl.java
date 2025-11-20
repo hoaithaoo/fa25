@@ -6,7 +6,6 @@ import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.*;
-import swp391.fa25.saleElectricVehicle.payload.request.stock.CreateStoreStockRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.stock.UpdatePriceOfStoreRequest;
 import swp391.fa25.saleElectricVehicle.repository.StoreStockRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
@@ -52,7 +51,7 @@ public class StoreStockServiceImpl implements StoreStockService {
         storeStock = storeStockRepository.save(StoreStock.builder()
                 .store(store)
                 .modelColor(modelColor)
-                .priceOfStore(BigDecimal.ZERO) // default 0, phải update sau
+                .priceOfStore(modelColor.getPrice()) // Set bằng giá gốc từ ModelColor khi tạo mới
                 .quantity(0) // default 0, phải cộng khi có nhập kho
                 .build());
 
@@ -176,6 +175,7 @@ public class StoreStockServiceImpl implements StoreStockService {
                 .modelName(storeStock.getModelColor().getModel().getModelName())
                 .colorId(storeStock.getModelColor().getColor().getColorId())
                 .colorName(storeStock.getModelColor().getColor().getColorName())
+                .basePrice(storeStock.getModelColor().getPrice()) // Giá gốc từ ModelColor
                 .priceOfStore(storeStock.getPriceOfStore())
                 .quantity(storeStock.getQuantity())
                 .availableStock(availableStock)

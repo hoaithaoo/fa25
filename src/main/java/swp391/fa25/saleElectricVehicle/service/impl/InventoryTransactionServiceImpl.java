@@ -8,6 +8,7 @@ import swp391.fa25.saleElectricVehicle.entity.entity_enum.InventoryTransactionSt
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.PaymentInfoDto;
 import swp391.fa25.saleElectricVehicle.payload.request.inventory.CreateInventoryTransactionRequest;
 import swp391.fa25.saleElectricVehicle.repository.InventoryTransactionRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
@@ -37,6 +38,9 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     private UserService userService;
     @Autowired
     private StoreService storeService;
+    
+    @Autowired
+    private CompanyBankAccountService companyBankAccountService;
 
 
     private final int DISCOUNT_3_TO_10_VEHICLES = 5;
@@ -463,6 +467,43 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
         InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
         return mapToDto(saved);
+    }
+
+    // cho manager xem thông tin thanh toán trước khi upload biên lai
+    @Override
+    public PaymentInfoDto getPaymentInfo(int inventoryId) {
+        InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+        
+        // Kiểm tra transaction có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        }
+        
+        // Chỉ cho phép xem khi status là CONFIRMED (chưa upload receipt)
+        if (transaction.getStatus() != InventoryTransactionStatus.CONFIRMED) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_VIEW_PAYMENT_INFO);
+        }
+        
+        // Lấy thông tin tài khoản ngân hàng đang active
+        CompanyBankAccount bankAccount = companyBankAccountService.getActiveBankAccount();
+        
+        // Tạo nội dung chuyển khoản
+        String note = String.format("TTGD%d - %s - %d xe", 
+                transaction.getInventoryId(),
+                transaction.getStoreStock().getStore().getStoreName(),
+                transaction.getImportQuantity());
+        
+        return PaymentInfoDto.builder()
+                .bankName(bankAccount.getBankName())
+                .accountNumber(bankAccount.getAccountNumber())
+                .accountHolderName(bankAccount.getAccountHolderName())
+                .totalAmount(transaction.getTotalPrice())
+                .transactionCode(String.valueOf(transaction.getInventoryId()))
+                .note(note)
+                .build();
     }
 
     // Helper method: Map Entity sang DTO

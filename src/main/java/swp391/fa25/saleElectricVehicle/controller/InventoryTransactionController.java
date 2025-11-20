@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.PaymentInfoDto;
 import swp391.fa25.saleElectricVehicle.payload.request.inventory.CreateInventoryTransactionRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
@@ -224,6 +225,21 @@ public class InventoryTransactionController {
                 .code(HttpStatus.OK.value())
                 .message("Biên lai đã được upload thành công")
                 .data(updated)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{inventoryId}/payment-info")
+    public ResponseEntity<ApiResponse<PaymentInfoDto>> getPaymentInfo(
+            @PathVariable int inventoryId) {
+
+        PaymentInfoDto paymentInfo = inventoryTransactionService.getPaymentInfo(inventoryId);
+
+        ApiResponse<PaymentInfoDto> response = ApiResponse.<PaymentInfoDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Thông tin thanh toán đã được lấy thành công")
+                .data(paymentInfo)
                 .build();
 
         return ResponseEntity.ok(response);

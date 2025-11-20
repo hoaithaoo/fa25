@@ -2,6 +2,7 @@ package swp391.fa25.saleElectricVehicle.service;
 
 import swp391.fa25.saleElectricVehicle.entity.InventoryTransaction;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.PaymentInfoDto;
 import swp391.fa25.saleElectricVehicle.payload.request.inventory.CreateInventoryTransactionRequest;
 
 import java.time.LocalDateTime;
@@ -40,4 +41,6 @@ public interface InventoryTransactionService {
     InventoryTransactionDto confirmPayment(int inventoryId);
 
     InventoryTransactionDto cancelRequest(int inventoryId);
+
+    PaymentInfoDto getPaymentInfo(int inventoryId);
 }

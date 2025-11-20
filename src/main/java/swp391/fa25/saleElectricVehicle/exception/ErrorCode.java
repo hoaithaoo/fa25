@@ -96,6 +96,10 @@ public enum ErrorCode {
     APPOINTMENT_NOT_EDITABLE(1082, "Lịch hẹn đã hoàn thành hoặc đã hủy, không thể thay đổi trạng thái", HttpStatus.BAD_REQUEST),
     ORDER_CANNOT_DELIVER(1084, "Chỉ có thể giao hàng khi đơn đã thanh toán đầy đủ", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED_UPDATE_PROMOTION(1083, "Chỉ quản lý cửa hàng mới được cập nhật trạng thái khuyến mãi", HttpStatus.FORBIDDEN),
+    COMPANY_BANK_ACCOUNT_NOT_FOUND(1085, "Không tìm thấy tài khoản ngân hàng công ty", HttpStatus.NOT_FOUND),
+    INVENTORY_TRANSACTION_CANNOT_VIEW_PAYMENT_INFO(1086, "Chỉ có thể xem thông tin thanh toán khi giao dịch ở trạng thái đã được xác nhận (CONFIRMED)", HttpStatus.BAD_REQUEST),
+    RECEIPT_NOT_FOUND(1087, "Biên lai thanh toán chưa được upload", HttpStatus.NOT_FOUND),
+    COMPANY_BANK_ACCOUNT_CANNOT_DELETE_ACTIVE(1088, "Không thể xóa tài khoản ngân hàng đang được sử dụng (active)", HttpStatus.BAD_REQUEST),
 //    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
 //    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;
