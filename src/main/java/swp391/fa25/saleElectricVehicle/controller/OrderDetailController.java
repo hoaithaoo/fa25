@@ -106,4 +106,22 @@ public class OrderDetailController {
 //        return ResponseEntity.ok(response);
 //    }
 
+    // UPDATE QUOTE - Sửa báo giá cho order DRAFT
+    @PutMapping("/quote/{orderId}")
+    public ResponseEntity<ApiResponse<swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse>> updateQuote(
+            @PathVariable int orderId,
+            @RequestBody CreateOrderWithItemsRequest request) {
+        
+        // Set orderId từ path variable
+        request.setOrderId(orderId);
+        
+        swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse updatedQuote = orderDetailService.updateQuote(request);
+        ApiResponse<swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse> response = ApiResponse.<swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Báo giá đã được cập nhật thành công")
+                .data(updatedQuote)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
 }

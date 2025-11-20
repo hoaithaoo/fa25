@@ -243,9 +243,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public GetOrderResponse confirmOrder(int orderId) {
+        User currentUser = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
+        }
+
+        // ✅ Validation: Order phải thuộc store của user hiện tại
+        if (order.getStore() == null || order.getStore().getStoreId() != store.getStoreId()) {
+            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
+        }
+
+        // ✅ Validation: Order status phải là DRAFT
+        if (order.getStatus() != OrderStatus.DRAFT) {
+            throw new AppException(ErrorCode.ORDER_NOT_EDITABLE, 
+                "Chỉ có thể xác nhận đơn hàng ở trạng thái DRAFT");
         }
 
         // không thể xác nhận đơn hàng nếu không có sản phẩm nào
@@ -312,10 +326,22 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrder(int orderId) {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        Order order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        
+        Order order;
+        if (isManager) {
+            // Manager: có thể xóa order trong store
+            order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
+        } else {
+            // Staff: chỉ có thể xóa order của chính họ
+            order = orderRepository.findByStore_StoreIdAndUser_UserIdAndOrderId(
+                    store.getStoreId(), currentUser.getUserId(), orderId);
+        }
+        
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
+        
         if (order.getStatus() == OrderStatus.CONTRACT_SIGNED
                 || order.getStatus() == OrderStatus.DEPOSIT_PAID
                 || order.getStatus() == OrderStatus.FULLY_PAID
@@ -584,6 +610,39 @@ public class OrderServiceImpl implements OrderService {
 
             // Nếu chưa có deposit payment thì hủy và unlock stock
             if (!hasDepositPayment) {
+                unlockStockForOrder(order);
+                order.setStatus(OrderStatus.CANCELLED);
+                order.setUpdatedAt(LocalDateTime.now());
+                orderRepository.save(order);
+            }
+        }
+    }
+
+    // ✅ Auto-cancel CONTRACT_PENDING orders không ký hợp đồng sau 72 giờ
+    @Scheduled(fixedRate = 3600000) // Mỗi giờ
+    @Transactional
+    public void autoCancelUnsignedContractOrders() {
+        LocalDateTime expiryTime = LocalDateTime.now().minusHours(72); // 72 giờ sau khi CONTRACT_PENDING
+
+        List<Order> unsignedOrders = orderRepository.findByStatusAndUpdatedAtBefore(
+            OrderStatus.CONTRACT_PENDING,
+            expiryTime
+        );
+
+        for (Order order : unsignedOrders) {
+            // Kiểm tra xem contract đã được ký chưa
+            boolean isContractSigned = false;
+            if (order.getContract() != null) {
+                if (order.getContract().getStatus() == ContractStatus.SIGNED
+                        || order.getContract().getStatus() == ContractStatus.DEPOSIT_PAID
+                        || order.getContract().getStatus() == ContractStatus.FULLY_PAID
+                        || order.getContract().getStatus() == ContractStatus.COMPLETED) {
+                    isContractSigned = true;
+                }
+            }
+
+            // Nếu chưa ký hợp đồng thì hủy và unlock stock
+            if (!isContractSigned) {
                 unlockStockForOrder(order);
                 order.setStatus(OrderStatus.CANCELLED);
                 order.setUpdatedAt(LocalDateTime.now());
