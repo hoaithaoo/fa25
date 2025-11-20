@@ -1,44 +1,36 @@
-name: My Jobs
+name: Deploy to Server
+
 on:
   push:
     branches:
       - main
-  pull_request:
-    types:
-      - closed
-    branches:
-      - main
+
 jobs:
   build_and_deploy:
-    runs-on: [self-hosted]
-    # Only run if PR is merged, not just closed
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-
+    runs-on: self-hosted
+    
     env:
       CONTAINER_NAME: myappCommandContainer
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Build Docker Image
         env:
-            DOCKER_BUILDKIT: 1
+          DOCKER_BUILDKIT: 1
         run: |
-            echo "Building Docker image..."
-            docker build -t myapp:latest -f ./Dockerfile .
+          echo "Building Docker image..."
+          docker build -t myapp:latest -f ./Dockerfile .
 
-
-      - name: Stop and Remove Existing Container if Any
+      - name: Stop and Remove Existing Container
         run: |
           CNAME=${{ env.CONTAINER_NAME }}
-
-          # Check if the container exists
           if [ "$(docker ps -aq -f name=$CNAME)" ]; then
               if [ "$(docker ps -aq -f status=exited -f name=$CNAME)" ]; then
-                  echo ":: Container $CNAME exists and is exited"
                   echo ":: Removing exited container - $CNAME"
                   docker rm $CNAME
               else
-                  echo ":: Container $CNAME exists and is running"
                   echo ":: Stopping and removing running container - $CNAME"
                   docker stop $CNAME
                   docker rm $CNAME
@@ -47,13 +39,9 @@ jobs:
               echo ":: No existing container named $CNAME"
           fi
 
-  
       - name: Run New Docker Container
         run: |
-          echo ":: Running new container - myappCommandContainer"
+          echo "Starting new container..."
           docker run -d -p 8080:8080 \
-            --name myappCommandContainer \
+            --name ${{ env.CONTAINER_NAME }} \
             myapp:latest
-
-           
- 
