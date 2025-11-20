@@ -56,6 +56,7 @@ public class LoginServiceImpl implements LoginService {
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .roleId(user.getRole().getRoleId())
+                .roleName(user.getRole().getRoleName())
                 .build();
 
         Jwt.TokenPair tokenPair = jwt.generateTokenPair(userDto);

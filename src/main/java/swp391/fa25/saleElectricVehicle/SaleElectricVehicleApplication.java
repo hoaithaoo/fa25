@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import swp391.fa25.saleElectricVehicle.entity.Role;
 import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.UserStatus;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.TimeZone;
 
 @SpringBootApplication
+@EnableScheduling
 public class SaleElectricVehicleApplication implements CommandLineRunner {
 
     @Autowired
