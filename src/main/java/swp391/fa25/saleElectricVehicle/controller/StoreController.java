@@ -141,6 +141,17 @@ public class StoreController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/toggle-status/{storeId}")
+    public ResponseEntity<ApiResponse<StoreDto>> toggleStoreStatus(@PathVariable int storeId) {
+        StoreDto updatedStore = storeService.toggleStoreStatus(storeId);
+        ApiResponse<StoreDto> response = ApiResponse.<StoreDto>builder()
+                .code(HttpStatus.OK.value())
+                .message("Store status toggled successfully")
+                .data(updatedStore)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
     // BUSINESS - Get stores by status
 //    @GetMapping("/status/{status}")
 //    public ResponseEntity<ApiResponse<List<StoreDto>>> getStoresByStatus(@PathVariable String status) {

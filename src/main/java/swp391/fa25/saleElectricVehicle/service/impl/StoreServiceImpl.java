@@ -250,6 +250,27 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
+    @Transactional
+    public StoreDto toggleStoreStatus(int storeId) {
+        Store store = storeRepository.findById(storeId).orElse(null);
+        if (store == null) {
+            throw new AppException(ErrorCode.STORE_NOT_EXIST);
+        }
+
+        // Toggle status: nếu đang ACTIVE thì chuyển sang INACTIVE và ngược lại
+        if (store.getStatus() == StoreStatus.ACTIVE) {
+            store.setStatus(StoreStatus.INACTIVE);
+        } else {
+            store.setStatus(StoreStatus.ACTIVE);
+        }
+
+        store.setUpdatedAt(LocalDateTime.now());
+        storeRepository.save(store);
+
+        return mapTodo(store);
+    }
+
+    @Override
     public List<StoreMonthlyRevenueResponse> getMonthlyRevenueForAllStores() {
         // Lấy tháng hiện tại
         YearMonth currentMonth = YearMonth.now();

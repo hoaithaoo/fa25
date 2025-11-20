@@ -421,7 +421,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    @Transactional
+               @Transactional
     public AppointmentDto updateAppointmentStatus(int id, AppointmentStatus status) {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
