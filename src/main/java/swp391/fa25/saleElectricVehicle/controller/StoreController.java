@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.store.StoreMonthlyRevenueResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.store.TotalStoresMonthlyRevenueResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.StoreService;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.StoreStatus;
@@ -148,6 +149,19 @@ public class StoreController {
                 .code(HttpStatus.OK.value())
                 .message("Store status toggled successfully")
                 .data(updatedStore)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/revenue/total-monthly")
+    public ResponseEntity<ApiResponse<TotalStoresMonthlyRevenueResponse>> getTotalStoresMonthlyRevenue(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        TotalStoresMonthlyRevenueResponse revenue = storeService.getTotalStoresMonthlyRevenue(year, month);
+        ApiResponse<TotalStoresMonthlyRevenueResponse> response = ApiResponse.<TotalStoresMonthlyRevenueResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Total monthly revenue for all stores retrieved successfully")
+                .data(revenue)
                 .build();
         return ResponseEntity.ok(response);
     }

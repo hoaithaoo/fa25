@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.service;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
 import swp391.fa25.saleElectricVehicle.payload.response.store.StoreMonthlyRevenueResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.store.TotalStoresMonthlyRevenueResponse;
 
 import java.util.List;
 
@@ -19,4 +20,5 @@ public interface StoreService {
     void deleteStore(int storeId);
     List<StoreMonthlyRevenueResponse> getMonthlyRevenueForAllStores();
     StoreDto toggleStoreStatus(int storeId);
+    TotalStoresMonthlyRevenueResponse getTotalStoresMonthlyRevenue(Integer year, Integer month);
 }
