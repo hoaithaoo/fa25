@@ -288,14 +288,16 @@ public class ContractServiceImpl implements ContractService {
         }
 
         contract.setContractFileUrl(fileUrl);
-        contract.setStatus(ContractStatus.SIGNED); // Đã ký
         contract.setUpdatedAt(LocalDateTime.now());
 
-//        Order order = contract.getOrder();
-//        order.setStatus(OrderStatus.CONTRACT_SIGNED); // Hoàn tất
-//        orderService.updateOrder(order);
-
-        orderService.updateOrderStatus(contract.getOrder(), OrderStatus.CONTRACT_SIGNED); // Hoàn tất
+        // Nếu totalPayment = 0, tự động set FULLY_PAID, không cần SIGNED
+        if (contract.getTotalPayment().compareTo(BigDecimal.ZERO) <= 0) {
+            contract.setStatus(ContractStatus.FULLY_PAID);
+            orderService.updateOrderStatus(contract.getOrder(), OrderStatus.FULLY_PAID);
+        } else {
+            contract.setStatus(ContractStatus.SIGNED); // Đã ký
+            orderService.updateOrderStatus(contract.getOrder(), OrderStatus.CONTRACT_SIGNED);
+        }
 
         contractRepository.save(contract);
         return mapToDto(contract);

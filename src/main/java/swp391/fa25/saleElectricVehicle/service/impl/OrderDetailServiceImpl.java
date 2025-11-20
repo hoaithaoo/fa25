@@ -248,6 +248,11 @@ public class OrderDetailServiceImpl implements OrderDetailService {
 //
 //        totalTax = totalTax.add(licensePlateFee).add(registrationFee);
 
+        // Đảm bảo finalAmount không bao giờ âm (nếu âm thì set = 0)
+        if (finalAmount.compareTo(BigDecimal.ZERO) < 0) {
+            finalAmount = BigDecimal.ZERO;
+        }
+        
         // cập nhật order khi có order details
         order.setTotalPrice(totalOrderPrice);
         order.setTotalTaxPrice(totalTax);
