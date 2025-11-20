@@ -18,4 +18,5 @@ public interface StoreService {
     StoreDto updateStore(int storeId, StoreDto storeDto);
     void deleteStore(int storeId);
     List<StoreMonthlyRevenueResponse> getMonthlyRevenueForAllStores();
+    StoreDto toggleStoreStatus(int storeId);
 }
