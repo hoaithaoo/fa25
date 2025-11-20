@@ -104,9 +104,10 @@ public enum ErrorCode {
     INVENTORY_TRANSACTION_CONTRACT_NOT_FOUND(1090, "Hợp đồng giao dịch tồn kho không tồn tại", HttpStatus.NOT_FOUND),
     INVENTORY_TRANSACTION_CONTRACT_ALREADY_EXISTS(1091, "Hợp đồng cho giao dịch tồn kho này đã tồn tại", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_CREATE_CONTRACT(1092, "Chỉ có thể tạo hợp đồng khi giao dịch ở trạng thái đã được xác nhận (CONFIRMED)", HttpStatus.BAD_REQUEST),
-    INVENTORY_TRANSACTION_CANNOT_SIGN_CONTRACT(1093, "Chỉ có thể ký hợp đồng khi hợp đồng ở trạng thái DRAFT", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_SIGN_CONTRACT(1093, "Hợp đồng đã có chữ ký EVM tự động khi tạo, không cần ký lại", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_UPLOAD_CONTRACT(1094, "Chỉ có thể upload hợp đồng đã ký khi hợp đồng ở trạng thái EVM_SIGNED", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CONTRACT_NOT_SIGNED(1095, "Hợp đồng chưa được ký, không thể upload biên lai thanh toán", HttpStatus.BAD_REQUEST),
+    EVM_SIGNATURE_NOT_CONFIGURED(1096, "Chữ ký mặc định của EVM chưa được cấu hình trong hệ thống", HttpStatus.INTERNAL_SERVER_ERROR),
 //    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
 //    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;

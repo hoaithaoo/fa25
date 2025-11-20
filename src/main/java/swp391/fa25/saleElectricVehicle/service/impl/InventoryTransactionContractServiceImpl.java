@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import swp391.fa25.saleElectricVehicle.config.EvmSignatureConfig;
 import swp391.fa25.saleElectricVehicle.entity.InventoryTransaction;
 import swp391.fa25.saleElectricVehicle.entity.InventoryTransactionContract;
 import swp391.fa25.saleElectricVehicle.entity.User;
@@ -41,6 +42,9 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
     @Autowired
     private SpringTemplateEngine templateEngine;
 
+    @Autowired
+    private EvmSignatureConfig evmSignatureConfig;
+
     @Override
     @Transactional
     public InventoryTransactionContractDto createDraftContract(int inventoryId) {
@@ -59,10 +63,17 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
 
         User staff = userService.getCurrentUserEntity();
 
-        // Create draft contract
+        // Lấy chữ ký mặc định từ config
+        String evmSignatureUrl = evmSignatureConfig.getDefaultSignatureUrl();
+        if (evmSignatureUrl == null || evmSignatureUrl.trim().isEmpty()) {
+            throw new AppException(ErrorCode.EVM_SIGNATURE_NOT_CONFIGURED);
+        }
+
+        // Tạo contract với chữ ký EVM sẵn có, status = EVM_SIGNED
         InventoryTransactionContract contract = InventoryTransactionContract.builder()
                 .contractDate(LocalDate.now())
-                .status(InventoryTransactionContractStatus.DRAFT)
+                .status(InventoryTransactionContractStatus.EVM_SIGNED) // Đã có chữ ký EVM ngay khi tạo
+                .evmSignatureUrl(evmSignatureUrl) // Tự động gán chữ ký mặc định
                 .uploadedBy(staff.getFullName())
                 .createdAt(LocalDateTime.now())
                 .inventoryTransaction(transaction)
@@ -79,33 +90,18 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
     @Override
     @Transactional
     public InventoryTransactionContractDto signContract(int inventoryId, SignInventoryTransactionContractRequest request) {
-        InventoryTransactionContract contract = getContractEntityByInventoryId(inventoryId);
-
-        // Validate status = DRAFT
-        if (contract.getStatus() != InventoryTransactionContractStatus.DRAFT) {
-            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_SIGN_CONTRACT);
-        }
-
-        // Lưu URL ảnh chữ ký EVM (không upload HTML)
-        contract.setEvmSignatureUrl(request.getEvmSignatureImageUrl());
-        contract.setStatus(InventoryTransactionContractStatus.EVM_SIGNED);
-        contract.setUpdatedAt(LocalDateTime.now());
-
-        InventoryTransactionContract saved = contractRepository.save(contract);
-        return mapToDto(saved);
+        // Contract đã có chữ ký EVM tự động khi tạo, không cần method này nữa
+        // Giữ lại để tương thích với API, nhưng sẽ throw error
+        // Contract đã có chữ ký khi tạo, không thể ký lại
+        throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_SIGN_CONTRACT);
     }
 
     @Override
     public String getContractHtml(int inventoryId) {
         InventoryTransactionContract contract = getContractEntityByInventoryId(inventoryId);
 
-        // If contract is EVM_SIGNED, generate HTML with EVM signature
-        if (contract.getStatus() == InventoryTransactionContractStatus.EVM_SIGNED) {
-            return generateContractHtml(inventoryId, contract.getEvmSignatureUrl());
-        }
-
-        // Otherwise, generate HTML without signature (for draft)
-        return generateContractHtml(inventoryId, null);
+        // Contract luôn có chữ ký EVM khi được tạo, nên luôn generate HTML với chữ ký
+        return generateContractHtml(inventoryId, contract.getEvmSignatureUrl());
     }
 
     @Override
