@@ -113,6 +113,11 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             throw new AppException(ErrorCode.ORDER_NOT_EDITABLE);
         }
 
+        // ✅ Validation: Không cho phép tạo quote nếu order đã có order details
+        if (!order.getOrderDetails().isEmpty()) {
+            throw new AppException(ErrorCode.ORDER_ALREADY_HAS_DETAILS);
+        }
+
         // lấy thông tin của user và store hiện tại
         User staff = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(staff.getUserId());
@@ -125,11 +130,9 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         BigDecimal totalPromotions = BigDecimal.ZERO;
         BigDecimal finalAmount = BigDecimal.ZERO;
 
-        // Check if customer selected license plate service
-        BigDecimal licensePlateFee = BigDecimal.ZERO;
-        BigDecimal registrationFee = BigDecimal.ZERO;
-
-        int quantity = 0;
+        // ✅ Tổng phí biển số và đăng ký cho tất cả items
+        BigDecimal totalLicensePlateFee = BigDecimal.ZERO;
+        BigDecimal totalRegistrationFee = BigDecimal.ZERO;
 
         for (int i = 0; i < request.getOrderDetails().size(); i++) {
             CreateOrderDetailsRequest itemReq = request.getOrderDetails().get(i);
@@ -159,28 +162,31 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             int availableStock = stock.getQuantity() - stock.getReservedQuantity();
             validateStockAvailability(stock, itemReq.getQuantity(), availableStock);
 
-            // tính toán tổng số lượng xe trong đơn
-            quantity += itemReq.getQuantity();
-
             // đơn giá bao gồm cả VAT
             BigDecimal unitPriceAfterVat = stock.getPriceOfStore()
                     .add(stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)));
             // tổng tiền xe (đã gồm vat)
             totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
 
-
+            // ✅ Tính phí biển số và đăng ký cho từng item
+            BigDecimal itemLicensePlateFee = BigDecimal.ZERO;
+            BigDecimal itemRegistrationFee = BigDecimal.ZERO;
+            
             if (request.isIncludeLicensePlateService()) {
                 // Khách chọn dịch vụ đăng ký biển số
-                licensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
+                itemLicensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
                 if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
                         || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
-                    licensePlateFee = (LICENSE_PLATE_AMOUNT_20M).multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                    itemLicensePlateFee = LICENSE_PLATE_AMOUNT_20M.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
                 }
-                registrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                itemRegistrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                
+                // ✅ Cộng dồn vào tổng
+                totalLicensePlateFee = totalLicensePlateFee.add(itemLicensePlateFee);
+                totalRegistrationFee = totalRegistrationFee.add(itemRegistrationFee);
             }
-            // Nếu không chọn dịch vụ thì licensePlateFee và registrationFee đã = 0
 
-            totalTax = totalTax.add(licensePlateFee).add(registrationFee);
+            totalTax = totalTax.add(itemLicensePlateFee).add(itemRegistrationFee);
 
             // Calculate discount amount
             Promotion promotion = null;
@@ -208,8 +214,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     stock.getPriceOfStore(),
                     itemReq.getQuantity(),
 //                    vatAmount,
-                    licensePlateFee,
-                    registrationFee,
+                    itemLicensePlateFee,
+                    itemRegistrationFee,
                     discountAmount
             );
             // calculate final amount
@@ -220,8 +226,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     // set đơn giá là giá tại cửa hàng đã bao gồm VAT
                     .unitPrice(unitPriceAfterVat)
                     .quantity(itemReq.getQuantity())
-                    .licensePlateFee(licensePlateFee) // phí biển số theo số lượng
-                    .registrationFee(registrationFee)
+                    .licensePlateFee(itemLicensePlateFee) // phí biển số theo số lượng
+                    .registrationFee(itemRegistrationFee)
                     .discountAmount(discountAmount)
                     .totalPrice(price) // tiền một model sau phí dịch vụ và khuyến mãi
                     .createdAt(LocalDateTime.now())
@@ -281,8 +287,8 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 .build()
                         ).toList())
                 .totalPrice(order.getTotalPrice())
-                .totalLicensePlateFee(licensePlateFee)
-                .totalRegistrationFee(registrationFee)
+                .totalLicensePlateFee(totalLicensePlateFee)
+                .totalRegistrationFee(totalRegistrationFee)
                 .totalPromotionAmount(order.getTotalPromotionAmount())
                 .totalPayment(order.getTotalPayment())
                 .status(order.getStatus().name())

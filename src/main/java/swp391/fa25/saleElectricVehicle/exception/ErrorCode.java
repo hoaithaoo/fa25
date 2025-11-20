@@ -100,6 +100,7 @@ public enum ErrorCode {
     INVENTORY_TRANSACTION_CANNOT_VIEW_PAYMENT_INFO(1086, "Chỉ có thể xem thông tin thanh toán khi giao dịch ở trạng thái đã được xác nhận (CONFIRMED)", HttpStatus.BAD_REQUEST),
     RECEIPT_NOT_FOUND(1087, "Biên lai thanh toán chưa được upload", HttpStatus.NOT_FOUND),
     COMPANY_BANK_ACCOUNT_CANNOT_DELETE_ACTIVE(1088, "Không thể xóa tài khoản ngân hàng đang được sử dụng (active)", HttpStatus.BAD_REQUEST),
+    ORDER_ALREADY_HAS_DETAILS(1089, "Đơn hàng đã có order details. Không thể tạo quote mới. Vui lòng xóa order details cũ trước.", HttpStatus.BAD_REQUEST),
 //    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
 //    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;

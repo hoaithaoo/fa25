@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Plan files ###
+plan.plan.md

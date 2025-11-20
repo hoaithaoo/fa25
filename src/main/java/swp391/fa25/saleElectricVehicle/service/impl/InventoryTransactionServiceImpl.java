@@ -531,6 +531,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .colorName(transaction.getStoreStock().getModelColor().getColor().getColorName())
                 .storeId(transaction.getStoreStock().getStore().getStoreId())
                 .storeName(transaction.getStoreStock().getStore().getStoreName())
+                .storeAddress(transaction.getStoreStock().getStore().getAddress())
 //                .storeStockId(transaction.getStoreStock().getStockId())
                 .build();
     }

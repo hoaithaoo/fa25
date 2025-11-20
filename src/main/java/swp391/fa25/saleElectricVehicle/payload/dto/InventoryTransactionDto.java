@@ -37,6 +37,7 @@ public class InventoryTransactionDto {
 
     private int storeId;
     private String storeName;
+    private String storeAddress;
 //    private int storeStockId;
 //    private Integer promotionId; // Promotion của hãng được áp dụng (nếu có)
 }

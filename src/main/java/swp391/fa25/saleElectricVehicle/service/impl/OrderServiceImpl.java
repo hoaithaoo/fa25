@@ -282,16 +282,17 @@ public class OrderServiceImpl implements OrderService {
     public GetOrderResponse markOrderDelivered(int orderId) {
         User currentUser = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        // boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
+        boolean isManager = currentUser.getRole().getRoleName().equalsIgnoreCase("Quản lý cửa hàng");
 
-        // chỉ được giao hàng khi đơn hàng thuộc store của user hiện tại
-        Order order = orderRepository.findByStore_StoreIdAndUser_UserIdAndOrderId(store.getStoreId(), currentUser.getUserId(), orderId);
-        // if (isManager) {
-        //     order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
-        // } else {
-        //     order = orderRepository.findByStore_StoreIdAndUser_UserIdAndOrderId(
-        //             store.getStoreId(), currentUser.getUserId(), orderId);
-        // }
+        // ✅ Manager: có thể mark delivered cho bất kỳ order nào trong store
+        // ✅ Staff: chỉ có thể mark delivered cho order của chính họ
+        Order order;
+        if (isManager) {
+            order = orderRepository.findByStore_StoreIdAndOrderId(store.getStoreId(), orderId);
+        } else {
+            order = orderRepository.findByStore_StoreIdAndUser_UserIdAndOrderId(
+                    store.getStoreId(), currentUser.getUserId(), orderId);
+        }
 
         if (order == null) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
