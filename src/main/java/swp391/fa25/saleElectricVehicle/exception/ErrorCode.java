@@ -82,7 +82,7 @@ public enum ErrorCode {
     INVENTORY_TRANSACTION_CANNOT_CONFIRM(1066, "Chỉ có thể xác nhận giao dịch tồn kho ở trạng thái chờ xử lí", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_REJECT(1067, "Chỉ có thể từ chối giao dịch tồn kho ở trạng thái chờ xử lí", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_DELIVER(1068, "Chỉ có thể đánh dấu giao dịch tồn kho là đã giao hàng khi ở trạng thái đang giao hàng", HttpStatus.BAD_REQUEST),
-    INVENTORY_TRANSACTION_CANNOT_UPLOAD_RECEIPT(1070, "Chỉ có thể upload biên lai khi giao dịch đã được hãng xác nhận (CONFIRMED)", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_UPLOAD_RECEIPT(1070, "Chỉ có thể upload biên lai khi hợp đồng đã được ký (CONTRACT_SIGNED)", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_CONFIRM_PAYMENT(1071, "Chỉ có thể xác nhận thanh toán khi đại lý đã upload biên lai (FILE_UPLOADED)", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_CANCEL(1072, "Chỉ có thể hủy request khi ở trạng thái chờ xử lí (PENDING)", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CANNOT_START_SHIPPING(1073, "Chỉ có thể bắt đầu giao hàng khi hãng đã xác nhận thanh toán (PAYMENT_CONFIRMED)", HttpStatus.BAD_REQUEST),
@@ -101,6 +101,12 @@ public enum ErrorCode {
     RECEIPT_NOT_FOUND(1087, "Biên lai thanh toán chưa được upload", HttpStatus.NOT_FOUND),
     COMPANY_BANK_ACCOUNT_CANNOT_DELETE_ACTIVE(1088, "Không thể xóa tài khoản ngân hàng đang được sử dụng (active)", HttpStatus.BAD_REQUEST),
     ORDER_ALREADY_HAS_DETAILS(1089, "Đơn hàng đã có order details. Không thể tạo quote mới. Vui lòng xóa order details cũ trước.", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CONTRACT_NOT_FOUND(1090, "Hợp đồng giao dịch tồn kho không tồn tại", HttpStatus.NOT_FOUND),
+    INVENTORY_TRANSACTION_CONTRACT_ALREADY_EXISTS(1091, "Hợp đồng cho giao dịch tồn kho này đã tồn tại", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_CREATE_CONTRACT(1092, "Chỉ có thể tạo hợp đồng khi giao dịch ở trạng thái đã được xác nhận (CONFIRMED)", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_SIGN_CONTRACT(1093, "Chỉ có thể ký hợp đồng khi hợp đồng ở trạng thái DRAFT", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_UPLOAD_CONTRACT(1094, "Chỉ có thể upload hợp đồng đã ký khi hợp đồng ở trạng thái EVM_SIGNED", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CONTRACT_NOT_SIGNED(1095, "Hợp đồng chưa được ký, không thể upload biên lai thanh toán", HttpStatus.BAD_REQUEST),
 //    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
 //    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
     ;

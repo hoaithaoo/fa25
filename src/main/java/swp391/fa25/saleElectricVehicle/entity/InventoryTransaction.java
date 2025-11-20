@@ -57,6 +57,9 @@ public class InventoryTransaction {
     @JoinColumn(name = "storeStockId", nullable = false)
     private StoreStock storeStock;
 
+    @OneToOne(mappedBy = "inventoryTransaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    private InventoryTransactionContract contract;
+
 //    @ManyToOne
 //    @JoinColumn(name = "promotionId", nullable = true)
 //    private Promotion promotion; // Promotion của hãng được áp dụng (nếu có)
