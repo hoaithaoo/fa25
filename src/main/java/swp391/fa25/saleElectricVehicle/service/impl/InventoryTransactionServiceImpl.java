@@ -510,13 +510,20 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     private InventoryTransactionDto mapToDto(InventoryTransaction transaction) {
         BigDecimal totalBasePrice = transaction.getUnitBasePrice()
                 .multiply(BigDecimal.valueOf(transaction.getImportQuantity()));
+        // Tính discountAmount = totalBasePrice * discountPercentage / 100
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if (transaction.getDiscountPercentage() > 0) {
+            discountAmount = totalBasePrice.multiply(BigDecimal.valueOf(transaction.getDiscountPercentage()))
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        }
+        
         return InventoryTransactionDto.builder()
                 .inventoryId(transaction.getInventoryId())
                 .unitBasePrice(transaction.getUnitBasePrice())
                 .importQuantity(transaction.getImportQuantity())
                 .totalBasePrice(totalBasePrice)
                 .discountPercentage(transaction.getDiscountPercentage())
-                .discountAmount(totalBasePrice.multiply(BigDecimal.valueOf(transaction.getDiscountPercentage())))
+                .discountAmount(discountAmount)
                 .totalPrice(transaction.getTotalPrice())
 //                .deposit(0) // Field không còn trong entity, set default
 //                .dept(null) // Field không còn trong entity, set null

@@ -320,18 +320,18 @@
                     </ul>
                 </td>
                 <td style="text-align: center;" th:text="${dto.quantity}">Số lượng</td>
-                <td style="text-align: right;" th:text="${dto.unitPrice}">Đơn giá</td>
-                <td style="text-align: right;" th:text="${dto.discount}">Khuyến mãi</td>
-                <td style="text-align: right;" th:text="${dto.totalTax}">Phí dịch vụ</td>
-                <td style="text-align: right;" th:text="${dto.totalPrice}">Tổng tiền</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.unitPrice, 0, 'COMMA', 0, 'POINT')}">Đơn giá</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.discount, 0, 'COMMA', 0, 'POINT')}">Khuyến mãi</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.totalTax, 0, 'COMMA', 0, 'POINT')}">Phí dịch vụ</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.totalPrice, 0, 'COMMA', 0, 'POINT')}">Tổng tiền</td>
             </tr>
             <tr>
                 <td colspan="2" class="price-total">Tổng Giá trị Hợp đồng</td>
                 <td style="text-align: center;" th:text="${order.totalQuantity}">Tổng SL</td>
-                <td style="text-align: right;" th:text="${order.totalUnitPrice}">Tổng đơn giá</td>
-                <td style="text-align: right;" th:text="${order.totalDiscount}">Tổng khuyến mãi</td>
-                <td style="text-align: right;" th:text="${order.totalTaxPrice}">Tổng dịch vụ</td>
-                <td style="text-align: right;" th:text="${contract.totalPayment}">Tổng thanh toán</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(order.totalUnitPrice, 0, 'COMMA', 0, 'POINT')}">Tổng đơn giá</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(order.totalDiscount, 0, 'COMMA', 0, 'POINT')}">Tổng khuyến mãi</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(order.totalTaxPrice, 0, 'COMMA', 0, 'POINT')}">Tổng dịch vụ</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(contract.totalPayment, 0, 'COMMA', 0, 'POINT')}">Tổng thanh toán</td>
             </tr>
             </tbody>
         </table>
@@ -344,12 +344,12 @@
             <p>Bên B thực hiện thanh toán giá trị hợp đồng cho Bên A theo các đợt như sau:</p>
             <ul>
                 <li><strong>Đặt Cọc: </strong>Trong thời hạn 02 (hai) ngày làm việc kể từ ngày hai bên ký hợp đồng,
-                    Bên B sẽ đặt cọc cho Bên A ngay khi ký hợp đồng với số tiền là <span th:text="${contract.depositPrice}">...</span> VNĐ.
+                    Bên B sẽ đặt cọc cho Bên A ngay khi ký hợp đồng với số tiền là <strong th:text="${#numbers.formatDecimal(contract.depositPrice, 0, 'COMMA', 0, 'POINT')}">...</strong> VNĐ.
                     Khoản đặt cọc này được coi là khoản thanh toán lần I.
                     Bên B không thể đòi lại số tiền đặt cọc, trừ trường hợp bên B thanh toán hết hợp đồng.</li>
                 <li><strong>Thanh Toán: </strong>Bên B thanh toán số tiền còn lại (05 ngày làm việc kể từ khi Bên A gửi
                     thông báo sẵn sàng giao xe, Bên B thanh toán cho Bên A giá trị hợp đồng còn lại tương đương với số tiền
-                    là <span th:text="${contract.remainPrice}">...</span> VNĐ-).</li>
+                    là <strong th:text="${#numbers.formatDecimal(contract.remainPrice, 0, 'COMMA', 0, 'POINT')}">...</strong> VNĐ-).</li>
             </ul>
         </div>
     </div>

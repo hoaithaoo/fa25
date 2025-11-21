@@ -134,6 +134,11 @@
             font-weight: bold;
         }
 
+        .price-total {
+            font-weight: bold;
+            font-style: italic;
+        }
+
         .signatures {
             display: flex;
             justify-content: space-between;
@@ -196,8 +201,8 @@
             <div class="logo">ELECTRA</div>
             <div class="company-details">
                 <strong>ELECTRIC VEHICLE MANUFACTURER</strong><br>
-                Địa chỉ: .................................<br>
-                <strong>ĐT:</strong> ..................... - <strong>MST:</strong> ..................... <br>
+                Địa chỉ: Số 45 Đường Lê Văn Sỹ, Phường 13, Quận 3, TP. Hồ Chí Minh<br>
+                <strong>ĐT:</strong> 0356964383 - <strong>MST:</strong> ..................... <br>
             </div>
         </div>
     </div>
@@ -212,16 +217,16 @@
     <div class="section">
         <div class="section-title">BÊN BÁN (BÊN A - HÃNG SẢN XUẤT):</div>
         <div class="info-row">
-            <span class="info-label">Tên:</span>
-            <span class="info-value">ELECTRIC VEHICLE MANUFACTURER</span>
+            <span class="info-label">Đại diện:</span>
+            <span class="info-value" th:text="${evmStaff.fullName}">...</span>
         </div>
         <div class="info-row">
             <span class="info-label">Địa chỉ:</span>
-            <span class="info-value">.................................</span>
+            <span class="info-value" th:text="Số 45 Đường Lê Văn Sỹ, Phường 13, Quận 3, TP. Hồ Chí Minh">...</span>
         </div>
         <div class="info-row">
             <span class="info-label">Điện thoại:</span>
-            <span class="info-value">.................................</span>
+            <span class="info-value" th:text="${evmStaff.phone}">...</span>
         </div>
     </div>
 
@@ -270,12 +275,25 @@
                 </td>
                 <td style="text-align: center;" th:text="${transaction.importQuantity}">...</td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(transaction.unitBasePrice, 0, 'COMMA', 0, 'POINT')}">...</td>
-                <td style="text-align: center;" th:text="${transaction.discountPercentage}">...</td>
+                <td style="text-align: center;">
+                    <span th:if="${transaction.discountPercentage > 0}">
+                        <span th:text="${transaction.discountPercentage}">...</span>%<br>
+                        (<span th:text="${#numbers.formatDecimal(transaction.discountAmount, 0, 'COMMA', 0, 'POINT')}">...</span> VNĐ)
+                    </span>
+                </td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(transaction.totalPrice, 0, 'COMMA', 0, 'POINT')}">...</td>
             </tr>
             <tr>
-                <td colspan="5" style="text-align: right; font-weight: bold;">TỔNG CỘNG:</td>
-                <td style="text-align: right; font-weight: bold;" th:text="${#numbers.formatDecimal(transaction.totalPrice, 0, 'COMMA', 0, 'POINT')}">...</td>
+                <td colspan="2" class="price-total">Tổng Giá trị Hợp đồng</td>
+                <td style="text-align: center;" th:text="${transaction.importQuantity}">Tổng SL</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(transaction.totalBasePrice, 0, 'COMMA', 0, 'POINT')}">Tổng đơn giá</td>
+                <td style="text-align: center;">
+                    <span th:if="${transaction.discountPercentage > 0}">
+                        <span th:text="${transaction.discountPercentage}">...</span>%<br>
+                        (<span th:text="${#numbers.formatDecimal(transaction.discountAmount, 0, 'COMMA', 0, 'POINT')}">...</span> VNĐ)
+                    </span>
+                </td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(transaction.totalPrice, 0, 'COMMA', 0, 'POINT')}">Tổng thanh toán</td>
             </tr>
             </tbody>
         </table>
@@ -316,7 +334,8 @@
                 </div>
                 <div th:if="${evmSignatureUrl == null}" style="min-height: 80px;"></div>
             </div>
-            <p style="margin-top: 20px;">(Ký và ghi rõ họ tên)</p>
+            <p style="margin-top: 20px;" th:text="${evmStaff.fullName}">...</p>
+            <p style="margin-top: 5px; font-size: 11px;">(Ký và ghi rõ họ tên)</p>
         </div>
         <div class="signature-box">
             <h3>BÊN MUA (BÊN B)</h3>

@@ -16,9 +16,11 @@ import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionContractDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
-import swp391.fa25.saleElectricVehicle.payload.request.inventorytransactioncontract.SignInventoryTransactionContractRequest;
 import swp391.fa25.saleElectricVehicle.repository.InventoryTransactionContractRepository;
-import swp391.fa25.saleElectricVehicle.service.*;
+import swp391.fa25.saleElectricVehicle.service.InventoryTransactionContractService;
+import swp391.fa25.saleElectricVehicle.service.InventoryTransactionService;
+import swp391.fa25.saleElectricVehicle.service.UserService;
+import swp391.fa25.saleElectricVehicle.service.StoreService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -63,18 +65,12 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
 
         User staff = userService.getCurrentUserEntity();
 
-        // Lấy chữ ký mặc định từ config
-        String evmSignatureUrl = evmSignatureConfig.getDefaultSignatureUrl();
-        if (evmSignatureUrl == null || evmSignatureUrl.trim().isEmpty()) {
-            throw new AppException(ErrorCode.EVM_SIGNATURE_NOT_CONFIGURED);
-        }
-
-        // Tạo contract với chữ ký EVM sẵn có, status = EVM_SIGNED
+        // Tạo contract, không lưu chữ ký vào database, sẽ lấy từ config khi cần
         InventoryTransactionContract contract = InventoryTransactionContract.builder()
                 .contractDate(LocalDate.now())
                 .status(InventoryTransactionContractStatus.EVM_SIGNED) // Đã có chữ ký EVM ngay khi tạo
-                .evmSignatureUrl(evmSignatureUrl) // Tự động gán chữ ký mặc định
                 .uploadedBy(staff.getFullName())
+                .evmStaff(staff) // Lưu FK relationship với User
                 .createdAt(LocalDateTime.now())
                 .inventoryTransaction(transaction)
                 .build();
@@ -88,20 +84,19 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
     }
 
     @Override
-    @Transactional
-    public InventoryTransactionContractDto signContract(int inventoryId, SignInventoryTransactionContractRequest request) {
-        // Contract đã có chữ ký EVM tự động khi tạo, không cần method này nữa
-        // Giữ lại để tương thích với API, nhưng sẽ throw error
-        // Contract đã có chữ ký khi tạo, không thể ký lại
-        throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_SIGN_CONTRACT);
-    }
-
-    @Override
     public String getContractHtml(int inventoryId) {
+        // Lấy chữ ký từ config, không lưu vào database
+        String evmSignatureUrl = evmSignatureConfig.getDefaultSignatureUrl();
+        if (evmSignatureUrl == null || evmSignatureUrl.trim().isEmpty()) {
+            throw new AppException(ErrorCode.EVM_SIGNATURE_NOT_CONFIGURED);
+        }
+
+        // Lấy thông tin contract để có thông tin EVM staff
         InventoryTransactionContract contract = getContractEntityByInventoryId(inventoryId);
 
-        // Contract luôn có chữ ký EVM khi được tạo, nên luôn generate HTML với chữ ký
-        return generateContractHtml(inventoryId, contract.getEvmSignatureUrl());
+        // Generate HTML với chữ ký từ config và thông tin EVM staff
+        // evmStaff đã được load qua FK relationship
+        return generateContractHtml(inventoryId, evmSignatureUrl, contract.getEvmStaff());
     }
 
     @Override
@@ -147,13 +142,15 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_TRANSACTION_CONTRACT_NOT_FOUND));
     }
 
-    private String generateContractHtml(int inventoryId, String evmSignatureUrl) {
+    private String generateContractHtml(int inventoryId, String evmSignatureUrl, User evmStaff) {
         InventoryTransactionDto transaction = inventoryTransactionService.getInventoryTransactionById(inventoryId);
+
         StoreDto storeDto = storeService.getStoreById(transaction.getStoreId());
 
         // Prepare context for Thymeleaf
         Context context = new Context();
         context.setVariable("transaction", transaction);
+        context.setVariable("evmStaff", evmStaff);
         context.setVariable("store", storeDto);
         context.setVariable("evmSignatureUrl", evmSignatureUrl);
 
@@ -167,7 +164,6 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
                 .contractCode(contract.getContractCode())
                 .contractDate(contract.getContractDate())
                 .contractFileUrl(contract.getContractFileUrl())
-                .evmSignatureUrl(contract.getEvmSignatureUrl())
                 .status(contract.getStatus() != null ? contract.getStatus().name() : null)
                 .uploadedBy(contract.getUploadedBy())
                 .createdAt(contract.getCreatedAt())

@@ -15,7 +15,6 @@ public class InventoryTransactionContractDto {
     private String contractCode;
     private LocalDate contractDate;
     private String contractFileUrl;
-    private String evmSignatureUrl;
     private String status;
     private String uploadedBy;
     private LocalDateTime createdAt;

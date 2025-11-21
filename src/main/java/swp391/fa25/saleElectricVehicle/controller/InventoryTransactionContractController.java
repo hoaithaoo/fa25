@@ -10,10 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionContractDto;
-import swp391.fa25.saleElectricVehicle.payload.request.inventorytransactioncontract.SignInventoryTransactionContractRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.InventoryTransactionContractService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/inventory-transactions")
@@ -27,29 +29,16 @@ public class InventoryTransactionContractController {
 
     // EVM tạo draft contract
     @PostMapping("/{inventoryId}/create-contract")
-    public ResponseEntity<ApiResponse<InventoryTransactionContractDto>> createContract(
+    public ResponseEntity<Map<String, Object>> createContract(
             @PathVariable int inventoryId) {
         InventoryTransactionContractDto contract = contractService.createDraftContract(inventoryId);
-        ApiResponse<InventoryTransactionContractDto> response = ApiResponse.<InventoryTransactionContractDto>builder()
-                .code(HttpStatus.CREATED.value())
-                .message("Contract created successfully")
-                .data(contract)
-                .build();
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Contract created successfully");
+        response.put("contractId", contract.getContractId());
+        response.put("viewUrl", "/api/inventory-transactions/" + inventoryId + "/contract/html");
+        
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    // EVM ký hợp đồng
-    @PostMapping("/{inventoryId}/sign-contract")
-    public ResponseEntity<ApiResponse<InventoryTransactionContractDto>> signContract(
-            @PathVariable int inventoryId,
-            @RequestBody SignInventoryTransactionContractRequest request) {
-        InventoryTransactionContractDto contract = contractService.signContract(inventoryId, request);
-        ApiResponse<InventoryTransactionContractDto> response = ApiResponse.<InventoryTransactionContractDto>builder()
-                .code(HttpStatus.OK.value())
-                .message("Contract signed successfully")
-                .data(contract)
-                .build();
-        return ResponseEntity.ok(response);
     }
 
     // Manager download HTML contract
@@ -69,7 +58,7 @@ public class InventoryTransactionContractController {
     )
     public ResponseEntity<ApiResponse<InventoryTransactionContractDto>> uploadSignedContract(
             @PathVariable int inventoryId,
-            @Parameter(description = "File hợp đồng đã ký (HTML hoặc PDF)", required = true,
+            @Parameter(description = "File hợp đồng đã ký", required = true,
                     content = @Content(schema = @Schema(type = "string", format = "binary")))
             @RequestPart("file") MultipartFile file) {
         String fileUrl = cloudinaryService.uploadFile(file, "inventory-contracts");

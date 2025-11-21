@@ -30,14 +30,15 @@ public class InventoryTransactionContract {
     private String contractFileUrl; // File cuối cùng (có cả 2 chữ ký) - Manager upload
 
     @Column
-    private String evmSignatureUrl; // URL ảnh chữ ký EVM (để generate HTML khi cần)
-
-    @Column
     @Enumerated(EnumType.STRING)
     private InventoryTransactionContractStatus status;
 
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String uploadedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "evmStaffId", nullable = false)
+    private User evmStaff; // EVM staff tạo contract
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
