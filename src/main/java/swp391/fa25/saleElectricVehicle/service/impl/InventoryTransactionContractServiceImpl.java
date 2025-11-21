@@ -80,6 +80,9 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
         contract.setContractCode("ITC" + String.format("%06d", contract.getContractId()));
         InventoryTransactionContract saved = contractRepository.save(contract);
 
+        // Update InventoryTransaction status to EVM_SIGNED when contract is created
+        inventoryTransactionService.updateStatusToEvmSigned(inventoryId);
+
         return mapToDto(saved);
     }
 

@@ -46,4 +46,7 @@ public interface InventoryTransactionService {
 
     // Update status to CONTRACT_SIGNED when contract is signed
     InventoryTransactionDto updateStatusToContractSigned(int inventoryId);
+
+    // Update status to EVM_SIGNED when EVM creates contract
+    InventoryTransactionDto updateStatusToEvmSigned(int inventoryId);
 }

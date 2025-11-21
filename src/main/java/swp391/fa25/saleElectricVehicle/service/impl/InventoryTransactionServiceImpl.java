@@ -561,4 +561,22 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
         InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
         return mapToDto(saved);
     }
+
+    @Override
+    @Transactional
+    public InventoryTransactionDto updateStatusToEvmSigned(int inventoryId) {
+        InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
+
+        // Validate status = CONFIRMED (chỉ cho phép update từ CONFIRMED)
+        if (transaction.getStatus() != InventoryTransactionStatus.CONFIRMED) {
+            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_CREATE_CONTRACT);
+        }
+
+        // Cập nhật status thành EVM_SIGNED
+        transaction.setStatus(InventoryTransactionStatus.EVM_SIGNED);
+        transaction.setUpdatedAt(LocalDateTime.now());
+
+        InventoryTransaction saved = inventoryTransactionRepository.save(transaction);
+        return mapToDto(saved);
+    }
 }
