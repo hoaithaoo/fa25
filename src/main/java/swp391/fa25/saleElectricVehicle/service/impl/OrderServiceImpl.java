@@ -403,9 +403,10 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
         LocalDateTime startOfNextMonth = currentMonth.plusMonths(1).atDay(1).atStartOfDay();
         
-        // Lấy orders của staff trong tháng hiện tại
-        List<Order> orders = orderRepository.findByUser_UserIdAndOrderDateBetween(
-                staffId, startOfMonth, startOfNextMonth);
+        // Lấy orders của staff trong tháng hiện tại với status FULLY_PAID hoặc DELIVERED
+        List<OrderStatus> allowedStatuses = List.of(OrderStatus.FULLY_PAID, OrderStatus.DELIVERED);
+        List<Order> orders = orderRepository.findByUser_UserIdAndStatusInAndOrderDateBetween(
+                staffId, allowedStatuses, startOfMonth, startOfNextMonth);
         
         // Convert to DTO
         List<GetOrderResponse> orderResponses = orders.stream()

@@ -22,6 +22,9 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     // Find by staff and date range (for monthly orders)
     List<Order> findByUser_UserIdAndOrderDateBetween(int staffId, LocalDateTime startDate, LocalDateTime endDate);
 
+    // Find by staff, status in list, and date range (for monthly orders with status filter)
+    List<Order> findByUser_UserIdAndStatusInAndOrderDateBetween(int staffId, List<OrderStatus> statuses, LocalDateTime startDate, LocalDateTime endDate);
+
     // Find by status
     List<Order> findByStatus(OrderStatus status);
 
