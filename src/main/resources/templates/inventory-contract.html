@@ -328,6 +328,7 @@
         <div class="signature-box">
             <h3>BÊN BÁN (BÊN A)</h3>
             <p class="subtitle">Đại diện hãng sản xuất</p>
+            <p style="margin-top: 5px; margin-bottom: 20px; font-size: 11px;">(Ký và ghi rõ họ tên)</p>
             <div class="signature-container">
                 <div th:if="${evmSignatureUrl != null}">
                     <img th:src="${evmSignatureUrl}" alt="Chữ ký EVM" class="signature-image" />
@@ -335,15 +336,14 @@
                 <div th:if="${evmSignatureUrl == null}" style="min-height: 80px;"></div>
             </div>
             <p style="margin-top: 20px;" th:text="${evmStaff.fullName}">...</p>
-            <p style="margin-top: 5px; font-size: 11px;">(Ký và ghi rõ họ tên)</p>
         </div>
         <div class="signature-box">
             <h3>BÊN MUA (BÊN B)</h3>
             <p class="subtitle">Đại diện đại lý</p>
+            <p style="margin-top: 5px; margin-bottom: 20px; font-size: 11px;">(Ký và ghi rõ họ tên)</p>
             <div class="signature-container">
                 <div style="min-height: 80px;"></div>
             </div>
-            <p style="margin-top: 20px;">(Ký và ghi rõ họ tên)</p>
         </div>
     </div>
 </div>
