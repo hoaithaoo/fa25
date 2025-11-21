@@ -8,6 +8,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import swp391.fa25.saleElectricVehicle.config.EvmSignatureConfig;
 import swp391.fa25.saleElectricVehicle.entity.InventoryTransaction;
 import swp391.fa25.saleElectricVehicle.entity.InventoryTransactionContract;
+import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.InventoryTransactionContractStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.InventoryTransactionStatus;
@@ -141,8 +142,20 @@ public class InventoryTransactionContractServiceImpl implements InventoryTransac
 
     @Override
     public InventoryTransactionContract getContractEntityByInventoryId(int inventoryId) {
-        return contractRepository.findByInventoryTransaction_InventoryId(inventoryId)
+        InventoryTransactionContract contract = contractRepository.findByInventoryTransaction_InventoryId(inventoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_TRANSACTION_CONTRACT_NOT_FOUND));
+        
+        // Nếu không phải EVM thì kiểm tra contract có thuộc store của user hiện tại không
+        User currentUser = userService.getCurrentUserEntity();
+        if (currentUser.getRole().getRoleId() != 2) {
+            Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+            
+            if (contract.getInventoryTransaction().getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+                throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CONTRACT_NOT_FOUND);
+            }
+        }
+        
+        return contract;
     }
 
     private String generateContractHtml(int inventoryId, String evmSignatureUrl, User evmStaff) {

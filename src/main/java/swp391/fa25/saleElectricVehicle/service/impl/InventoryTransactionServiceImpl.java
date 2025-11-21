@@ -114,12 +114,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     public InventoryTransactionDto getInventoryTransactionById(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
         
-        // Kiểm tra transaction có thuộc store của user hiện tại không
+        // Nếu không phải EVM thì kiểm tra transaction có thuộc store của user hiện tại không
         User currentUser = userService.getCurrentUserEntity();
-        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        
-        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
-            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        if (currentUser.getRole().getRoleId() != 2) {
+            Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+            
+            if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+                throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+            }
         }
         
         return mapToDto(transaction);
@@ -166,12 +168,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
         // Kiểm tra StoreStock tồn tại
         StoreStock storeStock = storeStockService.getStoreStockEntityById(storeStockId);
         
-        // Kiểm tra StoreStock có thuộc store của user hiện tại không
+        // Nếu không phải EVM thì kiểm tra StoreStock có thuộc store của user hiện tại không
         User currentUser = userService.getCurrentUserEntity();
-        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        
-        if (storeStock.getStore().getStoreId() != currentStore.getStoreId()) {
-            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+        if (currentUser.getRole().getRoleId() != 2) {
+            Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+            
+            if (storeStock.getStore().getStoreId() != currentStore.getStoreId()) {
+                throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
+            }
         }
 
         return inventoryTransactionRepository.findByStoreStock_StockId(storeStockId).stream()
@@ -183,11 +187,17 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     public List<InventoryTransactionDto> getInventoryTransactionsByDateRange(
             LocalDateTime start, LocalDateTime end) {
         
-        // Lấy store của user hiện tại
         User currentUser = userService.getCurrentUserEntity();
-        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
         
-        // Chỉ lấy transactions của store hiện tại trong khoảng ngày
+        // Nếu là EVM thì lấy tất cả transactions trong khoảng ngày
+        if (currentUser.getRole().getRoleId() == 2) {
+            return inventoryTransactionRepository.findByOrderDateBetween(start, end).stream()
+                    .map(this::mapToDto)
+                    .collect(Collectors.toList());
+        }
+        
+        // Nếu không phải EVM thì chỉ lấy transactions của store hiện tại trong khoảng ngày
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
         return inventoryTransactionRepository.findByStoreStock_Store_StoreIdAndOrderDateBetween(
                 currentStore.getStoreId(), start, end).stream()
                 .map(this::mapToDto)
