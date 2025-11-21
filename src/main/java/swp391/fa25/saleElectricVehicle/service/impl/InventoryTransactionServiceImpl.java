@@ -484,16 +484,18 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     public PaymentInfoDto getPaymentInfo(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
         
-        // Kiểm tra transaction có thuộc store của user hiện tại không
+        // Nếu không phải EVM thì kiểm tra transaction có thuộc store của user hiện tại không
         User currentUser = userService.getCurrentUserEntity();
-        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
-        
-        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
-            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+        if (currentUser.getRole().getRoleId() != 2) {
+            Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+            
+            if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
+                throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
+            }
         }
         
-        // Chỉ cho phép xem khi status là CONFIRMED (chưa upload receipt)
-        if (transaction.getStatus() != InventoryTransactionStatus.CONFIRMED) {
+        // Chỉ cho phép xem khi status là CONTRACT_SIGNED (hợp đồng đã được ký)
+        if (transaction.getStatus() != InventoryTransactionStatus.CONTRACT_SIGNED) {
             throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_VIEW_PAYMENT_INFO);
         }
         
