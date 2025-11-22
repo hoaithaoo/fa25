@@ -53,26 +53,6 @@ public class ColorServiceImpl implements ColorService {
         return colors.stream().map(this::mapToDto).toList();
     }
 
-//    // truy vấn color theo name
-//    @Override
-//    public ColorDto getColorByName(String colorName) {
-//        Color color = colorRepository.findColorByColorName(colorName);
-//        if (color == null) {
-//            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
-//        }
-//        return mapToDto(color);
-//    }
-
-//    // add color vào store stock
-//    @Override
-//    public Color getColorEntityByName(String colorName) {
-//        Color color = colorRepository.findColorByColorName(colorName);
-//        if (color == null) {
-//            throw new AppException(ErrorCode.COLOR_NOT_EXIST);
-//        }
-//        return color;
-//    }
-
     // add color vào store stock
     @Override
     public Color getColorEntityById(int colorId) {

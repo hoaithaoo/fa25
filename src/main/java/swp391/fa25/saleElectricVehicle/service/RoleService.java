@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface RoleService {
     void createRole(Role role);
-//    RoleDto findRoleById(int roleId);
     RoleDto getRoleByName(String roleName);
     Role getRoleEntityById(int roleId);
     List<RoleDto> getAllRoles();

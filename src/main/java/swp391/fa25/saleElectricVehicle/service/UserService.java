@@ -28,7 +28,4 @@ public interface UserService {
     UpdateUserProfileResponse updateUserStatus(int userId, UpdateUserStatusRequest updateUserStatusRequest);
     void deleteUser(int userId);
     ChangePasswordResponse changePassword(ChangePasswordRequest changePasswordRequest);
-
-//    LoginResponse login(LoginRequest loginRequest);
-//    IntrospectResponse introspect(IntrospectRequest introspectRequest);
 }

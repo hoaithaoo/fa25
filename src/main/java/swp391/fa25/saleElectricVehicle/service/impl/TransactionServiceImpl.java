@@ -24,7 +24,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Transaction createTransaction(CreateTransactionRequest request) {
         Payment payment = paymentService.getPaymentEntityByPaymentCode(request.getPaymentCode());
-//        Payment payment = paymentService.getPaymentEntityById(request.getPaymentId());
         Transaction transaction = Transaction.builder()
                 .payment(payment)
                 .transactionRef(request.getTransactionRef())
@@ -32,20 +31,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionTime(request.getTransactionDate())
                 .gateway(request.getGateway())
                 .bankTransactionCode(request.getBankTransactionCode())
-//                .payerInfor(request.getPayerInfor())
-//                .note(request.getNote())
                 .status(request.getStatus())
                 .build();
         return transactionRepository.save(transaction);
-//        return GetTransactionResponse.builder()
-//                .transactionId(savedTransaction.getTransactionId())
-//                .transactionRef(savedTransaction.getTransactionRef())
-//                .amount(savedTransaction.getAmount())
-//                .transactionDate(savedTransaction.getTransactionTime())
-//                .gateway(payment.getGateway())
-//                .payerInfor(savedTransaction.getPayerInfor())
-//                .note(savedTransaction.getNote())
-//                .status(savedTransaction.getStatus())
-//                .build();
     }
 }

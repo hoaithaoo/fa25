@@ -170,9 +170,6 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Contract getContractEntityByContractCode(String contractCode) {
         Contract contract = contractRepository.findContractByContractCode(contractCode);
-//        if (contract == null) {
-//            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
-//        }
         return contract;
     }
 

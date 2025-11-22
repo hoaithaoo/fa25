@@ -14,8 +14,6 @@ public interface PromotionService {
 
     List<PromotionDto> getAllPromotions();
 
-    Promotion getPromotionEntityById(int promotionId);
-
     List<PromotionDto> getPromotionByModelId(int modelId);
 
     PromotionDto updatePromotion(int promotionId, PromotionDto promotionDto);

@@ -55,13 +55,6 @@ public class TestDriveConfigServiceImpl implements TestDriveConfigService {
         return mapToDto(saved);
     }
 
-    // @Override
-    // public TestDriveConfigDto getTestDriveConfigById(int configId) {
-    //     TestDriveConfig config = testDriveConfigRepository.findById(configId)
-    //             .orElseThrow(() -> new AppException(ErrorCode.TEST_DRIVE_CONFIG_NOT_FOUND));
-    //     return mapToDto(config);
-    // }
-
     @Override
     public TestDriveConfigDto getTestDriveConfig() {
         // Validate store exists

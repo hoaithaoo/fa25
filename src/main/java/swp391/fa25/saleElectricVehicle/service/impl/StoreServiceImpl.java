@@ -41,10 +41,6 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public StoreDto createStore(StoreDto storeDto) {
-        // check store name đã tồn tại chưa
-//        if (storeRepository.existsByStoreName(storeDto.getStoreName())) {
-//            throw new AppException(ErrorCode.STORE_EXISTED);
-//        }
 
         LocalDate nowDate = LocalDate.now();
         // ngày bắt đầu có thể là ngày hôm nay hoặc sau, không được trước ngày hiện tại

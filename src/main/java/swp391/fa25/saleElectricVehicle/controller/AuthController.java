@@ -17,10 +17,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.RefreshTokenRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.ChangePasswordResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.LoginResponse;
-import swp391.fa25.saleElectricVehicle.service.AuthTokenService;
-import swp391.fa25.saleElectricVehicle.service.LoginService;
-import swp391.fa25.saleElectricVehicle.service.TokenBlacklistService;
-import swp391.fa25.saleElectricVehicle.service.UserService;
+import swp391.fa25.saleElectricVehicle.service.*;
 
 @RestController
 @RequestMapping("/auth")

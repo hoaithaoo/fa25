@@ -20,7 +20,5 @@ public interface ModelColorService {
     ModelColorDto updateModelColor(int id, ModelColorDto modelColorDto);
     ModelColorDto updateModelColorPrice(int id, UpdateModelColorPriceRequest request);
     void deleteModelColor(int id);
-    ModelColor getModelColor(int modelId, int colorId);
-
 
 }

@@ -13,7 +13,6 @@ public interface FeedbackService {
 
     FeedbackDto getFeedbackById(int feedbackId);
     List<FeedbackDto> getAllFeedbacks();
-//    List<FeedbackDto> getFeedbacksByStatus(String status);
     List<FeedbackDto> getFeedbacksByOrder(int orderId);
 
     // ✅ THAY ĐỔI: Dùng UpdateFeedbackRequest

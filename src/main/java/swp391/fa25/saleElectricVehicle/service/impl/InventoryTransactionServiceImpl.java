@@ -204,62 +204,6 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .collect(Collectors.toList());
     }
 
-//    @Override
-//    @Transactional
-//    public InventoryTransactionDto updateInventoryTransaction(
-//            int inventoryId, CreateInventoryTransactionRequest dto) {
-//
-//        InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
-//
-//        // Chỉ cho phép update khi status là PENDING
-//        if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
-//            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_UPDATE);
-//        }
-//
-//        // Cập nhật các field nếu có trong DTO (khác null)
-//        if (dto.getUnitBasePrice() != null) {
-//            transaction.setUnitBasePrice(dto.getUnitBasePrice());
-//        }
-//
-//        if (dto.getImportQuantity() != 0) {
-//            transaction.setImportQuantity(dto.getImportQuantity());
-//        }
-//
-//        if (dto.getDiscountPercentage() != 0) {
-//            transaction.setDiscountPercentage(dto.getDiscountPercentage());
-//        }
-//
-//        if (dto.getDeliveryDate() != null) {
-//            transaction.setDeliveryDate(dto.getDeliveryDate());
-//        }
-//
-//        // Không cho phép đổi StoreStock sau khi đã tạo transaction
-//        // if (dto.getStoreStockId() != 0) {
-//        //     StoreStock newStoreStock = storeStockService.getStoreStockEntityById(dto.getStoreStockId());
-//        //     transaction.setStoreStock(newStoreStock);
-//        // }
-//
-//        // Tính lại totalPrice
-//        BigDecimal baseAmount = transaction.getUnitBasePrice()
-//                .multiply(BigDecimal.valueOf(transaction.getImportQuantity()));
-//
-//        BigDecimal discountAmount = baseAmount
-//                .multiply(BigDecimal.valueOf(transaction.getDiscountPercentage()))
-//                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-//
-//        BigDecimal totalPrice = baseAmount.subtract(discountAmount);
-//
-//        // Đảm bảo totalPrice không bao giờ âm (nếu âm thì set = 0)
-//        if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
-//            totalPrice = BigDecimal.ZERO;
-//        }
-//
-//        transaction.setTotalPrice(totalPrice);
-//
-//        InventoryTransaction updated = inventoryTransactionRepository.save(transaction);
-//        return mapToDto(updated);
-//    }
-
     @Override
     @Transactional
     public void deleteInventoryTransaction(int inventoryId) {
@@ -287,14 +231,6 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     public InventoryTransactionDto acceptRequest(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
 
-        // Kiểm tra transaction có thuộc store của user hiện tại không
-//        User currentUser = userService.getCurrentUserEntity();
-//        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
-//
-//        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
-//            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
-//        }
-
         // Chỉ cho phép accept khi status là PENDING
         if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
             throw new AppException(ErrorCode.INVENTORY_TRANSACTION_CANNOT_CONFIRM);
@@ -313,14 +249,6 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto rejectRequest(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
-        
-        // Kiểm tra transaction có thuộc store của user hiện tại không
-//        User currentUser = userService.getCurrentUserEntity();
-//        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
-//
-//        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
-//            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
-//        }
 
         // Chỉ cho phép reject khi status là PENDING
         if (transaction.getStatus() != InventoryTransactionStatus.PENDING) {
@@ -340,14 +268,6 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
     @Transactional
     public InventoryTransactionDto startShipping(int inventoryId) {
         InventoryTransaction transaction = getInventoryTransactionEntityById(inventoryId);
-        
-        // Kiểm tra transaction có thuộc store của user hiện tại không
-//        User currentUser = userService.getCurrentUserEntity();
-//        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
-//
-//        if (transaction.getStoreStock().getStore().getStoreId() != currentStore.getStoreId()) {
-//            throw new AppException(ErrorCode.INVENTORY_TRANSACTION_NOT_FOUND);
-//        }
 
         // Chỉ cho phép start shipping khi status là PAYMENT_CONFIRMED
         if (transaction.getStatus() != InventoryTransactionStatus.PAYMENT_CONFIRMED) {

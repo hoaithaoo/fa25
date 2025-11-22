@@ -6,5 +6,4 @@ import swp391.fa25.saleElectricVehicle.payload.response.payment.GetTransactionRe
 
 public interface TransactionService {
     Transaction createTransaction(CreateTransactionRequest request);
-//    GetTransactionResponse createTransaction(CreateTransactionRequest request);
 }

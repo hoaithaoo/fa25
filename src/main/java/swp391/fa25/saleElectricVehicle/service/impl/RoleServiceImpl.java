@@ -28,18 +28,6 @@ public class RoleServiceImpl implements RoleService {
         Role savedRole = roleRepository.save(newRole);
     }
 
-//    @Override
-//    public RoleDto createRole(RoleDto roleDto) {
-//        if (roleRepository.existsByRoleName(roleDto.getRoleName())) {
-//            throw new AppException(ErrorCode.ROLE_EXISTED);
-//        }
-//        Role newRole = Role.builder()
-//                .roleName(roleDto.getRoleName())
-//                .build();
-//        Role savedRole = roleRepository.save(newRole);
-//        return mapToDto(savedRole);
-//    }
-
     // dùng để tìm kiếm role (?)
     @Override
     public RoleDto getRoleByName(String roleName) {
@@ -72,14 +60,6 @@ public class RoleServiceImpl implements RoleService {
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_EXIST);
         }
-
-        // ❌ Bug tương tự các entities khác - luôn check duplicate
-//        if (roleDto.getRoleName() != null && !roleDto.getRoleName().isEmpty()) {
-//            if (roleRepository.existsByRoleName(roleDto.getRoleName())) {
-//                throw new AppException(ErrorCode.ROLE_EXISTED); // ← Sẽ fail khi update cùng tên
-//            }
-//            role.setRoleName(roleDto.getRoleName());
-//        }
 
         // ✅ Phải check nếu tên khác với tên hiện tại
         if (roleDto.getRoleName() != null && !roleDto.getRoleName().trim().isEmpty()) {

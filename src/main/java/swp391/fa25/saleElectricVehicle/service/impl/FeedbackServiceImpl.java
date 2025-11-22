@@ -143,13 +143,6 @@ public class FeedbackServiceImpl implements FeedbackService {
                 feedback.setResolveAt(LocalDateTime.now());
                 feedback.setResolvedBy(userService.getCurrentUserEntity());
             }
-
-            // ✅ Nếu status = "RESOLVED" → tự động gán resolveAt và resolveBy
-//            if ("RESOLVED".equals(request.getStatus())) {
-//                feedback.setResolveAt(LocalDateTime.now());
-//                feedback.setResolveBy(SecurityContextHolder.getContext()
-//                        .getAuthentication().getName());
-//            }
         }
 
         Feedback updated = feedbackRepository.save(feedback);

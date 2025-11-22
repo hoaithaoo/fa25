@@ -136,24 +136,6 @@ public class ModelColorServiceImpl implements ModelColorService {
             existingModelColor.setImagePath(modelColorDto.getImagePath());
         }
 
-//        // Check model mới bằng TÊN
-//        if (modelColorDto.getModelName() != null && !modelColorDto.getModelName().trim().isEmpty()) {
-//            Model model = modelRepository.findByModelName(modelColorDto.getModelName()); // ← Cần check ModelRepository có method này không
-//            if (model == null) {
-//                throw new AppException(ErrorCode.MODEL_NOT_FOUND);
-//            }
-//            existingModelColor.setModel(model);
-//        }
-
-//        // Check color mới bằng TÊN - SỬA ĐÂY
-//        if (modelColorDto.getColorName() != null && !modelColorDto.getColorName().trim().isEmpty()) {
-//            Color color = colorRepository.findColorByColorName(modelColorDto.getColorName()); // ← SỬA thêm chữ "Color"
-//            if (color == null) {
-//                throw new AppException(ErrorCode.COLOR_NOT_EXIST);
-//            }
-//            existingModelColor.setColor(color);
-//        }
-
         modelColorRepository.save(existingModelColor);
         return mapToDto(existingModelColor);
     }
@@ -185,25 +167,6 @@ public class ModelColorServiceImpl implements ModelColorService {
             throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
         }
         modelColorRepository.delete(modelColor);
-    }
-
-    // Thêm method này vào ModelColorServiceImpl
-    @Override
-    public ModelColor getModelColor(int modelId, int colorId) {
-        // Tìm trong repository bằng cách lấy tất cả rồi filter
-        List<ModelColor> allModelColors = modelColorRepository.findAll();
-
-        ModelColor modelColor = allModelColors.stream()
-                .filter(mc -> mc.getModel().getModelId() == modelId &&
-                        mc.getColor().getColorId() == colorId)
-                .findFirst()
-                .orElse(null);
-
-        if (modelColor == null) {
-            throw new AppException(ErrorCode.MODEL_COLOR_NOT_EXIST);
-        }
-
-        return modelColor;
     }
 
     private ModelColorDto mapToDto(ModelColor modelColor) {

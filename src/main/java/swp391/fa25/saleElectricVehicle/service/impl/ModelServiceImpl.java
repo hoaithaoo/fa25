@@ -21,9 +21,6 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public ModelDto createModel(ModelDto modelDto) {
-//        if (modelRepository.existsModelByModelName(modelDto.getModelName())) {
-//            throw new AppException(ErrorCode.MODEL_EXISTED);
-//        }
 
         if (modelDto.getModelYear() <= 0) {
             throw new AppException(ErrorCode.INVALID_NUMBER);
@@ -160,11 +157,6 @@ public class ModelServiceImpl implements ModelService {
         }
         existingModel.setSeatingCapacity(modelDto.getSeatingCapacity());
 
-//        if (modelDto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-//            throw new AppException(ErrorCode.INVALID_NUMBER);
-//        }
-//        existingModel.setPrice(modelDto.getPrice());
-
         // body type phải được dropdown
         if (modelDto.getBodyType() != null
                 && modelDto.getBodyType().name().trim().isEmpty()
@@ -183,15 +175,6 @@ public class ModelServiceImpl implements ModelService {
         modelRepository.save(existingModel);
         return mapToDto(existingModel);
     }
-
-//    @Override
-//    public ModelDto getModelById(int modelId) {
-//        Model model = modelRepository.findById(modelId).orElse(null);
-//        if (model == null) {
-//            throw new AppException(ErrorCode.MODEL_NOT_FOUND);
-//        }
-//        return mapToDto(model);
-//    }
 
     private ModelDto mapToDto(Model model) {
         return ModelDto.builder()

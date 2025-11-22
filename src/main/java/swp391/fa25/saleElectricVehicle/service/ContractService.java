@@ -11,16 +11,10 @@ import java.util.List;
 
 public interface ContractService {
     ContractDto createDraftContract(CreateContractRequest request);
-//    ContractDto updateContract(int id, ContractDto contractDto);
     Contract getContractEntityById(int id);
-    Contract getContractEntityByContractCode(String contractCode);
     ContractDto getContractById(int id);
     GetContractDetailResponse getContractDetailById(int id);
     ContractDto addFileUrlContract(int id, String fileUrl);
-//    ContractDto getContractByFileUrl(String fileUrl);
     List<GetContractResponse> getAllContracts();
     void updateContractStatus(Contract contract, ContractStatus status);
-//    List<ContractDto> getContractsByStatus(Contract.ContractStatus status);
-    void deleteContractById(int id);
-//    ContractDto updateContractStatus(int id, Contract.ContractStatus status);
 }

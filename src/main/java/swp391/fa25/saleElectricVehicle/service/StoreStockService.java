@@ -8,7 +8,6 @@ import swp391.fa25.saleElectricVehicle.payload.request.stock.UpdatePriceOfStoreR
 import java.util.List;
 
 public interface StoreStockService {
-//    StoreStockDto createStoreStock(CreateStoreStockRequest createStoreStock);
     StoreStock createStoreStock(int modelColorId);
     List<StoreStockDto> getAllStoreStockByStoreId();
     StoreStock getStoreStockEntityById(int stockId);
@@ -17,7 +16,6 @@ public interface StoreStockService {
     int getQuantityByModelIdAndColorId(int modelId, int colorId);
     StoreStockDto updatePriceOfStore(UpdatePriceOfStoreRequest request);
     StoreStockDto updateQuantity(int stockId, int quantity);
-    // Update StoreStock entity (dùng nội bộ cho các service khác)
     void updateStoreStock(StoreStock storeStock);
 //    void deleteStoreStock(int stockId);
 }

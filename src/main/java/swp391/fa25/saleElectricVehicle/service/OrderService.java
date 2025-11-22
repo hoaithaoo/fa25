@@ -18,7 +18,6 @@ public interface OrderService {
     GetOrderResponse getOrderById(int orderId);
     OrderDto getOrderDtoById(int orderId);
     List<GetOrderResponse> getAllOrdersByStore();
-//    GetOrderResponse updateOrder(int orderId, OrderDto orderDto);
     void updateOrder(Order order);
     void updateOrderStatus(Order order, OrderStatus status);
     GetOrderResponse confirmOrder(int orderId);
@@ -27,18 +26,10 @@ public interface OrderService {
     Order getOrderEntityById(int orderId);
 
     // Business operations
-//    OrderDto updateOrderStatus(int orderId, OrderStatus status);
     List<GetOrderResponse> getOrdersByCustomerId(int customerId);
     StaffMonthlyOrdersResponse getOrdersByStaffId(int staffId);
     StoreMonthlyRevenueResponse getStoreMonthlyRevenue();
     
     // Get orders by store, status and date range (for revenue calculation)
     List<Order> getOrdersByStoreIdAndStatusAndDateRange(int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate);
-//    List<GetOrderResponse> getOrdersByStatus(OrderStatus status);
-//    List<GetOrderResponse> getOrdersByDateRange(LocalDate startDate, LocalDate endDate);
-//    List<OrderDto> searchOrdersByCustomerPhone(String phone);
-//
-//    // Analytics
-//    long countOrdersByStatus(OrderStatus status);
-//    List<OrderDto> getRecentOrders();
 }

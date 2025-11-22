@@ -49,11 +49,6 @@ public class OrderServiceImpl implements OrderService {
         User staff = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(staff.getUserId());
 
-        // Validation: Đảm bảo staff có store
-//        if (staff.getStore() == null) {
-//            throw new AppException(ErrorCode.STORE_NOT_EXIST, "Staff phải thuộc một store");
-//        }
-
         // Tạo order - store sẽ được tự động set từ user.store bởi @PrePersist
         Order newOrder = Order.builder()
                 .totalPrice(BigDecimal.ZERO)
@@ -181,35 +176,6 @@ public class OrderServiceImpl implements OrderService {
                 .map(this::mapToDto)
                 .toList();
     }
-
-//    @Override
-//    public OrderDto updateOrder(int orderId, OrderDto orderDto) {
-//        Order order = orderRepository.findById(orderId).orElse(null);
-//        if (order == null) {
-//            throw new AppException(ErrorCode.ORDER_NOT_EXIST);
-//        }
-//
-//        // Update fields
-//        if (orderDto.getTotalPrice() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
-//            order.setTotalPrice(orderDto.getTotalPrice());
-//        }
-//        if (orderDto.getTotalTaxPrice() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
-//            order.setTotalTaxPrice(orderDto.getTotalTaxPrice());
-//        }
-//        if (orderDto.getTotalPromotionAmount() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
-//            order.setTotalPromotionAmount(orderDto.getTotalPromotionAmount());
-//        }
-//        if (orderDto.getTotalPayment() != null && orderDto.getTotalPrice().compareTo(BigDecimal.ZERO) > 0) {
-//            order.setTotalPayment(orderDto.getTotalPayment());
-//        }
-//        if (orderDto.getStatus() != null) {
-//            order.setStatus(orderDto.getStatus());
-//        }
-//
-//        order.setUpdatedAt(LocalDateTime.now());
-//        Order savedOrder = orderRepository.save(order);
-//        return mapToDto(savedOrder);
-//    }
 
     @Override
     @Transactional

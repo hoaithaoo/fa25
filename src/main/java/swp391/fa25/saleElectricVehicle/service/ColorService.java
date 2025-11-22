@@ -9,8 +9,6 @@ public interface ColorService {
     ColorDto createColor(ColorDto colorDto);
     ColorDto getColorById(int colorId);
     List<ColorDto> getColorByNameContaining(String colorName);
-//    ColorDto getColorByName(String colorName);
-//    Color getColorEntityByName(String colorName);
     Color getColorEntityById(int colorId);
     List<ColorDto> getAllColors();
     ColorDto updateColor(int colorId, ColorDto colorDto);

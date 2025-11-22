@@ -8,11 +8,8 @@ import java.util.List;
 public interface ModelService {
     ModelDto createModel(ModelDto modelDto);
     ModelDto updateModel(int id, ModelDto modelDto);
-//    ModelDto getModelById(int modelId);
     Model getModelEntityById(int modelId);
     ModelDto getModelByName(String name);
     List<ModelDto> getAllModels();
     void deleteModelById(int id);
-
-//    ModelDto updateModel(int id, ModelDto modelDto);
 }

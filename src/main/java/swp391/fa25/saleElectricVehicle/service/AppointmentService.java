@@ -14,9 +14,6 @@ public interface AppointmentService {
     List<AppointmentDto> getAllAppointments();
     List<AppointmentDto> getAppointmentsByCustomerId(int customerId);
     List<AppointmentDto> getAppointmentsByStaffId(int staffId);
-//    List<AppointmentDto> getAppointmentsByStoreId(int storeId);
-//    List<AppointmentDto> getAppointmentsByModelId(int modelId);
-//    List<AppointmentDto> getAppointmentsByStatus(AppointmentStatus status);
     void deleteAppointmentById(int id);
     AppointmentDto updateAppointmentStatus(int id, AppointmentStatus status);
 }

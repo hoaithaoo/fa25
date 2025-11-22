@@ -39,11 +39,8 @@ public class StoreStockServiceImpl implements StoreStockService {
         User user = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(user.getUserId());
         ModelColor modelColor = modelColorService.getModelColorEntityById(modelColorId);
-//        Model model = modelService.getModelEntityById(request.getModelId());
-//        Color color = colorService.getColorEntityById(request.getColorId());
-//        ModelColor modelColor = modelColorService.getModelColorEntityByModelIdAndColorId(model.getModelId(), color.getColorId());
-
         StoreStock storeStock = storeStockRepository.findByStore_StoreIdAndModelColor_ModelColorId(store.getStoreId(), modelColor.getModelColorId());
+
         if (storeStock != null) {
             throw new AppException(ErrorCode.STORE_STOCK_EXISTED);
         }
@@ -104,7 +101,7 @@ public class StoreStockServiceImpl implements StoreStockService {
         if (storeStock == null) {
             throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
         }
-        // ✅ Trả về availableStock thay vì quantity
+        // Trả về availableStock thay vì quantity
         return storeStock.getQuantity() - storeStock.getReservedQuantity();
     }
 
@@ -154,17 +151,8 @@ public class StoreStockServiceImpl implements StoreStockService {
         storeStockRepository.save(storeStock);
     }
 
-//    @Override
-//    public void deleteStoreStock(int stockId) {
-//        StoreStock storeStock = storeStockRepository.findById(stockId).orElse(null);
-//        if (storeStock == null) {
-//            throw new AppException(ErrorCode.STORE_STOCK_NOT_FOUND);
-//        }
-//        storeStockRepository.delete(storeStock);
-//    }
-
     private StoreStockDto mapToDto(StoreStock storeStock) {
-        // ✅ Tính availableStock = quantity - reservedQuantity
+        // Tính availableStock = quantity - reservedQuantity
         int availableStock = storeStock.getQuantity() - storeStock.getReservedQuantity();
         
         return StoreStockDto.builder()
