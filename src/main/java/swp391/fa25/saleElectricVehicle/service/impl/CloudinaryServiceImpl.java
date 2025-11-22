@@ -60,22 +60,4 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         }
     }
 
-    @Override
-    public String uploadString(String content, String fileName, String folder) {
-        try {
-            Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                    content.getBytes("UTF-8"),
-                    ObjectUtils.asMap(
-                            "folder", folder,
-                            "resource_type", "raw",
-                            "public_id", fileName.replace(".html", "").replace(".htm", "")
-                    )
-            );
-            return uploadResult.get("secure_url").toString();
-        } catch (IOException e) {
-            throw new RuntimeException("Upload Cloudinary thất bại: " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("Upload Cloudinary thất bại - Lỗi không xác định: " + e.getMessage(), e);
-        }
-    }
 }

@@ -167,11 +167,6 @@ public class ContractServiceImpl implements ContractService {
         return contract;
     }
 
-    @Override
-    public Contract getContractEntityByContractCode(String contractCode) {
-        Contract contract = contractRepository.findContractByContractCode(contractCode);
-        return contract;
-    }
 
     @Override
     public ContractDto getContractById(int id) {
@@ -352,115 +347,6 @@ public class ContractServiceImpl implements ContractService {
         contractRepository.save(contract);
     }
 
-    //    @Override
-//    public ContractDto getContractByFileUrl(String fileUrl) {
-//        Contract contract = contractRepository.findByContractFileUrl(fileUrl);
-//        if (contract == null) {
-//            throw new AppException(ErrorCode.CONTRACT_NOT_FOUND);
-//        }
-//        return mapToDto(contract);
-//    }
-//
-//    @Override
-//    public List<ContractDto> getAllContracts() {
-//        List<Contract> contracts = contractRepository.findAll();
-//        return contracts.stream().map(this::mapToDto).toList();
-//    }
-//
-//    @Override
-//    public List<ContractDto> getContractsByStatus(Contract.ContractStatus status) {
-//        List<Contract> contracts = contractRepository.findByStatus(status);
-//        return contracts.stream().map(this::mapToDto).toList();
-//    }
-//
-    @Override
-    public void deleteContractById(int id) {
-        Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
-        if (contract.getStatus() == ContractStatus.SIGNED) {
-            throw new AppException(ErrorCode.CANNOT_DELETE_SIGNED_CONTRACT);
-        }
-        contractRepository.delete(contract);
-    }
-//
-//    @Override
-//    public ContractDto updateContract(int id, ContractDto contractDto) {
-//        Contract existingContract = contractRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
-//
-//        // Update contractFileUrl if provided and different
-//        if (contractDto.getContractFileUrl() != null
-//                && !contractDto.getContractFileUrl().trim().isEmpty()
-//                && !contractDto.getContractFileUrl().equals(existingContract.getContractFileUrl())) {
-//            if (contractRepository.existsByContractFileUrl(contractDto.getContractFileUrl())) {
-//                throw new AppException(ErrorCode.CONTRACT_FILE_URL_EXISTED);
-//            }
-//            existingContract.setContractFileUrl(contractDto.getContractFileUrl());
-//        }
-//
-//        // Update contractDate if provided
-//        if (contractDto.getContractDate() != null) {
-//            existingContract.setContractDate(contractDto.getContractDate());
-//        }
-//
-//        // Update status if provided
-//        if (contractDto.getStatus() != null) {
-//            existingContract.setStatus(contractDto.getStatus());
-//        }
-//
-//        // Update depositPrice if provided
-//        if (contractDto.getDepositPrice() != null) {
-//            if (contractDto.getDepositPrice().compareTo(BigDecimal.ZERO) < 0) {
-//                throw new AppException(ErrorCode.INVALID_NUMBER);
-//            }
-//            existingContract.setDepositPrice(contractDto.getDepositPrice());
-//        }
-//
-//        // Update totalPayment if provided
-//        if (contractDto.getTotalPayment() != null) {
-//            if (contractDto.getTotalPayment().compareTo(BigDecimal.ZERO) <= 0) {
-//                throw new AppException(ErrorCode.INVALID_NUMBER);
-//            }
-//            existingContract.setTotalPayment(contractDto.getTotalPayment());
-//        }
-//
-//        // Recalculate remainPrice
-//        BigDecimal depositPrice;
-//        if (existingContract.getDepositPrice() != null) {
-//            depositPrice = existingContract.getDepositPrice();
-//        } else {
-//            depositPrice = BigDecimal.ZERO;
-//        }
-//        existingContract.setRemainPrice(existingContract.getTotalPayment().subtract(depositPrice));
-//
-//        // Update terms if provided
-//        if (contractDto.getTerms() != null && !contractDto.getTerms().trim().isEmpty()) {
-//            existingContract.setTerms(contractDto.getTerms());
-//        }
-//
-//        // Update uploadedBy if provided
-//        if (contractDto.getUploadedBy() != null && !contractDto.getUploadedBy().trim().isEmpty()) {
-//            existingContract.setUploadedBy(contractDto.getUploadedBy());
-//        }
-//
-//        existingContract.setUpdatedAt(LocalDateTime.now().format(formatter));
-//
-//        contractRepository.save(existingContract);
-//        return mapToDto(existingContract);
-//    }
-//
-//    @Override
-//    public ContractDto updateContractStatus(int id, Contract.ContractStatus status) {
-//        Contract contract = contractRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND));
-//
-//        contract.setStatus(status);
-//        contract.setUpdatedAt(LocalDateTime.now().format(formatter));
-//
-//        contractRepository.save(contract);
-//        return mapToDto(contract);
-//    }
-//
     /**
      * Tính số tiền còn lại phải trả dựa trên payment status
      * - Nếu chưa trả cọc (deposit) lẫn balance: remainingAmountToPay = totalPayment
