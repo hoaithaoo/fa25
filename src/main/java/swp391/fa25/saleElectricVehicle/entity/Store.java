@@ -66,7 +66,7 @@ public class Store {
 //    private TestDriveConfig testDriveConfig;
 
     //Sửa lại để test delete bên TestDriveConfig
-    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private TestDriveConfig testDriveConfig;
 
 
