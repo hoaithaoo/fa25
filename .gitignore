@@ -34,3 +34,5 @@ build/
 
 ### Plan files ###
 plan.plan.md
+
+database=.sql

@@ -19,15 +19,29 @@ public class CustomerController {
     private CustomerService customerService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<CustomerDto>> createCustomer(
+    public ResponseEntity<ApiResponse<String>> createCustomer(
             @Valid @RequestBody CustomerDto request) {
-        CustomerDto createdCustomer = customerService.createCustomer(request);
-        ApiResponse<CustomerDto> response = ApiResponse.<CustomerDto>builder()
+        // Nhân viên tạo thông tin khách hàng: lưu vào Redis và gửi email verification
+        String verificationToken = customerService.createCustomer(request);
+
+        ApiResponse<String> response = ApiResponse.<String>builder()
                 .code(HttpStatus.CREATED.value())
-                .message("Customer created successfully")
-                .data(createdCustomer)
+                .message("Thông tin khách hàng đã được tạo và email xác thực đã được gửi đến khách hàng. Vui lòng yêu cầu khách hàng kiểm tra email để xác thực.")
+                .data(verificationToken)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/resend-verification-email")
+    public ResponseEntity<ApiResponse<String>> resendVerificationEmail(
+            @RequestParam String email) {
+        customerService.resendVerificationEmail(email);
+
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Email xác thực đã được gửi lại thành công.")
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // Thêm method này vào CustomerController:
@@ -86,4 +100,15 @@ public class CustomerController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    // @GetMapping("/check-token/{token}")
+    // public ResponseEntity<ApiResponse<Boolean>> checkToken(@PathVariable String token) {
+    //     boolean exists = customerService.checkTokenExists(token);
+    //     ApiResponse<Boolean> response = ApiResponse.<Boolean>builder()
+    //             .code(HttpStatus.OK.value())
+    //             .message(exists ? "Token hợp lệ" : "Token không tồn tại hoặc đã hết hạn")
+    //             .data(exists)
+    //             .build();
+    //     return ResponseEntity.ok(response);
+    // }
 }
