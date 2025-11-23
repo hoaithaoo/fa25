@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    //use at AuthTokenService
+    //use at AuthenService
     @Override
     public UserDto getUserById(int userId) {
         User user = userRepository.findById(userId).orElse(null);

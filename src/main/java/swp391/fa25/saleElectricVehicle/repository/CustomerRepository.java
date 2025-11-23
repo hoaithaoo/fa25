@@ -18,4 +18,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
     @Query("SELECT c FROM Customer c JOIN c.orders o JOIN o.user u JOIN u.store s WHERE s.storeId = :storeId")
     List<Customer> findCustomersByStore(int storeId);
+
+    Customer findCustomerByEmail(String email);
 }

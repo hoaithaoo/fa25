@@ -108,8 +108,8 @@ public enum ErrorCode {
     INVENTORY_TRANSACTION_CANNOT_UPLOAD_CONTRACT(1094, "Chỉ có thể upload hợp đồng đã ký khi hợp đồng ở trạng thái EVM_SIGNED", HttpStatus.BAD_REQUEST),
     INVENTORY_TRANSACTION_CONTRACT_NOT_SIGNED(1095, "Hợp đồng chưa được ký, không thể upload biên lai thanh toán", HttpStatus.BAD_REQUEST),
     EVM_SIGNATURE_NOT_CONFIGURED(1096, "Chữ ký mặc định của EVM chưa được cấu hình trong hệ thống", HttpStatus.INTERNAL_SERVER_ERROR),
-//    INVALID_EMAIL_FORMAT(1074, "Định dạng email không hợp lệ", HttpStatus.BAD_REQUEST),
-//    INVALID_PHONE_FORMAT(1075, "Định dạng số điện thoại không hợp lệ. Số điện thoại phải có 10 chữ số và bắt đầu bằng 0", HttpStatus.BAD_REQUEST)
+    VERIFICATION_ALREADY_SENT_RECENTLY(1097, "Đã gửi liên kết xác minh gần đây. Vui lòng chờ trước khi gửi lại.", HttpStatus.BAD_REQUEST),
+    INVALID_VERIFICATION_LINK(1098, "Liên kết xác minh không hợp lệ hoặc đã hết hạn.", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

@@ -4,10 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.jwt.Jwt;
@@ -27,7 +29,7 @@ public class AuthController {
     LoginService loginService;
 
     @Autowired
-    AuthTokenService authTokenService;
+    AuthenService authenService;
 
     @Autowired
     UserService userService;
@@ -54,7 +56,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
         try {
-            Jwt.TokenInfor newAccessToken = authTokenService.generateAccessTokenFromRefreshToken(request.getRefreshToken());
+            Jwt.TokenInfor newAccessToken = authenService.generateAccessTokenFromRefreshToken(request.getRefreshToken());
             
             ApiResponse<Jwt.TokenInfor> response = ApiResponse.<Jwt.TokenInfor>builder()
                     .code(HttpStatus.OK.value())
@@ -120,5 +122,25 @@ public class AuthController {
                 .build();
         
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        try {
+            // Backend nhận callback từ khách hàng khi click link trong email
+            String successUrl = authenService.verifyLink(token);
+            
+            // Redirect đến frontend success page
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", successUrl)
+                    .build();
+        } catch (AppException e) {
+            ApiResponse<String> errorResponse = ApiResponse.<String>builder()
+                    .code(e.getErrorCode().getStatusCode().value())
+                    .message(e.getMessage())
+                    .build();
+            
+            return ResponseEntity.status(e.getErrorCode().getStatusCode()).body(errorResponse);
+        }
     }
 }
