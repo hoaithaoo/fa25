@@ -5,6 +5,7 @@ import swp391.fa25.saleElectricVehicle.entity.entity_enum.InventoryTransactionSt
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -12,6 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 public class InventoryTransactionDto {
     private int inventoryId;
+
+    List<VehicleDto> vehicles;
 
     private BigDecimal unitBasePrice;
     private int importQuantity;

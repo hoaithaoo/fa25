@@ -9,6 +9,7 @@ import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.PaymentInfoDto;
+import swp391.fa25.saleElectricVehicle.payload.dto.VehicleDto;
 import swp391.fa25.saleElectricVehicle.payload.request.inventory.CreateInventoryTransactionRequest;
 import swp391.fa25.saleElectricVehicle.repository.InventoryTransactionRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
@@ -449,8 +450,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         }
         
+        // Map vehicles list
+        List<VehicleDto> vehicles = transaction.getVehicles().stream()
+                .map(this::mapVehicleToDto)
+                .collect(Collectors.toList());
+        
         return InventoryTransactionDto.builder()
                 .inventoryId(transaction.getInventoryId())
+                .vehicles(vehicles)
                 .unitBasePrice(transaction.getUnitBasePrice())
                 .importQuantity(transaction.getImportQuantity())
                 .totalBasePrice(totalBasePrice)
@@ -472,6 +479,22 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 .storeName(transaction.getStoreStock().getStore().getStoreName())
                 .storeAddress(transaction.getStoreStock().getStore().getAddress())
 //                .storeStockId(transaction.getStoreStock().getStockId())
+                .build();
+    }
+
+    // Helper method: Map Vehicle Entity sang VehicleDto
+    private VehicleDto mapVehicleToDto(Vehicle vehicle) {
+        return VehicleDto.builder()
+                .vehicleId(vehicle.getVehicleId())
+                .vin(vehicle.getVin())
+                .engineNo(vehicle.getEngineNo())
+                .batteryNo(vehicle.getBatteryNo())
+                .status(vehicle.getStatus() != null ? vehicle.getStatus().name() : null)
+                .importDate(vehicle.getImportDate())
+                .saleDate(vehicle.getSaleDate())
+                .notes(vehicle.getNotes())
+                .inventoryTransaction(vehicle.getInventoryTransaction() != null 
+                        ? vehicle.getInventoryTransaction().getInventoryId() : 0)
                 .build();
     }
 

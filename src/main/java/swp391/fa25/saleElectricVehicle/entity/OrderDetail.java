@@ -53,6 +53,10 @@ public class OrderDetail {
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
 
+    @OneToOne
+    @JoinColumn(name = "vehicleId", nullable = false)
+    private Vehicle vehicle;
+
     @ManyToOne
     @JoinColumn(name = "storeStockId", nullable = false)
     private StoreStock storeStock;

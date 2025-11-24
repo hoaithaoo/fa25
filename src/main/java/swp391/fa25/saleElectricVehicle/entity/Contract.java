@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,6 +25,9 @@ public class Contract {
 
     @Column(unique = true)
     private String contractCode;
+
+    @Column
+    private ContractType contractType;
 
     @Column(nullable = false)
     private LocalDate contractDate;
@@ -58,6 +62,10 @@ public class Contract {
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payment> payments = new ArrayList<>();
+
+//    @ManyToOne
+//    @JoinColumn(name = "orderId", nullable = false)
+//    private Order order;
 
     @OneToOne
     @JoinColumn(name = "orderId", nullable = false)

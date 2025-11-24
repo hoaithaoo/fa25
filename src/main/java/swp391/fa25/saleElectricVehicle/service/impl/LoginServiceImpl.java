@@ -49,8 +49,8 @@ public class LoginServiceImpl implements LoginService {
         }
 
         // Kiểm tra nếu user là staff (không phải admin) và status là PENDING
-        boolean isStaff = !user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên");
-        boolean requirePasswordChange = isStaff && user.getStatus() == UserStatus.PENDING;
+//        boolean isStaff = !user.getRole().getRoleName().equalsIgnoreCase("Quản trị viên");
+        boolean requirePasswordChange = user.getStatus() == UserStatus.PENDING;
 
         UserDto userDto = UserDto.builder()
                 .userId(user.getUserId())

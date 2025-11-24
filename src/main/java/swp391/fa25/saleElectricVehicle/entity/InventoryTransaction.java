@@ -1,11 +1,14 @@
 package swp391.fa25.saleElectricVehicle.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.InventoryTransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "inventory_transactions")
@@ -52,6 +55,9 @@ public class InventoryTransaction {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InventoryTransactionStatus status;
+
+    @OneToMany(mappedBy = "inventoryTransaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vehicle> vehicles = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "storeStockId", nullable = false)
