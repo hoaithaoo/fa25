@@ -88,8 +88,8 @@ public class CustomerServiceImpl implements CustomerService {
             
             // Tạo verification URL - backend endpoint để nhận callback
             // Sử dụng app.backend-url từ application.properties (có thể là ngrok URL hoặc domain thật)
-//            String verificationUrl = backendUrl + contextPath + "/auth/verify-email?token=" + verificationToken;
-            String verificationUrl = frontendUrl + contextPath + "/auth/verify-email?token=" + verificationToken;
+           String verificationUrl = backendUrl + contextPath + "/auth/verify-email?token=" + verificationToken;
+            // String verificationUrl = frontendUrl + contextPath + "/auth/verify-email?token=" + verificationToken;
 
 
             // Gửi email verification cho khách hàng
@@ -221,8 +221,7 @@ public class CustomerServiceImpl implements CustomerService {
             stringRedisTemplate.opsForValue().set(emailKey, newVerificationToken, 60, TimeUnit.MINUTES);
             
             // Tạo verification URL
-//            String verificationUrl = backendUrl + contextPath + "/auth/verify-email?token=" + newVerificationToken;
-            String verificationUrl = frontendUrl + contextPath + "/auth/verify-email?token=" + newVerificationToken;
+            String verificationUrl = backendUrl + contextPath + "/auth/verify-email?token=" + newVerificationToken;
 
             // Gửi lại email verification
             emailService.sendVerificationLink(email, verificationUrl, customerDto.getFullName());
