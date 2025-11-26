@@ -27,7 +27,7 @@ public class SwaggerConfig {
                                         .scheme("bearer")
                                         .bearerFormat("JWT")))
                 // <-- set server url to https
-                .addServersItem(new Server().url("https://tiembanhvuive.io.vn/api"))
+//                .addServersItem(new Server().url("https://tiembanhvuive.io.vn/api"))
                 // SwaggerConfig nên cấu hình dynamic hoặc theo profile
 //                .addServersItem(new Server().url("http://localhost:8080/api"))
                 ;

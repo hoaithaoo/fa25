@@ -580,11 +580,17 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     }
 
     private GetOrderDetailsResponse mapToDto(OrderDetail od) {
-        // Map list vehicles từ order detail sang VehicleDto
-        List<VehicleDto> vehicles = null;
+        // Map list vehicles từ order detail sang VehicleSimpleResponse (chỉ thông tin cơ bản)
+        List<swp391.fa25.saleElectricVehicle.payload.response.order.VehicleSimpleResponse> vehicles = null;
         if (od.getVehicles() != null && !od.getVehicles().isEmpty()) {
             vehicles = od.getVehicles().stream()
-                    .map(this::mapToVehicleDto)
+                    .map(v -> swp391.fa25.saleElectricVehicle.payload.response.order.VehicleSimpleResponse.builder()
+                            .vehicleId(v.getVehicleId())
+                            .vin(v.getVin())
+                            .engineNo(v.getEngineNo())
+                            .batteryNo(v.getBatteryNo())
+                            .status(v.getStatus() != null ? v.getStatus().name() : null)
+                            .build())
                     .toList();
         }
         

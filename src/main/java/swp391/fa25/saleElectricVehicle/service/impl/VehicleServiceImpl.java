@@ -25,6 +25,7 @@ import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
 import swp391.fa25.saleElectricVehicle.payload.request.order.VehicleAssignment;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.VehicleSimpleResponse;
 import swp391.fa25.saleElectricVehicle.utils.ExcelHelper;
 
 import java.io.IOException;
@@ -390,10 +391,16 @@ public class VehicleServiceImpl implements VehicleService {
     }
     
     private GetOrderDetailsResponse mapOrderDetailToResponse(OrderDetail od) {
-        List<VehicleDto> vehicles = null;
+        List<VehicleSimpleResponse> vehicles = null;
         if (od.getVehicles() != null && !od.getVehicles().isEmpty()) {
             vehicles = od.getVehicles().stream()
-                    .map(this::mapToDto)
+                    .map(v -> VehicleSimpleResponse.builder()
+                            .vehicleId(v.getVehicleId())
+                            .vin(v.getVin())
+                            .engineNo(v.getEngineNo())
+                            .batteryNo(v.getBatteryNo())
+                            .status(v.getStatus() != null ? v.getStatus().name() : null)
+                            .build())
                     .toList();
         }
         
@@ -427,8 +434,7 @@ public class VehicleServiceImpl implements VehicleService {
                 .importDate(vehicle.getImportDate())
                 .saleDate(vehicle.getSaleDate())
                 .notes(vehicle.getNotes())
-                .inventoryTransaction(vehicle.getInventoryTransaction() != null
-                        ? vehicle.getInventoryTransaction().getInventoryId() : 0)
+                .inventoryTransaction(vehicle.getInventoryTransaction() != null ? vehicle.getInventoryTransaction().getInventoryId() : null)
                 .build();
     }
 }

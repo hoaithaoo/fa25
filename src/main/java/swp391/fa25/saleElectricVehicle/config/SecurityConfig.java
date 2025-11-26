@@ -16,7 +16,6 @@ import swp391.fa25.saleElectricVehicle.jwt.CustomAuthenticationEntryPoint;
 import swp391.fa25.saleElectricVehicle.jwt.CustomJwtDecoder;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -111,10 +110,19 @@ public class SecurityConfig {
                 "https://tiembanhvuive.io.vn"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-       configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        // Cho phép tất cả headers để hỗ trợ file upload (multipart/form-data)
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization", 
+                "Content-Type", 
+                "Accept",
+                "X-Requested-With",
+                "Content-Disposition",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

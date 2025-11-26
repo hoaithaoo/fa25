@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,28 +35,7 @@ public class VNPayController {
 
     @GetMapping("/ipn")
     public ResponseEntity<Map<String, String>> handleIPN(@RequestParam Map<String,String> params) {
-//        Map<String, String> response = new HashMap<>();
         Map<String, String> response = vnpayService.processIpn(params);
-//        if (!vnpayService.validateChecksum(params)) {
-//            response.put("RspCode", "97");
-//            response.put("Message", "Invalid checksum");
-//            return ResponseEntity.badRequest().body(response);
-//        }
-
-//        String txnStatus = response.get("vnp_TransactionStatus");
-//        String orderCode = params.get("vnp_TxnRef");
-//        BigDecimal amount = new BigDecimal(params.get("vnp_Amount")).divide(BigDecimal.valueOf(100));
-
-//        if ("00".equals(txnStatus)) {
-//            paymentService.confirmPayment(orderCode, amount);
-//            response.put("RspCode", "00");
-//            response.put("Message", "Success");
-//        } else {
-//            paymentService.markPaymentFailed(orderCode);
-//            response.put("RspCode", "01");
-//            response.put("Message", "Failed");
-//        }
-
         return ResponseEntity.ok(response);
     }
 

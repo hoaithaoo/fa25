@@ -82,12 +82,28 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
 
+        // Tự động tính amount dựa trên paymentType
+        BigDecimal calculatedAmount;
+        BigDecimal paidAmount = order.getPaidAmount() != null ? order.getPaidAmount() : BigDecimal.ZERO;
+        BigDecimal remainingAmount = order.getTotalPayment().subtract(paidAmount);
+        
+        if (request.getPaymentType() == PaymentType.DEPOSIT) {
+            // Đặt cọc: 20% của totalPayment
+            calculatedAmount = order.getTotalPayment().multiply(new BigDecimal("0.20"));
+        } else if (request.getPaymentType() == PaymentType.BALANCE) {
+            // Thanh toán số dư: số tiền còn lại
+            calculatedAmount = remainingAmount;
+        } else {
+            // Fallback: dùng totalPayment
+            calculatedAmount = order.getTotalPayment();
+        }
+
         // Tạo payment
         Payment payment = Payment.builder()
                 .status(PaymentStatus.DRAFT)
                 .paymentType(request.getPaymentType())
                 .paymentMethod(request.getPaymentMethod())
-                .amount(request.getAmount())
+                .amount(calculatedAmount)
                 .createdAt(LocalDateTime.now())
                 .order(order)
                 .build();
