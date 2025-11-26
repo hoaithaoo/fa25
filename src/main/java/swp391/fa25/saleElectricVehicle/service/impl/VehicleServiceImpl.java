@@ -423,11 +423,12 @@ public class VehicleServiceImpl implements VehicleService {
                 .vin(vehicle.getVin())
                 .engineNo(vehicle.getEngineNo())
                 .batteryNo(vehicle.getBatteryNo())
-                .status(vehicle.getStatus().name())
+                .status(vehicle.getStatus() != null ? vehicle.getStatus().name() : null)
                 .importDate(vehicle.getImportDate())
                 .saleDate(vehicle.getSaleDate())
                 .notes(vehicle.getNotes())
-                .inventoryTransaction(vehicle.getInventoryTransaction().getInventoryId())
+                .inventoryTransaction(vehicle.getInventoryTransaction() != null
+                        ? vehicle.getInventoryTransaction().getInventoryId() : 0)
                 .build();
     }
 }
