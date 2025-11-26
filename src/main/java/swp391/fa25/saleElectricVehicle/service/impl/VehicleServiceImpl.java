@@ -22,6 +22,7 @@ import swp391.fa25.saleElectricVehicle.utils.ExcelHelper;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -115,7 +116,11 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public List<VehicleDto> getVehiclesByInventoryTransaction(int inventoryId) {
         InventoryTransaction inventoryTransaction = transactionService.getInventoryTransactionEntityById(inventoryId);
+        if (inventoryTransaction.getVehicles() == null) {
+            return new ArrayList<>();
+        }
         return inventoryTransaction.getVehicles().stream()
+                .filter(vehicle -> vehicle != null)
                 .map(this::mapToDto)
                 .toList();
     }
@@ -124,8 +129,12 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public void updateVehicleStatus(int inventoryId, VehicleStatus status) {
         InventoryTransaction inventoryTransaction = transactionService.getInventoryTransactionEntityById(inventoryId);
-        for (Vehicle vehicle : inventoryTransaction.getVehicles()) {
-            vehicle.setStatus(status);
+        if (inventoryTransaction.getVehicles() != null) {
+            for (Vehicle vehicle : inventoryTransaction.getVehicles()) {
+                if (vehicle != null) {
+                    vehicle.setStatus(status);
+                }
+            }
         }
     }
 
@@ -139,11 +148,15 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public void updateVehicleDate(int inventoryId, VehicleStatus status, LocalDateTime date) {
         InventoryTransaction inventoryTransaction = transactionService.getInventoryTransactionEntityById(inventoryId);
-        for (Vehicle vehicle : inventoryTransaction.getVehicles()) {
-            if (status == VehicleStatus.SOLED) {
-                vehicle.setSaleDate(date);
-            } else if (status == VehicleStatus.AVAILABLE) {
-                vehicle.setImportDate(date);
+        if (inventoryTransaction.getVehicles() != null) {
+            for (Vehicle vehicle : inventoryTransaction.getVehicles()) {
+                if (vehicle != null) {
+                    if (status == VehicleStatus.SOLED) {
+                        vehicle.setSaleDate(date);
+                    } else if (status == VehicleStatus.AVAILABLE) {
+                        vehicle.setImportDate(date);
+                    }
+                }
             }
         }
     }
@@ -185,16 +198,20 @@ public class VehicleServiceImpl implements VehicleService {
 
 
     private VehicleDto mapToDto(Vehicle vehicle) {
+        if (vehicle == null) {
+            return null;
+        }
         return VehicleDto.builder()
                 .vehicleId(vehicle.getVehicleId())
                 .vin(vehicle.getVin())
                 .engineNo(vehicle.getEngineNo())
                 .batteryNo(vehicle.getBatteryNo())
-                .status(vehicle.getStatus().name())
+                .status(vehicle.getStatus() != null ? vehicle.getStatus().name() : null)
                 .importDate(vehicle.getImportDate())
                 .saleDate(vehicle.getSaleDate())
                 .notes(vehicle.getNotes())
-                .inventoryTransaction(vehicle.getInventoryTransaction().getInventoryId())
+                .inventoryTransaction(vehicle.getInventoryTransaction() != null 
+                        ? vehicle.getInventoryTransaction().getInventoryId() : 0)
                 .build();
     }
 }
