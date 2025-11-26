@@ -44,4 +44,5 @@ jobs:
           echo "Starting new container..."
           docker run -d -p 8080:8080 \
             --name ${{ env.CONTAINER_NAME }} \
+            --network host \
             myapp:latest
