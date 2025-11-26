@@ -23,6 +23,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsRes
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.StoreMonthlyRevenueResponse;
+import swp391.fa25.saleElectricVehicle.payload.response.order.VehicleSimpleResponse;
 import swp391.fa25.saleElectricVehicle.repository.OrderRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
@@ -626,21 +627,16 @@ public class OrderServiceImpl implements OrderService {
      * Helper method để map OrderDetail thành GetOrderDetailsResponse (bao gồm list vehicles)
      */
     private GetOrderDetailsResponse mapOrderDetailToResponse(OrderDetail od) {
-        // Map list vehicles từ order detail sang VehicleDto
-        List<swp391.fa25.saleElectricVehicle.payload.dto.VehicleDto> vehicles = null;
+        // Map list vehicles từ order detail sang VehicleSimpleResponse (chỉ thông tin cơ bản)
+        List<VehicleSimpleResponse> vehicles = null;
         if (od.getVehicles() != null && !od.getVehicles().isEmpty()) {
             vehicles = od.getVehicles().stream()
-                    .map(v -> swp391.fa25.saleElectricVehicle.payload.dto.VehicleDto.builder()
+                    .map(v -> VehicleSimpleResponse.builder()
                             .vehicleId(v.getVehicleId())
                             .vin(v.getVin())
                             .engineNo(v.getEngineNo())
                             .batteryNo(v.getBatteryNo())
                             .status(v.getStatus() != null ? v.getStatus().name() : null)
-                            .importDate(v.getImportDate())
-                            .saleDate(v.getSaleDate())
-                            .notes(v.getNotes())
-                            .inventoryTransaction(v.getInventoryTransaction() != null ? 
-                                    v.getInventoryTransaction().getInventoryId() : 0)
                             .build())
                     .toList();
         }
