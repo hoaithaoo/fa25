@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "order_details")
@@ -21,8 +23,8 @@ public class OrderDetail {
     @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal unitPrice;
 
-    // @Column(nullable = false)
-    // private int quantity;
+    @Column(nullable = false)
+    private int quantity;
 
 //    @Column(nullable = false)
 //    private BigDecimal vatAmount;
@@ -56,12 +58,13 @@ public class OrderDetail {
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
 
-    @OneToOne
-    @JoinColumn(name = "vehicleId")
-    private Vehicle vehicle;
-
     // giữ để tạo báo giá
     @ManyToOne
     @JoinColumn(name = "storeStockId", nullable = false)
     private StoreStock storeStock;
+
+    // 1 detail có thể có nhiều vehicle
+    @OneToMany(mappedBy = "orderDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Vehicle> vehicles = new ArrayList<>();
 }

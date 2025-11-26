@@ -15,11 +15,10 @@ import java.time.LocalDateTime;
 public class GetPaymentResponse {
     private int paymentId;
     private String paymentCode;
-    private BigDecimal remainPrice;
     private PaymentStatus status;
     private PaymentType paymentType;
     private PaymentMethod paymentMethod;
     private BigDecimal amount;
     private LocalDateTime createdAt;
-    private String contractCode;
+    private String orderCode;
 }

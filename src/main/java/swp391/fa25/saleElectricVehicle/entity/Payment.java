@@ -25,9 +25,6 @@ public class Payment {
     @Column
     private String paymentCode;
 
-    @Column(columnDefinition = "DECIMAL(15,0)")
-    private BigDecimal remainPrice;
-
     @Column
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
@@ -50,8 +47,8 @@ public class Payment {
     private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "contract_id", nullable = false)
-    private Contract contract;
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();

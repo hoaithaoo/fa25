@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class ContractPaymentInfo {
     private int paymentId;
     private String paymentCode;
-    private BigDecimal remainPrice;
     private String status;
     private String paymentType;
     private String paymentMethod;

@@ -1,7 +1,9 @@
 package swp391.fa25.saleElectricVehicle.service;
 
 import swp391.fa25.saleElectricVehicle.entity.Order;
+import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderResponse;
@@ -33,4 +35,7 @@ public interface OrderService {
     
     // Get orders by store, status and date range (for revenue calculation)
     List<Order> getOrdersByStoreIdAndStatusAndDateRange(int storeId, OrderStatus status, LocalDateTime startDate, LocalDateTime endDate);
+    
+    // Confirm deposit payment (update order status to DEPOSIT_PAID)
+    GetOrderResponse confirmDepositPayment(int orderId);
 }

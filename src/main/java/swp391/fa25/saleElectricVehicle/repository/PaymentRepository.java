@@ -2,7 +2,7 @@ package swp391.fa25.saleElectricVehicle.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import swp391.fa25.saleElectricVehicle.entity.Contract;
+import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Store;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
@@ -17,30 +17,29 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     Payment findPaymentByPaymentCode(String paymentCode);
 
-    // Find all payments by contract and payment type (may return multiple)
-    List<Payment> findByContractAndPaymentType(Contract contract, PaymentType paymentType);
+    // Find all payments by order and payment type (may return multiple)
+    List<Payment> findByOrderAndPaymentType(Order order, PaymentType paymentType);
     
-    // Find the latest active payment (not CANCELLED or DRAFT) by contract and payment type
-    @Query("SELECT p FROM Payment p WHERE p.contract = :contract AND p.paymentType = :paymentType " +
+    // Find the latest active payment (not CANCELLED or DRAFT) by order and payment type
+    @Query("SELECT p FROM Payment p WHERE p.order = :order AND p.paymentType = :paymentType " +
            "AND p.status NOT IN (:cancelledStatus, :draftStatus) ORDER BY p.createdAt DESC")
-    List<Payment> findActivePaymentsByContractAndPaymentType(
-            @Param("contract") Contract contract, 
+    List<Payment> findActivePaymentsByOrderAndPaymentType(
+            @Param("order") Order order, 
             @Param("paymentType") PaymentType paymentType,
             @Param("cancelledStatus") PaymentStatus cancelledStatus,
             @Param("draftStatus") PaymentStatus draftStatus);
 
-    List<Payment> findPaymentsByContract_Order_User_Store(Store contractOrderUserStore);
+    // Find payments by order
+    List<Payment> findByOrder_OrderId(int orderId);
 
-    Payment findPaymentByPaymentIdAndContract_Order_User_Store(int paymentId, Store contractOrderUserStore);
+    // Find payments by store
+    List<Payment> findByOrder_Store(Store store);
 
-    // New methods using order.store instead of order.user.store
-    List<Payment> findPaymentsByContract_Order_Store(Store contractOrderStore);
-
-    Payment findPaymentByPaymentIdAndContract_Order_Store(int paymentId, Store contractOrderStore);
+    Payment findPaymentByPaymentIdAndOrder_Store(int paymentId, Store store);
 
     // Find payments by store and user (for staff filtering)
-    List<Payment> findByContract_Order_Store_StoreIdAndContract_Order_User_UserId(int storeId, int userId);
+    List<Payment> findByOrder_Store_StoreIdAndOrder_User_UserId(int storeId, int userId);
 
     // Find payment by store, user and paymentId (for staff filtering)
-    Payment findByContract_Order_Store_StoreIdAndContract_Order_User_UserIdAndPaymentId(int storeId, int userId, int paymentId);
+    Payment findByOrder_Store_StoreIdAndOrder_User_UserIdAndPaymentId(int storeId, int userId, int paymentId);
 }

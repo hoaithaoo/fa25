@@ -17,11 +17,14 @@ import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetQuoteResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.StaffMonthlyOrdersResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.StoreMonthlyRevenueResponse;
+import swp391.fa25.saleElectricVehicle.service.DepositAgreementService;
 import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 import swp391.fa25.saleElectricVehicle.service.OrderService;
 import swp391.fa25.saleElectricVehicle.service.UserService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/orders")
@@ -35,6 +38,9 @@ public class OrderController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DepositAgreementService depositAgreementService;
 
     // CREATE
     @PostMapping("/create/quote")
@@ -70,6 +76,43 @@ public class OrderController {
                 .data(createdOrder)
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // CREATE DEPOSIT REQUEST AFTER CONFIRM ORDER
+    @PostMapping("/{orderId}/create-deposit-request")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> createDepositRequest(@PathVariable int orderId) {
+        depositAgreementService.createDepositRequest(orderId);
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("orderId", orderId);
+        responseData.put("viewUrl", "/api/orders/" + orderId + "/deposit-agreement");
+        ApiResponse<Map<String, Object>> response = ApiResponse.<Map<String, Object>>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("Phiếu thỏa thuận đặt cọc đã được tạo thành công. Khách hàng phải thanh toán trong vòng 4 giờ, nếu không đơn hàng sẽ bị hủy.")
+                .data(responseData)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // VIEW DEPOSIT AGREEMENT
+    @GetMapping("/{orderId}/deposit-agreement")
+    public ResponseEntity<String> viewDepositAgreement(@PathVariable int orderId) {
+        String htmlContent = depositAgreementService.generateDepositAgreementHtml(orderId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(org.springframework.http.MediaType.TEXT_HTML)
+                .body(htmlContent);
+    }
+
+    // CONFIRM DEPOSIT PAYMENT (Update order status to DEPOSIT_PAID)
+    @PutMapping("/{orderId}/confirm-deposit-payment")
+    public ResponseEntity<ApiResponse<GetOrderResponse>> confirmDepositPayment(@PathVariable int orderId) {
+        GetOrderResponse order = orderService.confirmDepositPayment(orderId);
+        ApiResponse<GetOrderResponse> response = ApiResponse.<GetOrderResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Đã xác nhận thanh toán đặt cọc thành công.")
+                .data(order)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // STAFF marks order as delivered

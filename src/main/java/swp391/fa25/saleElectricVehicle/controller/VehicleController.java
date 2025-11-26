@@ -78,16 +78,16 @@ public class VehicleController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/available/model/{modelId}/color/{colorId}")
-    public ResponseEntity<ApiResponse<List<VehicleDto>>> getAvailableVehiclesByModelAndColor(
-            @PathVariable int modelId, @PathVariable int colorId) {
-        List<VehicleDto> vehicleDtos = vehicleService.getAvailableVehiclesByModelAndColor(modelId, colorId);
-        ApiResponse<List<VehicleDto>> response = ApiResponse.<List<VehicleDto>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Lấy danh sách xe có sẵn theo model và color thành công")
-                .data(vehicleDtos)
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+//    @GetMapping("/available/model/{modelId}/color/{colorId}")
+//    public ResponseEntity<ApiResponse<List<VehicleDto>>> getAvailableVehiclesByModelAndColor(
+//            @PathVariable int modelId, @PathVariable int colorId) {
+//        List<VehicleDto> vehicleDtos = vehicleService.getAvailableVehiclesByModelAndColor(modelId, colorId);
+//        ApiResponse<List<VehicleDto>> response = ApiResponse.<List<VehicleDto>>builder()
+//                .code(HttpStatus.OK.value())
+//                .message("Lấy danh sách xe có sẵn theo model và color thành công")
+//                .data(vehicleDtos)
+//                .build();
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
 import swp391.fa25.saleElectricVehicle.entity.Order;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.*;
@@ -25,21 +26,22 @@ import java.util.*;
 public class VNPayServiceImpl implements VNPayService {
 
     @Autowired
-    private ContractService contractService;
-
-    @Autowired
     private PaymentService paymentService;
 
     @Autowired
     private TransactionService transactionService;
+    
     @Autowired
     private OrderService orderService;
+    
+    @Autowired
+    private ContractService contractService;
 
     @Override
     public String buildPaymentUrl(int paymentId, HttpServletRequest request) {
         Payment payment = paymentService.getPaymentEntityById(paymentId);
 
-        BigDecimal amount = payment.getRemainPrice().multiply(BigDecimal.valueOf(100));
+        BigDecimal amount = payment.getAmount().multiply(BigDecimal.valueOf(100));
 
         try {
             // lấy payment code làm mã tham chiếu giao dịch của merchant,
@@ -225,20 +227,36 @@ public class VNPayServiceImpl implements VNPayService {
             }
 
             if ("00".equals(responseCode)) {
+                // Cập nhật payment status thành COMPLETED
                 paymentService.updatePaymentStatus(payment, amount, PaymentStatus.COMPLETED);
 
-                // cập nhật contract status nếu đã đặt cọc hoặc thanh toán hết thành công
-                if (payment.getPaymentType().equals(PaymentType.DEPOSIT)) {
-                    contractService.updateContractStatus(payment.getContract(), ContractStatus.DEPOSIT_PAID);
-                    Order order = payment.getContract().getOrder();
-                    // Set payment deadline: 7 ngày sau khi đặt cọc thành công
-                    LocalDateTime paymentDeadline = LocalDateTime.now().plusDays(7);
-                    orderService.updateOrderStatusWithDeadline(order, OrderStatus.DEPOSIT_PAID, paymentDeadline);
-                } else if (payment.getPaymentType().equals(PaymentType.BALANCE)) {
-                    contractService.updateContractStatus(payment.getContract(), ContractStatus.FULLY_PAID);
-                    orderService.updateOrderStatus(payment.getContract().getOrder(), OrderStatus.FULLY_PAID);
+                // Cập nhật order paidAmount
+                Order order = payment.getOrder();
+                order.setPaidAmount(order.getPaidAmount().add(amount));
+                orderService.updateOrder(order);
+
+                // Nếu là payment deposit và đã có contract đặt cọc, update contract status thành DEPOSIT_PAID
+                if (payment.getPaymentType() == PaymentType.DEPOSIT) {
+                    if (contractService.hasDepositContract(order.getOrderId())) {
+                        Contract depositContract = contractService.getDepositContractByOrderId(order.getOrderId());
+                        contractService.updateContractStatus(depositContract, ContractStatus.DEPOSIT_PAID);
+                    }
+                } else if (payment.getPaymentType() == PaymentType.BALANCE) {
+                    // Nếu là payment balance, tìm contract mua bán và update status thành FULLY_PAID
+                    if (contractService.hasSaleContract(order.getOrderId())) {
+                        Contract saleContract = contractService.getSaleContractByOrderId(order.getOrderId());
+                        contractService.updateContractStatus(saleContract, ContractStatus.FULLY_PAID);
+                    }
+                    
+                    // Kiểm tra xem đã thanh toán đủ chưa (paidAmount >= totalPayment)
+                    if (order.getPaidAmount().compareTo(order.getTotalPayment()) >= 0) {
+                        // Update order status thành FULLY_PAID
+                        orderService.updateOrderStatus(order, OrderStatus.FULLY_PAID);
+                    }
                 }
-                // TODO: mark order as paid in DB
+
+                // Không tự động cập nhật order status hay tạo contract
+                // Staff sẽ xem payment đã COMPLETED và ấn nút tạo hợp đồng đặt cọc
                 response.put("RspCode", "00");
                 response.put("Message", "Confirm Success");
             } else {

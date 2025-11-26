@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import swp391.fa25.saleElectricVehicle.entity.OrderDetail;
-import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -93,6 +92,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     // New method using order.store instead of order.user.store
     List<OrderDetail> findByOrder_OrderIdAndOrder_Store_StoreId(int orderOrderId, int orderStoreStoreId);
     
-    // Find by Vehicle
-    List<OrderDetail> findByVehicle_VehicleId(long vehicleId);
+    // Find by Vehicle (using JPQL because OrderDetail has vehicles (List), not vehicle)
+    @Query("SELECT od FROM OrderDetail od JOIN od.vehicles v WHERE v.vehicleId = :vehicleId")
+    List<OrderDetail> findByVehicle_VehicleId(@Param("vehicleId") long vehicleId);
 }
