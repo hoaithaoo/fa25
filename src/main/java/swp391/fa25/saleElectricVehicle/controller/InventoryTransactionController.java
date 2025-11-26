@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import swp391.fa25.saleElectricVehicle.entity.Vehicle;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.VehicleStatus;
 import swp391.fa25.saleElectricVehicle.payload.dto.InventoryTransactionDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.PaymentInfoDto;
 import swp391.fa25.saleElectricVehicle.payload.request.inventory.CreateInventoryTransactionRequest;
@@ -18,6 +20,7 @@ import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.CloudinaryService;
 import swp391.fa25.saleElectricVehicle.service.InventoryTransactionService;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.InventoryTransactionStatus;
+import swp391.fa25.saleElectricVehicle.service.VehicleService;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -33,6 +36,9 @@ public class InventoryTransactionController {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private VehicleService vehicleService;
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<InventoryTransactionDto>> createInventoryTransaction(
@@ -178,9 +184,9 @@ public class InventoryTransactionController {
     @PutMapping("/start-shipping/{inventoryId}")
     public ResponseEntity<ApiResponse<InventoryTransactionDto>> startShipping(
             @PathVariable int inventoryId) {
-
+        // Cập nhật trạng thái xe trong inventory transaction thành IN_TRANSIT
+        vehicleService.updateVehicleStatus(inventoryId, VehicleStatus.IN_TRANSIT);
         InventoryTransactionDto started = inventoryTransactionService.startShipping(inventoryId);
-
         ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
                 .code(HttpStatus.OK.value())
                 .message("Shipping started successfully")
@@ -193,9 +199,11 @@ public class InventoryTransactionController {
     @PutMapping("/confirm-delivery/{inventoryId}")
     public ResponseEntity<ApiResponse<InventoryTransactionDto>> confirmDelivery(
             @PathVariable int inventoryId) {
-
+        // Cập nhật trạng thái xe trong inventory transaction thành AVAILABLE
+        vehicleService.updateVehicleStatus(inventoryId, VehicleStatus.AVAILABLE);
+        // Cập nhật ngày nhập xe là ngày hiện tại
+        vehicleService.updateVehicleDate(inventoryId, VehicleStatus.AVAILABLE, LocalDateTime.now());
         InventoryTransactionDto confirmed = inventoryTransactionService.confirmDelivery(inventoryId);
-
         ApiResponse<InventoryTransactionDto> response = ApiResponse.<InventoryTransactionDto>builder()
                 .code(HttpStatus.OK.value())
                 .message("Delivery confirmed successfully. Stock updated.")

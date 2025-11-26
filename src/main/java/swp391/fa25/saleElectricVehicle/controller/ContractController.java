@@ -7,22 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-import swp391.fa25.saleElectricVehicle.entity.Contract;
-import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.payload.dto.ContractDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.CustomerDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDto;
 import swp391.fa25.saleElectricVehicle.payload.dto.StoreDto;
 import swp391.fa25.saleElectricVehicle.payload.request.contract.CreateContractRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractDetailResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.contract.GetContractResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderResponse;
 import swp391.fa25.saleElectricVehicle.service.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
 
@@ -51,6 +45,7 @@ public class ContractController {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
     @Autowired
     private StoreService storeService;
 
@@ -137,9 +132,9 @@ public class ContractController {
 //    }
 //
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<GetContractResponse>>> getAllContracts() {
-        List<GetContractResponse> contracts = contractService.getAllContracts();
-        ApiResponse<List<GetContractResponse>> response = ApiResponse.<List<GetContractResponse>>builder()
+    public ResponseEntity<ApiResponse<List<ContractDto>>> getAllContracts() {
+        List<ContractDto> contracts = contractService.getAllContracts();
+        ApiResponse<List<ContractDto>> response = ApiResponse.<List<ContractDto>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Contracts fetched successfully")
                 .data(contracts)
@@ -148,9 +143,9 @@ public class ContractController {
     }
 
     @GetMapping("/detail/{id}")
-    public ResponseEntity<ApiResponse<GetContractDetailResponse>> getContractDetail(@PathVariable int id) {
-        GetContractDetailResponse contractDetail = contractService.getContractDetailById(id);
-        ApiResponse<GetContractDetailResponse> response = ApiResponse.<GetContractDetailResponse>builder()
+    public ResponseEntity<ApiResponse<ContractDto>> getContractDetail(@PathVariable int id) {
+        ContractDto contractDetail = contractService.getContractDetailById(id);
+        ApiResponse<ContractDto> response = ApiResponse.<ContractDto>builder()
                 .code(HttpStatus.OK.value())
                 .message("Get contract detail successfully")
                 .data(contractDetail)

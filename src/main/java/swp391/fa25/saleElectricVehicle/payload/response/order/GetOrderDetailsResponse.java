@@ -21,9 +21,10 @@ public class GetOrderDetailsResponse {
     private BigDecimal unitPrice;
     private int quantity;
 
-//    private BigDecimal vatAmount;
-    private BigDecimal licensePlateFee;
-    private BigDecimal registrationFee;
+    private BigDecimal licensePlateFee; // phí biển số
+    private BigDecimal serviceFee; // phí đăng ký biển số
+    private BigDecimal otherTax; // thuế khác
+    private BigDecimal otherFees; // phí khác (gồm phí đăng ký biển số + thuế khác = serviceFee + otherTax)
 
     private Integer promotionId;
     private String promotionName;

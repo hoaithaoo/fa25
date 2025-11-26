@@ -3,6 +3,7 @@ package swp391.fa25.saleElectricVehicle.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +26,9 @@ public class Contract {
     @Column(unique = true)
     private String contractCode;
 
+    @Column
+    private ContractType contractType;
+
     @Column(nullable = false)
     private LocalDate contractDate;
 
@@ -35,17 +39,8 @@ public class Contract {
     @Enumerated(EnumType.STRING)
     private ContractStatus status;
 
-    @Column(columnDefinition = "DECIMAL(15,0)")
-    private BigDecimal depositPrice;
-
     @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal totalPayment;
-
-    @Column(columnDefinition = "DECIMAL(15,0)")
-    private BigDecimal remainPrice;
-
-    @Column(columnDefinition = "NVARCHAR(1000)")
-    private String terms;
 
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String uploadedBy;
@@ -57,9 +52,14 @@ public class Contract {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Payment> payments = new ArrayList<>();
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "orderId", nullable = false)
     private Order order;
+
+//    @OneToOne
+//    @JoinColumn(name = "orderId", nullable = false)
+//    private Order order;
 }

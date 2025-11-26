@@ -44,11 +44,11 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     List<OrderDetail> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
 
     // Analytics queries
-    @Query("SELECT SUM(od.quantity) FROM OrderDetail od WHERE od.storeStock.modelColor.model.modelId = :modelId")
-    Integer getTotalQuantitySoldByModel(@Param("modelId") int modelId);
-
-    @Query("SELECT SUM(od.totalPrice) FROM OrderDetail od WHERE od.order.orderId = :orderId")
-    BigDecimal getTotalAmountByOrder(@Param("orderId") int orderId);
+//    @Query("SELECT SUM(od.quantity) FROM OrderDetail od WHERE od.storeStock.modelColor.model.modelId = :modelId")
+//    Integer getTotalQuantitySoldByModel(@Param("modelId") int modelId);
+//
+//    @Query("SELECT SUM(od.totalPrice) FROM OrderDetail od WHERE od.order.orderId = :orderId")
+//    BigDecimal getTotalAmountByOrder(@Param("orderId") int orderId);
 
     // Electric Vehicle specific analytics
 //    @Query("SELECT SUM(od.vatAmount) FROM OrderDetail od WHERE od.order.orderId = :orderId")
@@ -57,8 +57,11 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     @Query("SELECT SUM(od.licensePlateFee) FROM OrderDetail od WHERE od.order.orderId = :orderId")
     BigDecimal getTotalLicenseFeeByOrder(@Param("orderId") int orderId);
 
-    @Query("SELECT SUM(od.registrationFee) FROM OrderDetail od WHERE od.order.orderId = :orderId")
-    BigDecimal getTotalRegistrationFeeByOrder(@Param("orderId") int orderId);
+    @Query("SELECT SUM(od.serviceFee) FROM OrderDetail od WHERE od.order.orderId = :orderId")
+    BigDecimal getTotalServiceFeeByOrder(@Param("orderId") int orderId);
+
+    @Query("SELECT SUM(od.otherTax) FROM OrderDetail od WHERE od.order.orderId = :orderId")
+    BigDecimal getTotalOtherTaxByOrder(@Param("orderId") int orderId);
 
     @Query("SELECT SUM(od.discountAmount) FROM OrderDetail od WHERE od.order.orderId = :orderId")
     BigDecimal getTotalDiscountByOrder(@Param("orderId") int orderId);
@@ -81,7 +84,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     List<OrderDetail> findByTotalPriceGreaterThan(BigDecimal amount);
 
     // Find by quantity range
-    List<OrderDetail> findByQuantityBetween(int minQuantity, int maxQuantity);
+//    List<OrderDetail> findByQuantityBetween(int minQuantity, int maxQuantity);
 
     List<OrderDetail> findByOrder_OrderIdAndOrder_User_UserId(int orderOrderId, int orderUserUserId);
 
@@ -89,4 +92,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
 
     // New method using order.store instead of order.user.store
     List<OrderDetail> findByOrder_OrderIdAndOrder_Store_StoreId(int orderOrderId, int orderStoreStoreId);
+    
+    // Find by Vehicle
+    List<OrderDetail> findByVehicle_VehicleId(long vehicleId);
 }

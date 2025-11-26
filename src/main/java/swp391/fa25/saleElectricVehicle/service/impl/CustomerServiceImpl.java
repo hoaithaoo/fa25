@@ -156,7 +156,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         // Tạo Customer entity và lưu vào DB
-        // Lưu ý: Customer chỉ được lưu vào DB sau khi verify email, nên không cần field isEmailVerified
+        // Lưu ý: Customer chỉ được lưu vào DB sau khi verify email
         Customer newCustomer = Customer.builder()
                 .fullName(customerDto.getFullName())
                 .address(customerDto.getAddress())

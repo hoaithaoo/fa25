@@ -110,6 +110,15 @@ public enum ErrorCode {
     EVM_SIGNATURE_NOT_CONFIGURED(1096, "Chữ ký mặc định của EVM chưa được cấu hình trong hệ thống", HttpStatus.INTERNAL_SERVER_ERROR),
     VERIFICATION_ALREADY_SENT_RECENTLY(1097, "Đã gửi liên kết xác minh gần đây. Vui lòng chờ trước khi gửi lại.", HttpStatus.BAD_REQUEST),
     INVALID_VERIFICATION_LINK(1098, "Liên kết xác minh không hợp lệ hoặc đã hết hạn.", HttpStatus.BAD_REQUEST),
+    INVENTORY_TRANSACTION_CANNOT_IMPORT_VEHICLES(1099, "Chỉ có thể nhập xe khi hãng đã xác nhận thanh toán (PAYMENT_CONFIRMED)", HttpStatus.BAD_REQUEST),
+    VEHICLE_NOT_FOUNDl(1100, "Xe không tồn tại", HttpStatus.NOT_FOUND),
+    VEHICLE_NOTE_TOO_LONG(1101, "Ghi chú xe vượt quá độ dài cho phép", HttpStatus.BAD_REQUEST),
+    VEHICLE_NOT_AVAILABLE(1102, "Xe không có sẵn để gán cho đơn hàng", HttpStatus.BAD_REQUEST),
+    VEHICLE_NOT_MATCH(1103, "Xe không khớp với model và color của đơn hàng", HttpStatus.BAD_REQUEST),
+    VEHICLE_ALREADY_ASSIGNED(1104, "Xe đã được gán cho đơn hàng khác", HttpStatus.BAD_REQUEST),
+    CONTRACT_TYPE_REQUIRED(1105, "Loại hợp đồng không được để trống", HttpStatus.BAD_REQUEST),
+    DEPOSIT_CONTRACT_ALREADY_EXISTS(1106, "Hợp đồng đặt cọc cho đơn hàng này đã tồn tại", HttpStatus.BAD_REQUEST),
+    SALE_CONTRACT_ALREADY_EXISTS(1107, "Hợp đồng mua bán cho đơn hàng này đã tồn tại", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;

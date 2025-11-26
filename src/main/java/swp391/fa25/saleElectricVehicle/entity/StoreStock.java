@@ -37,11 +37,14 @@ public class StoreStock {
     @JoinColumn(name = "modelColorId")
     private ModelColor modelColor;
 
-    @Builder.Default
+//    @Builder.Default
     @OneToMany(mappedBy = "storeStock", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryTransaction> inventoryTransactions = new ArrayList<>();
 
-    @Builder.Default
+//    @Builder.Default
     @OneToMany(mappedBy = "storeStock", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
+
+//    @OneToMany(mappedBy = "vin", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Vehicle> vehicles = new ArrayList<>();
 }

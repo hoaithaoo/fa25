@@ -72,4 +72,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     // Find order by store, user and orderId (for staff filtering)
     Order findByStore_StoreIdAndUser_UserIdAndOrderId(int storeId, int userId, int orderId);
+
+    // Find orders that have passed payment deadline (for expired orders)
+    @Query("SELECT o FROM Order o WHERE o.status = :status AND o.paymentDeadline IS NOT NULL AND o.paymentDeadline < :now")
+    List<Order> findOrdersWithExpiredPaymentDeadline(@Param("status") OrderStatus status, @Param("now") LocalDateTime now);
 }

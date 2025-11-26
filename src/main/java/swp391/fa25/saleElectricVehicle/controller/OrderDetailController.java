@@ -1,18 +1,13 @@
 package swp391.fa25.saleElectricVehicle.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swp391.fa25.saleElectricVehicle.exception.AppException;
-import swp391.fa25.saleElectricVehicle.payload.dto.OrderDetailDto;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderWithItemsRequest;
-import swp391.fa25.saleElectricVehicle.payload.request.stock.StockValidationRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.order.VehicleAssignment;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.order.CreateOrderWithItemsResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
-import swp391.fa25.saleElectricVehicle.payload.response.stock.StockValidationResponse;
 import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
 
 import java.util.List;
@@ -120,6 +115,19 @@ public class OrderDetailController {
                 .code(HttpStatus.OK.value())
                 .message("Báo giá đã được cập nhật thành công")
                 .data(updatedQuote)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    // ASSIGN VEHICLES TO ORDER DETAILS - Gán xe cho order details (có thể 1 hoặc nhiều)
+    @PutMapping("/assign-vehicles")
+    public ResponseEntity<ApiResponse<List<GetOrderDetailsResponse>>> assignVehiclesToOrderDetails(
+            @RequestBody List<VehicleAssignment> assignments) {
+        List<GetOrderDetailsResponse> updatedOrderDetails = orderDetailService.assignVehiclesToOrderDetails(assignments);
+        ApiResponse<List<GetOrderDetailsResponse>> response = ApiResponse.<List<GetOrderDetailsResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Gán xe cho đơn hàng thành công")
+                .data(updatedOrderDetails)
                 .build();
         return ResponseEntity.ok(response);
     }

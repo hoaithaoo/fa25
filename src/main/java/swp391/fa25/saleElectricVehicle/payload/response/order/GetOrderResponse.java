@@ -24,9 +24,9 @@ public class GetOrderResponse {
     private BigDecimal totalPayment;
     private String status;
 
-    private int contractId;
-    private String contractCode; // For display
-    private String urlContractFile;
+//    private int contractId;
+//    private String contractCode; // For display
+//    private String urlContractFile;
 
     private int customerId;
     private String customerName;  // For display
@@ -41,4 +41,5 @@ public class GetOrderResponse {
     private String storeName;
 
     private LocalDateTime orderDate;
+    private LocalDateTime paymentDeadline; // hạn thanh toán số tiền còn lại (7 ngày sau khi đặt cọc, nếu có)
 }

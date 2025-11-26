@@ -34,14 +34,17 @@ public class AuthenServiceImpl implements AuthenService {
     @Autowired
     private CustomerService customerService;
 
-    @Autowired
-    StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
-    private EmailService emailService;
+//    @Autowired
+//    StringRedisTemplate stringRedisTemplate;
+//
+//    @Autowired
+//    private EmailService emailService;
 
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
+
+    @Value("${app.backend-url:http://localhost:8080}")
+    private String backendUrl;
 
     //generate access token from refresh token
     @Override
@@ -122,6 +125,7 @@ public class AuthenServiceImpl implements AuthenService {
 
         // CHUYỂN HƯỚNG ĐẾN TRANG THÔNG BÁO THÀNH CÔNG
         // Địa chỉ của một trang tĩnh trên Frontend/Website thông báo rằng xác minh thành công
+//        String successUrl = backendUrl + "/verify-email-success?email=" + customerDto.getEmail();
         String successUrl = frontendUrl + "/verify-email-success?email=" + customerDto.getEmail();
         // Hoặc có thể redirect về trang login/register
 

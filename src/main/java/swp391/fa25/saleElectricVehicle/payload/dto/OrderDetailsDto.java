@@ -18,6 +18,11 @@ public class OrderDetailsDto {
 
     private String colorName;
 
+    // Vehicle information (số khung, số máy, số seri pin)
+    private String vin; // số khung
+    private String engineNo; // số máy
+    private String batteryNo; // số seri pin
+
     private BigDecimal unitPrice;
     private int quantity;
     private BigDecimal discount;

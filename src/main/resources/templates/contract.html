@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hợp Đồng Mua Bán Xe</title>
+    <title th:text="${contract.contractType == 'DEPOSIT'} ? 'Hợp Đồng Đặt Cọc Xe' : 'Hợp Đồng Mua Bán Xe'">Hợp Đồng</title>
     <style>
         * {
             margin: 0;
@@ -226,9 +226,9 @@
     </div>
 
     <div class="title">
-        <h1>HỢP ĐỒNG MUA BÁN XE</h1>
-        <p>Số: ............../HD/XD - BMVLVL<br>
-            ......, ngày ... tháng ... năm 20...<br>
+        <h1 th:text="${contract.contractType == 'DEPOSIT'} ? 'HỢP ĐỒNG ĐẶT CỌC XE' : 'HỢP ĐỒNG MUA BÁN XE'">HỢP ĐỒNG</h1>
+        <p>Số: <span th:text="${contract.contractCode}">............../HD/XD</span> - <span th:text="${contract.contractType == 'DEPOSIT'} ? 'DC' : 'MB'">BMVLVL</span><br>
+            <span th:text="${#temporals.format(contract.contractDate, 'dd')}">...</span>, ngày <span th:text="${#temporals.format(contract.contractDate, 'MM')}">...</span> tháng <span th:text="${#temporals.format(contract.contractDate, 'yyyy')}">20...</span><br>
             Chúng tôi gồm có bên:</p>
     </div>
 
@@ -289,7 +289,8 @@
             <span class="info-value" th:text="${customer.phone}"></span>
         </div>
         <p style="font-size: 13px; margin-top: 10px; line-height: 1.6;">
-            Sau khi bàn bạc thỏa thuận, hai bên cùng nhau thống nhất ký kết hợp đồng mua bán xe ô tô điện với các điều khoản như sau:
+            <span th:if="${contract.contractType == 'DEPOSIT'}">Sau khi bàn bạc thỏa thuận, hai bên cùng nhau thống nhất ký kết hợp đồng đặt cọc xe ô tô điện với các điều khoản như sau:</span>
+            <span th:if="${contract.contractType == 'SALE'}">Sau khi bàn bạc thỏa thuận, hai bên cùng nhau thống nhất ký kết hợp đồng mua bán xe ô tô điện với các điều khoản như sau:</span>
         </p>
     </div>
 
@@ -300,7 +301,6 @@
             <tr>
                 <th>STT</th>
                 <th>Mô tả hàng hóa</th>
-                <th>SL</th>
                 <th>Đơn giá<br>(Đã gồm VAT)</th>
                 <th>Khuyến mãi (nếu có)</th>
                 <th>Phí dịch vụ (nếu có)</th>
@@ -317,48 +317,121 @@
                         <li> <span>Số chỗ ngồi: </span> <span th:text="${dto.seatingCapacity}"></span> </li>
                         <li> <span>Năm sản xuất: </span> <span th:text="${dto.modelYear}"></span> </li>
                         <li> <span>Màu sơn: </span> <span th:text="${dto.colorName}"></span> </li>
+                        <li th:if="${dto.vin != null and dto.vin != ''}"> 
+                            <span>Số khung (VIN): </span> 
+                            <span th:text="${dto.vin}" style="font-weight: bold;"></span> 
+                        </li>
+                        <li th:if="${dto.engineNo != null and dto.engineNo != ''}"> 
+                            <span>Số máy: </span> 
+                            <span th:text="${dto.engineNo}" style="font-weight: bold;"></span> 
+                        </li>
+                        <li th:if="${dto.batteryNo != null and dto.batteryNo != ''}"> 
+                            <span>Số seri pin: </span> 
+                            <span th:text="${dto.batteryNo}" style="font-weight: bold;"></span> 
+                        </li>
                     </ul>
                 </td>
-                <td style="text-align: center;" th:text="${dto.quantity}">Số lượng</td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.unitPrice, 0, 'COMMA', 0, 'POINT')}">Đơn giá</td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.discount, 0, 'COMMA', 0, 'POINT')}">Khuyến mãi</td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.totalTax, 0, 'COMMA', 0, 'POINT')}">Phí dịch vụ</td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.totalPrice, 0, 'COMMA', 0, 'POINT')}">Tổng tiền</td>
             </tr>
             <tr>
-                <td colspan="2" class="price-total">Tổng Giá trị Hợp đồng</td>
-                <td style="text-align: center;" th:text="${order.totalQuantity}">Tổng SL</td>
+                <td colspan="2" class="price-total" th:text="${contract.contractType == 'DEPOSIT'} ? 'Tổng Giá trị Hợp đồng (Tạm tính)' : 'Tổng Giá trị Hợp đồng'">Tổng Giá trị Hợp đồng</td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(order.totalUnitPrice, 0, 'COMMA', 0, 'POINT')}">Tổng đơn giá</td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(order.totalDiscount, 0, 'COMMA', 0, 'POINT')}">Tổng khuyến mãi</td>
                 <td style="text-align: right;" th:text="${#numbers.formatDecimal(order.totalTaxPrice, 0, 'COMMA', 0, 'POINT')}">Tổng dịch vụ</td>
-                <td style="text-align: right;" th:text="${#numbers.formatDecimal(contract.totalPayment, 0, 'COMMA', 0, 'POINT')}">Tổng thanh toán</td>
+                <td style="text-align: right;">
+                    <span th:if="${contract.contractType == 'DEPOSIT'}">
+                        <span th:text="${#numbers.formatDecimal(contract.totalPayment, 0, 'COMMA', 0, 'POINT')}">Tiền cọc</span>
+                    </span>
+                    <span th:if="${contract.contractType == 'SALE'}">
+                        <span th:text="${#numbers.formatDecimal(contract.totalPayment, 0, 'COMMA', 0, 'POINT')}">Tổng thanh toán</span>
+                    </span>
+                </td>
             </tr>
             </tbody>
         </table>
         <p class="note">Bằng chữ: .......................... -/-.</p>
     </div>
 
-    <div class="article">
-        <div class="article-title">ĐIỀU 2. ĐẶT CỌC VÀ THANH TOÁN</div>
+    <div class="article" th:if="${contract.contractType == 'DEPOSIT'}">
+        <div class="article-title">ĐIỀU 2. ĐẶT CỌC VÀ CAM KẾT GIAO XE</div>
         <div class="article-content">
-            <p>Bên B thực hiện thanh toán giá trị hợp đồng cho Bên A theo các đợt như sau:</p>
+            <p>Hai bên đã thống nhất về việc đặt cọc và cam kết giao xe như sau:</p>
             <ul>
-                <li><strong>Đặt Cọc: </strong>Trong thời hạn 02 (hai) ngày làm việc kể từ ngày hai bên ký hợp đồng,
-                    Bên B sẽ đặt cọc cho Bên A ngay khi ký hợp đồng với số tiền là <strong th:text="${#numbers.formatDecimal(contract.depositPrice, 0, 'COMMA', 0, 'POINT')}">...</strong> VNĐ.
-                    Khoản đặt cọc này được coi là khoản thanh toán lần I.
-                    Bên B không thể đòi lại số tiền đặt cọc, trừ trường hợp bên B thanh toán hết hợp đồng.</li>
-                <li><strong>Thanh Toán: </strong>Bên B thanh toán số tiền còn lại (05 ngày làm việc kể từ khi Bên A gửi
-                    thông báo sẵn sàng giao xe, Bên B thanh toán cho Bên A giá trị hợp đồng còn lại tương đương với số tiền
-                    là <strong th:text="${#numbers.formatDecimal(contract.remainPrice, 0, 'COMMA', 0, 'POINT')}">...</strong> VNĐ-).</li>
+                <li><strong>1. Tình trạng thanh toán cọc: </strong>
+                    Bên B đã thực hiện đặt cọc thành công cho Bên A với số tiền là 
+                    <strong th:text="${#numbers.formatDecimal(contract.totalPayment, 0, 'COMMA', 0, 'POINT')}">...</strong> VNĐ
+                    (tương đương 20% giá trị hợp đồng). Khoản đặt cọc này được xác nhận đã được chuyển khoản/thực hiện thanh toán thành công.</li>
+                
+                <li><strong>2. Cam kết của Bên A (Đại lý): </strong>
+                    Bên A cam kết sẽ giao đúng xe theo đúng thông tin đã thỏa thuận cho Bên B trong thời hạn 
+                    <strong>07 (bảy) ngày làm việc</strong> kể từ ngày ký hợp đồng đặt cọc này. Xe được giao phải đúng với mô tả 
+                    trong ĐIỀU 1 về đối tượng hợp đồng.</li>
+                
+                <li><strong>3. Quy định về vi phạm của Bên A: </strong>
+                    Trong trường hợp Bên A không thể giao xe đúng hạn trong vòng 07 (bảy) ngày làm việc như đã cam kết, 
+                    Bên A có trách nhiệm:
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>Hoàn trả lại toàn bộ số tiền đặt cọc cho Bên B;</li>
+                        <li>Bồi thường cho Bên B một khoản tiền tương đương với số tiền đặt cọc đã nhận.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>4. Quy định về vi phạm của Bên B: </strong>
+                    Trong trường hợp Bên B từ chối hoặc không thực hiện việc mua xe sau khi Bên A đã sẵn sàng giao xe đúng hạn:
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>Bên A có quyền đơn phương hủy hợp đồng đặt cọc này;</li>
+                        <li>Bên B sẽ mất hoàn toàn số tiền đặt cọc đã thanh toán và không được đòi lại bất kỳ khoản tiền nào;</li>
+                        <li>Số tiền đặt cọc sẽ thuộc về Bên A như một khoản bồi thường cho việc vi phạm hợp đồng của Bên B.</li>
+                    </ul>
+                </li>
+                
+                <li><strong>5. Thanh toán còn lại: </strong>
+                    Sau khi Bên A giao xe đúng hạn và Bên B xác nhận nhận xe, Bên B sẽ thanh toán số tiền còn lại 
+                    khi ký kết hợp đồng mua bán chính thức (Hợp đồng mua bán xe). Số tiền đặt cọc này sẽ được trừ vào 
+                    tổng giá trị hợp đồng mua bán.                </li>
             </ul>
         </div>
     </div>
 
-    <div class="article">
+    <div class="article" th:if="${contract.contractType == 'DEPOSIT'}">
+        <div class="article-title">ĐIỀU 3. GIAO HÀNG VÀ NHẬN HÀNG</div>
         <div class="article-content">
             <ul>
-                <li>Thời hạn giao xe: ....................;</li>
-                <li>Địa điểm giao xe: Tại trụ sở của bên A;</li>
+                <li><strong>Thời hạn giao xe: </strong>Bên A sẽ giao xe cho Bên B trong thời hạn <strong>07 (bảy) ngày làm việc</strong> kể từ ngày ký hợp đồng đặt cọc này;</li>
+                <li><strong>Địa điểm giao xe: </strong>Tại trụ sở của Bên A;</li>
+                <li><strong>Phương thức giao xe: </strong>Bên A sẽ giao xe trực tiếp cho Bên B, Bên B có trách nhiệm kiểm tra tình trạng xe 
+                    trước khi nhận;</li>
+                <li><strong>Giấy tờ kèm theo: </strong>Bên A sẽ giao kèm theo xe các giấy tờ liên quan theo quy định của pháp luật.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="article" th:if="${contract.contractType == 'SALE'}">
+        <div class="article-title">ĐIỀU 2. THANH TOÁN</div>
+        <div class="article-content">
+            <p>Bên B thực hiện thanh toán giá trị hợp đồng cho Bên A như sau:</p>
+            <ul>
+                <li><strong>Thanh toán: </strong>Bên B thanh toán toàn bộ giá trị hợp đồng cho Bên A vào ngày ký hợp đồng, với số tiền là 
+                    <strong th:text="${#numbers.formatDecimal(contract.totalPayment, 0, 'COMMA', 0, 'POINT')}">...</strong> VNĐ.</li>
+                <li><strong>Khấu trừ tiền đặt cọc: </strong>Số tiền thanh toán nêu trên đã được khấu trừ tiền đặt cọc từ hợp đồng đặt cọc trước đó (nếu có). 
+                    Bên B chỉ cần thanh toán số tiền còn lại sau khi đã trừ đi tiền đặt cọc.</li>
+                <li><strong>Phương thức thanh toán: </strong>Bên B thanh toán bằng tiền mặt hoặc chuyển khoản theo thỏa thuận giữa hai bên.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="article" th:if="${contract.contractType == 'SALE'}">
+        <div class="article-title">ĐIỀU 3. GIAO HÀNG VÀ NHẬN HÀNG</div>
+        <div class="article-content">
+            <ul>
+                <li><strong>Thời hạn giao xe: </strong>Bên A sẽ giao xe cho Bên B trong ngày ký hợp đồng mua bán xe này;</li>
+                <li><strong>Địa điểm giao xe: </strong>Tại trụ sở của Bên A;</li>
+                <li><strong>Phương thức giao xe: </strong>Bên A sẽ giao xe trực tiếp cho Bên B, Bên B có trách nhiệm kiểm tra tình trạng xe 
+                    trước khi nhận;</li>
+                <li><strong>Giấy tờ kèm theo: </strong>Bên A sẽ giao kèm theo xe các giấy tờ liên quan theo quy định của pháp luật.</li>
             </ul>
         </div>
     </div>
