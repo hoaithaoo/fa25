@@ -7,7 +7,9 @@ import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.*;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
+import swp391.fa25.saleElectricVehicle.payload.request.payment.ConfirmCashPaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.payment.CreateTransactionRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentResponse;
 import swp391.fa25.saleElectricVehicle.repository.PaymentRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
@@ -31,6 +33,14 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private StoreService storeService;
+
+    @Autowired
+    @Lazy
+    private TransactionService transactionService;
+
+    @Autowired
+    @Lazy
+    private ContractService contractService;
 
     @Override
     public GetPaymentResponse createDraftPayment(CreatePaymentRequest request) {
@@ -56,9 +66,9 @@ public class PaymentServiceImpl implements PaymentService {
             }
         } else if (request.getPaymentType() == PaymentType.BALANCE) {
             // Payment balance chỉ được tạo khi order ở trạng thái DEPOSIT_PAID hoặc DEPOSIT_SIGNED
-            if (order.getStatus() != OrderStatus.DEPOSIT_PAID && order.getStatus() != OrderStatus.DEPOSIT_SIGNED) {
+            if (order.getStatus() != OrderStatus.SALE_SIGNED) {
                 throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
-                    "Chỉ có thể tạo payment số dư cho đơn hàng đã thanh toán đặt cọc");
+                    "Chỉ có thể tạo payment số dư cho đơn hàng đã ký hợp đồng mua bán");
             }
             
             // kiểm tra xem đã có payment đặt cọc completed chưa
@@ -188,6 +198,108 @@ public class PaymentServiceImpl implements PaymentService {
     public List<Payment> getPaymentsByOrderAndPaymentType(int orderId, PaymentType paymentType) {
         Order order = orderService.getOrderEntityById(orderId);
         return paymentRepository.findByOrderAndPaymentType(order, paymentType);
+    }
+
+    @Override
+    public GetPaymentResponse confirmCashPayment(int paymentId, ConfirmCashPaymentRequest request) {
+        // Lấy payment và kiểm tra quyền truy cập - chỉ cần payment thuộc store của user
+        User user = userService.getCurrentUserEntity();
+        Store store = storeService.getCurrentStoreEntity(user.getUserId());
+        
+        // Cả staff và manager đều có thể confirm payment trong store của mình
+        Payment payment = paymentRepository.findPaymentByPaymentIdAndOrder_Store(paymentId, store);
+        
+        if (payment == null) {
+            throw new AppException(ErrorCode.PAYMENT_NOT_EXISTED);
+        }
+
+        // Validate payment method phải là CASH
+        if (payment.getPaymentMethod() != PaymentMethod.CASH) {
+            throw new AppException(ErrorCode.INVALID_PAYMENT_METHOD, 
+                "Chỉ có thể xác nhận thanh toán tiền mặt cho payment có payment method là CASH");
+        }
+
+        // Validate payment status phải là DRAFT
+        if (payment.getStatus() != PaymentStatus.DRAFT) {
+            throw new AppException(ErrorCode.INVALID_PAYMENT_STATUS, 
+                "Chỉ có thể xác nhận thanh toán cho payment ở trạng thái DRAFT");
+        }
+
+        // Validate đã thanh toán payment này chưa để tránh xử lí trùng
+        if (payment.getStatus().equals(PaymentStatus.COMPLETED)) {
+            throw new AppException(ErrorCode.PAYMENT_ALREADY_CONFIRMED, 
+                "Payment đã được xác nhận");
+        }
+
+        // Validate request data
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new AppException(ErrorCode.INVALID_AMOUNT, 
+                "Số tiền thanh toán phải lớn hơn 0");
+        }
+
+        if (request.getTransactionRef() == null || request.getTransactionRef().trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_TIME_RANGE, 
+                "Mã tham chiếu giao dịch không được để trống");
+        }
+
+        // Validate amount phải khớp với payment amount (cho phép sai số nhỏ do làm tròn)
+        BigDecimal paymentAmount = payment.getAmount();
+        BigDecimal requestAmount = request.getAmount();
+        if (requestAmount.compareTo(paymentAmount) != 0) {
+            throw new AppException(ErrorCode.INVALID_AMOUNT, 
+                String.format("Số tiền thanh toán (%s) không khớp với số tiền của payment (%s)", 
+                    requestAmount, paymentAmount));
+        }
+
+        // Tự động lấy thời gian hiện tại
+        LocalDateTime transactionDate = LocalDateTime.now();
+
+        // Sử dụng thông tin từ request để tạo transaction
+        CreateTransactionRequest transactionRequest = CreateTransactionRequest.builder()
+                .paymentCode(payment.getPaymentCode())
+                .transactionRef(request.getTransactionRef())
+                .amount(request.getAmount())
+                .transactionDate(transactionDate) // Tự động lấy thời gian hiện tại
+                .bankTransactionCode(request.getBankTransactionCode()) // Có thể null
+                .gateway(PaymentGateway.CASH)
+                .status(TransactionStatus.SUCCESS)
+                .build();
+
+        transactionService.createTransaction(transactionRequest);
+
+        // Cập nhật payment status thành COMPLETED
+        updatePaymentStatus(payment, requestAmount, PaymentStatus.COMPLETED);
+
+        // Cập nhật order paidAmount
+        Order order = payment.getOrder();
+        order.setPaidAmount(order.getPaidAmount().add(requestAmount));
+        orderService.updateOrder(order);
+
+        // Nếu là payment deposit, update order status thành DEPOSIT_PAID
+        if (payment.getPaymentType() == PaymentType.DEPOSIT) {
+            // Update order status thành DEPOSIT_PAID
+            orderService.updateOrderStatus(order, OrderStatus.DEPOSIT_PAID);
+            
+            // Nếu đã có contract đặt cọc, update contract status thành DEPOSIT_PAID
+            if (contractService.hasDepositContract(order.getOrderId())) {
+                Contract depositContract = contractService.getDepositContractByOrderId(order.getOrderId());
+                contractService.updateContractStatus(depositContract, ContractStatus.DEPOSIT_PAID);
+            }
+        } else if (payment.getPaymentType() == PaymentType.BALANCE) {
+            // Nếu là payment balance, tìm contract mua bán và update status thành FULLY_PAID
+            if (contractService.hasSaleContract(order.getOrderId())) {
+                Contract saleContract = contractService.getSaleContractByOrderId(order.getOrderId());
+                contractService.updateContractStatus(saleContract, ContractStatus.FULLY_PAID);
+            }
+            
+            // Kiểm tra xem đã thanh toán đủ chưa (paidAmount >= totalPayment)
+            if (order.getPaidAmount().compareTo(order.getTotalPayment()) >= 0) {
+                // Update order status thành FULLY_PAID
+                orderService.updateOrderStatus(order, OrderStatus.FULLY_PAID);
+            }
+        }
+
+        return mapToDto(payment);
     }
 
     private GetPaymentResponse mapToDto(Payment payment) {

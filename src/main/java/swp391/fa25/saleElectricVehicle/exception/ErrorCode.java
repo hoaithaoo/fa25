@@ -119,6 +119,9 @@ public enum ErrorCode {
     CONTRACT_TYPE_REQUIRED(1105, "Loại hợp đồng không được để trống", HttpStatus.BAD_REQUEST),
     DEPOSIT_CONTRACT_ALREADY_EXISTS(1106, "Hợp đồng đặt cọc cho đơn hàng này đã tồn tại", HttpStatus.BAD_REQUEST),
     SALE_CONTRACT_ALREADY_EXISTS(1107, "Hợp đồng mua bán cho đơn hàng này đã tồn tại", HttpStatus.BAD_REQUEST),
+    INVALID_PAYMENT_METHOD(1108, "Phương thức thanh toán không hợp lệ", HttpStatus.BAD_REQUEST),
+    INVALID_PAYMENT_STATUS(1109, "Trạng thái thanh toán không hợp lệ", HttpStatus.BAD_REQUEST),
+    PAYMENT_ALREADY_CONFIRMED(1110, "Thanh toán đã được xác nhận", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
