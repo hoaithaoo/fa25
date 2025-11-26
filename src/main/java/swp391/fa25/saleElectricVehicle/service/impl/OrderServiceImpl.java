@@ -185,6 +185,7 @@ public class OrderServiceImpl implements OrderService {
                 .storeId(order.getStore().getStoreId())
                 .storeName(order.getStore().getStoreName())
                 .storeAddress(order.getStore().getAddress())
+                .orderDate(order.getOrderDate())
                 .paymentDeadline(order.getPaymentDeadline())
                 .build();
     }
