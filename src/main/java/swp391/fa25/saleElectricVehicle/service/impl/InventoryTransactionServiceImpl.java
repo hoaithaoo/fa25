@@ -17,6 +17,7 @@ import swp391.fa25.saleElectricVehicle.service.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -450,10 +451,14 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         }
         
-        // Map vehicles list
-        List<VehicleDto> vehicles = transaction.getVehicles().stream()
-                .map(this::mapVehicleToDto)
-                .collect(Collectors.toList());
+        // Map vehicles list - xử lý null safety
+        List<VehicleDto> vehicles = (transaction.getVehicles() != null) 
+                ? transaction.getVehicles().stream()
+                        .filter(vehicle -> vehicle != null)
+                        .map(this::mapVehicleToDto)
+                        .filter(dto -> dto != null)
+                        .collect(Collectors.toList())
+                : new ArrayList<>();
         
         return InventoryTransactionDto.builder()
                 .inventoryId(transaction.getInventoryId())
@@ -484,6 +489,9 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
 
     // Helper method: Map Vehicle Entity sang VehicleDto
     private VehicleDto mapVehicleToDto(Vehicle vehicle) {
+        if (vehicle == null) {
+            return null;
+        }
         return VehicleDto.builder()
                 .vehicleId(vehicle.getVehicleId())
                 .vin(vehicle.getVin())
