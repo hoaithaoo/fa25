@@ -361,8 +361,12 @@ public class VNPayServiceImpl implements VNPayService {
                 order.setPaidAmount(order.getPaidAmount().add(amount));
                 orderService.updateOrder(order);
 
-                // Nếu là payment deposit và đã có contract đặt cọc, update contract status thành DEPOSIT_PAID
+                // Nếu là payment deposit, update order status thành DEPOSIT_PAID
                 if (payment.getPaymentType() == PaymentType.DEPOSIT) {
+                    // Update order status thành DEPOSIT_PAID
+                    orderService.updateOrderStatus(order, OrderStatus.DEPOSIT_PAID);
+                    
+                    // Nếu đã có contract đặt cọc, update contract status thành DEPOSIT_PAID
                     if (contractService.hasDepositContract(order.getOrderId())) {
                         Contract depositContract = contractService.getDepositContractByOrderId(order.getOrderId());
                         contractService.updateContractStatus(depositContract, ContractStatus.DEPOSIT_PAID);
