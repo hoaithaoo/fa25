@@ -9,6 +9,7 @@ import swp391.fa25.saleElectricVehicle.payload.request.order.VehicleAssignment;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.order.GetOrderDetailsResponse;
 import swp391.fa25.saleElectricVehicle.service.OrderDetailService;
+import swp391.fa25.saleElectricVehicle.service.VehicleService;
 
 import java.util.List;
 
@@ -18,6 +19,9 @@ public class OrderDetailController {
 
     @Autowired
     private OrderDetailService orderDetailService;
+
+    @Autowired
+    private VehicleService vehicleService;
 
     // API 2.3: VALIDATE STOCK (KHÔNG LƯU DB)
 //    @PostMapping("/validate")
@@ -123,7 +127,7 @@ public class OrderDetailController {
     @PutMapping("/assign-vehicles")
     public ResponseEntity<ApiResponse<List<GetOrderDetailsResponse>>> assignVehiclesToOrderDetails(
             @RequestBody List<VehicleAssignment> assignments) {
-        List<GetOrderDetailsResponse> updatedOrderDetails = orderDetailService.assignVehiclesToOrderDetails(assignments);
+        List<GetOrderDetailsResponse> updatedOrderDetails = vehicleService.assignVehiclesToOrderDetails(assignments);
         ApiResponse<List<GetOrderDetailsResponse>> response = ApiResponse.<List<GetOrderDetailsResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Gán xe cho đơn hàng thành công")

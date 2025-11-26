@@ -18,7 +18,7 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long vehicleId;
 
-    @Column(columnDefinition = "VARCHAR(17)")
+    @Column(columnDefinition = "VARCHAR(17)", nullable = false, unique = true)
     private String vin;
 
     @Column(nullable = false, unique = true, length = 6)
@@ -47,6 +47,11 @@ public class Vehicle {
     @ManyToOne
     @JoinColumn(name = "stockId")
     private StoreStock storeStock;
+
+    // 1 vehicle thuộc về 1 order detail (nhiều vehicle có thể cùng 1 detail)
+    @ManyToOne
+    @JoinColumn(name = "orderDetailId")
+    private OrderDetail orderDetail;
 
     // gán stock vào ngay khi tạo
     @PrePersist

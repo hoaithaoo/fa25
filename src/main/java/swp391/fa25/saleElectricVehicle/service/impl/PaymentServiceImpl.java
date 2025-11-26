@@ -1,8 +1,8 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
 import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.*;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
@@ -12,13 +12,9 @@ import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentRespon
 import swp391.fa25.saleElectricVehicle.repository.PaymentRepository;
 import swp391.fa25.saleElectricVehicle.service.*;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -27,7 +23,8 @@ public class PaymentServiceImpl implements PaymentService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private ContractService contractService;
+    @Lazy
+    private OrderService orderService;
 
     @Autowired
     private UserService userService;
@@ -37,77 +34,77 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public GetPaymentResponse createDraftPayment(CreatePaymentRequest request) {
-        Contract contract = contractService.getContractEntityById(request.getContractId());
+        // Lấy Order entity từ OrderService với @Lazy để tránh circular dependency
+        Order order = orderService.getOrderEntityById(request.getOrderId());
 
-        // không cho thanh toán khi hợp đồng chưa ký,
-        if (contract.getStatus().equals(ContractStatus.DRAFT)) {
-            throw new AppException(ErrorCode.CONTRACT_NOT_SIGNED);
-        }
-
+        // Validate order status
         if (request.getPaymentType() == PaymentType.DEPOSIT) {
+            // Payment deposit chỉ được tạo khi order ở trạng thái PENDING_DEPOSIT
+            if (order.getStatus() != OrderStatus.PENDING_DEPOSIT) {
+                throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
+                    "Chỉ có thể tạo payment đặt cọc cho đơn hàng ở trạng thái PENDING_DEPOSIT");
+            }
+            
             // Kiểm tra xem đã có payment đặt cọc active (không phải CANCELLED hoặc DRAFT) chưa
             List<Payment> existingDepositPayments = paymentRepository
-                    .findActivePaymentsByContractAndPaymentType(
-                            contract, PaymentType.DEPOSIT, 
+                    .findActivePaymentsByOrderAndPaymentType(
+                            order, PaymentType.DEPOSIT, 
                             PaymentStatus.CANCELLED, PaymentStatus.DRAFT);
             // nếu đã có payment active thì không được tạo nữa
             if (!existingDepositPayments.isEmpty()) {
                 throw new AppException(ErrorCode.DEPOSIT_PAYMENT_ALREADY_EXISTS);
             }
         } else if (request.getPaymentType() == PaymentType.BALANCE) {
+            // Payment balance chỉ được tạo khi order ở trạng thái DEPOSIT_PAID hoặc DEPOSIT_SIGNED
+            if (order.getStatus() != OrderStatus.DEPOSIT_PAID && order.getStatus() != OrderStatus.DEPOSIT_SIGNED) {
+                throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
+                    "Chỉ có thể tạo payment số dư cho đơn hàng đã thanh toán đặt cọc");
+            }
+            
             // kiểm tra xem đã có payment đặt cọc completed chưa
-            // nếu chưa có thì không được tạo payment số dư
             List<Payment> existingDepositPayments = paymentRepository
-                    .findActivePaymentsByContractAndPaymentType(
-                            contract, PaymentType.DEPOSIT, 
+                    .findActivePaymentsByOrderAndPaymentType(
+                            order, PaymentType.DEPOSIT, 
                             PaymentStatus.CANCELLED, PaymentStatus.DRAFT);
             boolean hasCompletedDeposit = existingDepositPayments.stream()
                     .anyMatch(p -> p.getStatus().equals(PaymentStatus.COMPLETED));
             if (!hasCompletedDeposit) {
                 throw new AppException(ErrorCode.DEPOSIT_PAYMENT_NOT_COMPLETED);
             }
+            
             // Kiểm tra xem đã có payment thanh toán số dư active chưa
             List<Payment> existingBalancePayments = paymentRepository
-                    .findActivePaymentsByContractAndPaymentType(
-                            contract, PaymentType.BALANCE, 
+                    .findActivePaymentsByOrderAndPaymentType(
+                            order, PaymentType.BALANCE, 
                             PaymentStatus.CANCELLED, PaymentStatus.DRAFT);
             if (!existingBalancePayments.isEmpty()) {
                 throw new AppException(ErrorCode.BALANCE_PAYMENT_ALREADY_EXISTS);
             }
         }
 
-        Payment payment = paymentRepository.save(Payment.builder()
+        // Tạo payment
+        Payment payment = Payment.builder()
                 .status(PaymentStatus.DRAFT)
                 .paymentType(request.getPaymentType())
                 .paymentMethod(request.getPaymentMethod())
+                .amount(request.getAmount())
                 .createdAt(LocalDateTime.now())
-                .contract(contract)
-                .build());
+                .order(order)
+                .build();
 
-//        if (PaymentType.DEPOSIT.equals(request.getPaymentType())) {
-//            payment.setPaymentCode("DP" + String.format("%06d", payment.getPaymentId()));
-//            payment.setAmount(contract.getDepositPrice()); // số tiền cần thanh toán
-//            payment.setRemainPrice(contract.getDepositPrice()); // số tiền còn lại cần thanh toán
-//        } else {
-//            payment.setPaymentCode("BL" + String.format("%06d", payment.getPaymentId()));
-//            payment.setAmount(contract.getRemainPrice()); // số tiền cần thanh toán
-//            payment.setRemainPrice(contract.getRemainPrice()); // số tiền còn lại cần thanh toán
-//        }
-
-        // lưu lại khi đã có payment code
+        // Save to get paymentId
+        paymentRepository.save(payment);
+        
+        // Set payment code
+        if (PaymentType.DEPOSIT.equals(request.getPaymentType())) {
+            payment.setPaymentCode("DP" + String.format("%06d", payment.getPaymentId()));
+        } else {
+            payment.setPaymentCode("BL" + String.format("%06d", payment.getPaymentId()));
+        }
+        
         paymentRepository.save(payment);
 
-        return GetPaymentResponse.builder()
-                .paymentId(payment.getPaymentId())
-                .paymentCode(payment.getPaymentCode())
-                .remainPrice(payment.getRemainPrice())
-                .status(payment.getStatus())
-                .paymentType(payment.getPaymentType())
-                .paymentMethod(payment.getPaymentMethod())
-                .amount(payment.getAmount())
-                .createdAt(payment.getCreatedAt())
-                .contractCode(contract.getContractCode())
-                .build();
+        return mapToDto(payment);
     }
 
     @Override
@@ -119,10 +116,10 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment;
         if (isManager) {
             // Manager: chỉ check store
-            payment = paymentRepository.findPaymentByPaymentIdAndContract_Order_Store(paymentId, store);
+            payment = paymentRepository.findPaymentByPaymentIdAndOrder_Store(paymentId, store);
         } else {
             // Staff: check cả store và userId
-            payment = paymentRepository.findByContract_Order_Store_StoreIdAndContract_Order_User_UserIdAndPaymentId(
+            payment = paymentRepository.findByOrder_Store_StoreIdAndOrder_User_UserIdAndPaymentId(
                     store.getStoreId(), user.getUserId(), paymentId);
         }
         
@@ -141,7 +138,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Payment getPaymentEntityByPaymentCode(String paymentCode) {
         return paymentRepository.findPaymentByPaymentCode(paymentCode);
-        // xử lí null ở vnpay service
     }
 
     @Override
@@ -153,10 +149,10 @@ public class PaymentServiceImpl implements PaymentService {
         List<Payment> payments;
         if (isManager) {
             // Manager: xem tất cả payments trong store
-            payments = paymentRepository.findPaymentsByContract_Order_Store(store);
+            payments = paymentRepository.findByOrder_Store(store);
         } else {
             // Staff: chỉ xem payments của chính họ trong store
-            payments = paymentRepository.findByContract_Order_Store_StoreIdAndContract_Order_User_UserId(
+            payments = paymentRepository.findByOrder_Store_StoreIdAndOrder_User_UserId(
                     store.getStoreId(), user.getUserId());
         }
         
@@ -167,52 +163,27 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void updatePaymentStatus(Payment payment, BigDecimal amount, PaymentStatus status) {
-        // Tìm payment theo orderCode (tùy business, có thể là orderId hoặc mã khác)
-//        Payment payment = getPaymentEntityById(paymentId);
-
-//        Transaction transaction = transactionService.createTransaction(payment.getPaymentId())
-//
-//        Transaction txn = Transaction.builder()
-//                        .amount(amount)
-//                        .transactionTime(LocalDateTime.now())
-//                        .status(TransactionStatus.SUCCESS)
-//                        .gateway("VNPAY")
-//                        .payerInfor("IPN")
-//                        .note("Thanh toán qua VNPAY IPN thành công")
-//                        .payment(payment)
-//                        .build();
-//
-//        txn.setPayment(payment);
-//        txn.setAmount(amount);
-//        txn.setTransactionTime(LocalDateTime.now());
-//        txn.setStatus("SUCCESS"); // mã hóa có thể lấy từ IPN params
-//        txn.setNote("Thanh toán qua VNPAY IPN thành công");
-//        transactionRepository.save(txn);
-
-//        boolean isEnough = vnpayService.validateAmount(paymentCode, amount);
-//        if (isEnough) {
-//            payment.setStatus(PaymentStatus.COMPLETED);
-//        }
-        payment.setRemainPrice(payment.getAmount().subtract(amount)); // tiền còn lại = tiền phải trả - tiền đã trả ở lần này
         payment.setStatus(status);
         payment.setUpdatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
+    }
 
-        // Lưu transaction cho lần nhận IPN này (phiên bản tối giản)
-
+    @Override
+    public List<Payment> getPaymentsByOrderAndPaymentType(int orderId, PaymentType paymentType) {
+        Order order = orderService.getOrderEntityById(orderId);
+        return paymentRepository.findByOrderAndPaymentType(order, paymentType);
     }
 
     private GetPaymentResponse mapToDto(Payment payment) {
         return GetPaymentResponse.builder()
                 .paymentId(payment.getPaymentId())
                 .paymentCode(payment.getPaymentCode())
-                .remainPrice(payment.getRemainPrice())
                 .status(payment.getStatus())
                 .paymentType(payment.getPaymentType())
                 .paymentMethod(payment.getPaymentMethod())
                 .amount(payment.getAmount())
                 .createdAt(payment.getCreatedAt())
-                .contractCode(payment.getContract().getContractCode())
+                .orderCode(payment.getOrder().getOrderCode())
                 .build();
     }
 }

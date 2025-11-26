@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu Thỏa Thuận Đặt Cọc</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .company-info {
+            flex: 1;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+
+        .company-details {
+            font-size: 11px;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .title {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .title h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .title p {
+            font-size: 12px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .warning-box {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info-label {
+            min-width: 150px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            flex: 1;
+            border-bottom: 1px dotted #999;
+            padding-left: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 13px;
+        }
+
+        table th, table td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: left;
+        }
+
+        table th {
+            background: #f0f0f0;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .price-total {
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        .note {
+            font-style: italic;
+            font-size: 12px;
+            margin-top: 5px;
+            color: #666;
+        }
+
+        .article {
+            margin: 20px 0;
+        }
+
+        .article-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .article-content {
+            font-size: 13px;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .article-content ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .article-content li {
+            margin: 5px 0;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .signature-box {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .signature-box h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .signature-box .subtitle {
+            font-size: 12px;
+            font-style: italic;
+            margin-bottom: 80px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="company-info">
+            <div class="logo">ELECTRA</div>
+            <div class="company-details">
+                <strong th:text="${store.storeName}"></strong><br>
+                Địa chỉ: <span style="text-decoration: underline;" th:text="${store.storeAddress}"></span><br>
+                <strong>ĐT:</strong> ..................... - <strong>MST:</strong> ..................... <br>
+            </div>
+        </div>
+    </div>
+
+    <div class="title">
+        <h1>PHIẾU THỎA THUẬN ĐẶT CỌC</h1>
+        <p>Số: <span th:text="${order.orderCode}">............../PTC</span><br>
+            Ngày <span th:text="${#temporals.format(agreementDate, 'dd')}">...</span>, tháng <span th:text="${#temporals.format(agreementDate, 'MM')}">...</span>, năm <span th:text="${#temporals.format(agreementDate, 'yyyy')}">20...</span></p>
+    </div>
+
+    <div class="warning-box">
+        <p>
+            ⚠️ <strong>THÔNG BÁO QUAN TRỌNG:</strong> Khách hàng phải thanh toán số tiền đặt cọc trong vòng <strong>4 giờ</strong> kể từ khi tạo phiếu thỏa thuận đặt cọc này. 
+            <span th:if="${paymentDeadline != null}">
+                Hạn thanh toán: <strong th:text="${#temporals.format(paymentDeadline, 'dd/MM/yyyy HH:mm')}"></strong>
+            </span>
+            Nếu không thanh toán đúng hạn, đơn hàng sẽ bị hủy và xe sẽ được giải phóng để bán cho khách hàng khác.
+        </p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">THÔNG TIN ĐƠN HÀNG:</div>
+        <div class="info-row">
+            <span class="info-label">Mã đơn hàng:</span>
+            <span class="info-value" th:text="${order.orderCode}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Ngày đặt hàng:</span>
+            <span class="info-value" th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">THÔNG TIN KHÁCH HÀNG:</div>
+        <div class="info-row">
+            <span class="info-label">Họ và tên:</span>
+            <span class="info-value" th:text="${customer.fullName}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">CMND/CCCD:</span>
+            <span class="info-value" th:text="${customer.identificationNumber}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Địa chỉ:</span>
+            <span class="info-value" th:text="${customer.address}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Số điện thoại:</span>
+            <span class="info-value" th:text="${customer.phone}"></span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">THÔNG TIN SẢN PHẨM ĐẶT CỌC:</div>
+        <table>
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Mô tả hàng hóa</th>
+                <th>Đơn giá</th>
+                <th>Số lượng</th>
+                <th>Thành tiền</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="dto, counter : ${order.orderDetailsList}">
+                <td style="text-align: center;" th:text="${counter.count}">STT</td>
+                <td>
+                    <strong>Mẫu xe: <span th:text="${dto.modelName}"></span></strong>
+                    <ul style="list-style: none; padding-left: 15px; margin: 5px 0;">
+                        <li>Kiểu dáng: <span th:text="${dto.bodyType}"></span></li>
+                        <li>Số chỗ ngồi: <span th:text="${dto.seatingCapacity}"></span></li>
+                        <li>Năm sản xuất: <span th:text="${dto.modelYear}"></span></li>
+                        <li>Màu sơn: <span th:text="${dto.colorName}"></span></li>
+                    </ul>
+                </td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.unitPrice, 0, 'COMMA', 0, 'POINT')}">Đơn giá</td>
+                <td style="text-align: center;" th:text="${dto.quantity}">Số lượng</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(dto.totalPrice, 0, 'COMMA', 0, 'POINT')}">Thành tiền</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="price-total">Tổng giá trị đơn hàng:</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(order.totalUnitPrice, 0, 'COMMA', 0, 'POINT')}">Tổng tiền</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">THÔNG TIN THANH TOÁN ĐẶT CỌC:</div>
+        <div class="info-row">
+            <span class="info-label">Số tiền đặt cọc (20%):</span>
+            <span class="info-value" style="font-weight: bold; font-size: 16px; color: #e74c3c;" th:text="${#numbers.formatDecimal(depositAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Hạn thanh toán:</span>
+            <span class="info-value" style="font-weight: bold; color: #e74c3c;" th:text="${paymentDeadline != null ? #temporals.format(paymentDeadline, 'dd/MM/yyyy HH:mm') : 'Chưa xác định'}"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Số tiền còn lại:</span>
+            <span class="info-value" th:text="${#numbers.formatDecimal(order.totalUnitPrice - depositAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></span>
+        </div>
+    </div>
+
+    <div class="article">
+        <div class="article-title">LƯU Ý:</div>
+        <div class="article-content">
+            <ul>
+                <li>Phiếu thỏa thuận đặt cọc này chỉ có giá trị trong vòng <strong>4 giờ</strong> kể từ thời điểm tạo.</li>
+                <li>Khách hàng cần thanh toán số tiền đặt cọc tại phòng kế toán trước thời hạn quy định.</li>
+                <li>Sau khi thanh toán đặt cọc, khách hàng sẽ được cấp <strong>Hợp đồng đặt cọc</strong> chính thức.</li>
+                <li>Nếu không thanh toán đúng hạn, đơn hàng sẽ tự động bị hủy và xe sẽ được giải phóng.</li>
+                <li>Số tiền đặt cọc sẽ được trừ vào tổng giá trị hợp đồng mua bán khi ký hợp đồng chính thức.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="signatures">
+        <div class="signature-box">
+            <h3>NGƯỜI LẬP PHIẾU</h3>
+            <p class="subtitle">(Ký và ghi rõ họ tên)</p>
+        </div>
+        <div class="signature-box">
+            <h3>KHÁCH HÀNG</h3>
+            <p class="subtitle">(Ký và ghi rõ họ tên)</p>
+            <p th:text="${customer.fullName}"></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+

@@ -51,10 +51,6 @@ public class Contract {
     @Column
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Payment> payments = new ArrayList<>();
-
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = false)
     private Order order;

@@ -1,6 +1,7 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
 import swp391.fa25.saleElectricVehicle.entity.Customer;
@@ -32,6 +33,7 @@ public class ContractServiceImpl implements ContractService {
     private ContractRepository contractRepository;
 
     @Autowired
+    @Lazy
     private OrderService orderService;
 
     @Autowired
@@ -43,26 +45,49 @@ public class ContractServiceImpl implements ContractService {
 //    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 //
     @Override
-    public ContractDto createDraftContract(CreateContractRequest request) {
+    public ContractDto createContract(CreateContractRequest request) {
         // Validate contractType không được để trống
         if (request.getContractType() == null) {
             throw new AppException(ErrorCode.CONTRACT_TYPE_REQUIRED);
         }
 
-        // Validate order, không thể tạo contract nếu chưa confirm order
         Order order = orderService.getOrderEntityById(request.getOrderId());
-        if (!order.getStatus().equals(OrderStatus.CONFIRMED)) {
-            throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS);
-        }
 
         // Kiểm tra contract cùng loại đã tồn tại chưa
         if (request.getContractType() == ContractType.DEPOSIT) {
             if (contractRepository.existsByOrder_OrderIdAndContractType(request.getOrderId(), ContractType.DEPOSIT)) {
                 throw new AppException(ErrorCode.DEPOSIT_CONTRACT_ALREADY_EXISTS);
             }
+            
+            // Validate order status phải là DEPOSIT_PAID (đã xác nhận thanh toán đặt cọc)
+            if (order.getStatus() != OrderStatus.DEPOSIT_PAID) {
+                throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
+                    "Chỉ có thể tạo hợp đồng đặt cọc cho đơn hàng đã xác nhận thanh toán đặt cọc");
+            }
         } else if (request.getContractType() == ContractType.SALE) {
             if (contractRepository.existsByOrder_OrderIdAndContractType(request.getOrderId(), ContractType.SALE)) {
                 throw new AppException(ErrorCode.SALE_CONTRACT_ALREADY_EXISTS);
+            }
+            
+            // Validate: Nếu là contract mua bán, phải có contract đặt cọc đã được ký
+            Contract depositContract = contractRepository.findByOrder_OrderIdAndContractType(
+                request.getOrderId(), ContractType.DEPOSIT).orElse(null);
+            
+            if (depositContract == null) {
+                throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
+                    "Chỉ có thể tạo hợp đồng mua bán sau khi đã có hợp đồng đặt cọc");
+            }
+            
+            // Contract đặt cọc phải đã được ký
+            if (depositContract.getStatus() != ContractStatus.DEPOSIT_SIGNED) {
+                throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
+                    "Chỉ có thể tạo hợp đồng mua bán sau khi hợp đồng đặt cọc đã được ký");
+            }
+            
+            // Order phải ở trạng thái DEPOSIT_SIGNED (đã ký hợp đồng đặt cọc)
+            if (order.getStatus() != OrderStatus.DEPOSIT_SIGNED) {
+                throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
+                    "Chỉ có thể tạo hợp đồng mua bán cho đơn hàng đã ký hợp đồng đặt cọc");
             }
         }
 
@@ -71,7 +96,6 @@ public class ContractServiceImpl implements ContractService {
 
         // Tính toán totalPayment dựa trên loại hợp đồng
         BigDecimal totalPayment;
-
         if (request.getContractType() == ContractType.DEPOSIT) {
             // Hợp đồng đặt cọc: chỉ tính 20% của tổng tiền
             totalPayment = orderTotalPayment.multiply(DEPOSIT_PERCENTAGE);
@@ -80,7 +104,7 @@ public class ContractServiceImpl implements ContractService {
             totalPayment = orderTotalPayment;
         }
 
-        // Create draft contract
+        // Create contract
         Contract contract = Contract.builder()
                 .contractDate(LocalDateTime.now().toLocalDate())
                 .contractType(request.getContractType())
@@ -96,65 +120,43 @@ public class ContractServiceImpl implements ContractService {
         contract.setContractCode("CTR" + String.format("%06d", contract.getContractId()));
         Contract saved = contractRepository.save(contract);
 
-        // Generate PDF from template (để in ra)
-//        String unsignedPdfUrl = pdfGeneratorService.generateContractPdf(saved);
+        // Update order status và set payment deadline
+        if (request.getContractType() == ContractType.DEPOSIT) {
+            // Contract đặt cọc: giữ nguyên DEPOSIT_PAID, chỉ set deadline 7 ngày để thanh toán đầy đủ
+            // Set payment deadline: 7 ngày sau khi tạo contract đặt cọc (sau khi thanh toán đặt cọc)
+            LocalDateTime paymentDeadline = LocalDateTime.now().plusDays(7);
+            order.setPaymentDeadline(paymentDeadline);
+            orderService.updateOrder(order);
+        } else {
+            // Contract mua bán: giữ nguyên status hiện tại (FULLY_PAID)
+            orderService.updateOrder(order);
+        }
 
-//         Update order
-//        order.setContract(saved);
-        order.setStatus(OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
-        orderService.updateOrder(order); // phải lưu 2 chiều
-//        orderService.updateOrderStatus(saved.getOrder(), OrderStatus.CONTRACT_PENDING); // Chờ ký hợp đồng
         return mapToDto(saved);
+    }
 
-//        // Validate contractFileUrl unique
-//        if (contractRepository.existsByContractFileUrl(contractDto.getContractFileUrl())) {
-//            throw new AppException(ErrorCode.CONTRACT_FILE_URL_EXISTED);
-//        }
-//
-//        // Validate Order exists
-//        Order order = orderRepository.findById(contractDto.getOrderId())
-//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
-//
-//        // Validate depositPrice and remainPrice
-//        if (contractDto.getDepositPrice() != null && contractDto.getDepositPrice().compareTo(BigDecimal.ZERO) < 0) {
-//            throw new AppException(ErrorCode.INVALID_NUMBER);
-//        }
-//
-//        if (contractDto.getTotalPayment() == null || contractDto.getTotalPayment().compareTo(BigDecimal.ZERO) <= 0) {
-//            throw new AppException(ErrorCode.INVALID_NUMBER);
-//        }
-//
-//        // Calculate remainPrice if not provided
-//        BigDecimal remainPrice;
-//        if (contractDto.getDepositPrice() != null) {
-//            remainPrice = contractDto.getTotalPayment().subtract(contractDto.getDepositPrice());
-//        } else {
-//            remainPrice = contractDto.getTotalPayment();
-//        }
-//
-//        // Set default status if not provided
-//        Contract.ContractStatus status;
-//        if (contractDto.getStatus() != null) {
-//            status = contractDto.getStatus();
-//        } else {
-//            status = Contract.ContractStatus.DRAFT;
-//        }
-//
-//        Contract newContract = Contract.builder()
-//                .contractDate(contractDto.getContractDate())
-//                .contractFileUrl(contractDto.getContractFileUrl())
-//                .status(status)
-//                .depositPrice(contractDto.getDepositPrice())
-//                .totalPayment(contractDto.getTotalPayment())
-//                .remainPrice(remainPrice)
-//                .terms(contractDto.getTerms())
-//                .uploadedBy(contractDto.getUploadedBy())
-//                .createdAt(LocalDateTime.now().format(formatter))
-//                .order(order)
-//                .build();
-//
-//        contractRepository.save(newContract);
-//        return mapToDto(newContract);
+    @Override
+    public boolean hasDepositContract(int orderId) {
+        return contractRepository.existsByOrder_OrderIdAndContractType(orderId, ContractType.DEPOSIT);
+    }
+
+    @Override
+    public Contract getDepositContractByOrderId(int orderId) {
+        return contractRepository.findByOrder_OrderIdAndContractType(orderId, ContractType.DEPOSIT)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND, 
+                    "Không tìm thấy hợp đồng đặt cọc cho đơn hàng này"));
+    }
+
+    @Override
+    public boolean hasSaleContract(int orderId) {
+        return contractRepository.existsByOrder_OrderIdAndContractType(orderId, ContractType.SALE);
+    }
+
+    @Override
+    public Contract getSaleContractByOrderId(int orderId) {
+        return contractRepository.findByOrder_OrderIdAndContractType(orderId, ContractType.SALE)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTRACT_NOT_FOUND, 
+                    "Không tìm thấy hợp đồng mua bán cho đơn hàng này"));
     }
 
     @Override
@@ -217,13 +219,15 @@ public class ContractServiceImpl implements ContractService {
         contract.setContractFileUrl(fileUrl);
         contract.setUpdatedAt(LocalDateTime.now());
 
-        // Nếu totalPayment = 0, tự động set FULLY_PAID, không cần SIGNED
-        if (contract.getTotalPayment().compareTo(BigDecimal.ZERO) <= 0) {
-            contract.setStatus(ContractStatus.FULLY_PAID);
-            orderService.updateOrderStatus(contract.getOrder(), OrderStatus.FULLY_PAID);
-        } else {
-            contract.setStatus(ContractStatus.SIGNED); // Đã ký
-            orderService.updateOrderStatus(contract.getOrder(), OrderStatus.CONTRACT_SIGNED);
+        // Update contract status dựa trên contract type
+        if (contract.getContractType() == ContractType.DEPOSIT) {
+            // Hợp đồng đặt cọc: sau khi upload → DEPOSIT_SIGNED
+            contract.setStatus(ContractStatus.DEPOSIT_SIGNED);
+            orderService.updateOrderStatus(contract.getOrder(), OrderStatus.DEPOSIT_SIGNED);
+        } else if (contract.getContractType() == ContractType.SALE) {
+            // Hợp đồng mua bán: sau khi upload → SALE_SIGNED
+            contract.setStatus(ContractStatus.SALE_SIGNED);
+            orderService.updateOrderStatus(contract.getOrder(), OrderStatus.SALE_SIGNED);
         }
 
         contractRepository.save(contract);

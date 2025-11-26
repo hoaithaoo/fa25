@@ -1,8 +1,10 @@
 package swp391.fa25.saleElectricVehicle.payload.response.order;
 
 import lombok.*;
+import swp391.fa25.saleElectricVehicle.payload.dto.VehicleDto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
@@ -31,4 +33,7 @@ public class GetOrderDetailsResponse {
     private BigDecimal discountAmount;
 
     private BigDecimal totalPrice;
+
+    // Danh sách vehicles được gán vào order detail này (nếu có)
+    private List<VehicleDto> vehicles;
 }

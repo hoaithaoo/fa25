@@ -49,10 +49,10 @@ public class ContractController {
     @Autowired
     private StoreService storeService;
 
-    // Tạo hợp đồng nháp
+    // Tạo hợp đồng (đặt cọc hoặc mua bán)
     @PostMapping("/contracts")
     public ResponseEntity<Map<String, Object>> createContract(@RequestBody CreateContractRequest request) {
-        ContractDto created = contractService.createDraftContract(request);
+        ContractDto created = contractService.createContract(request);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Contract created successfully");
@@ -87,6 +87,7 @@ public class ContractController {
                 .contentType(MediaType.TEXT_HTML)
                 .body(htmlContent);
     }
+
 
     // Upload hợp đồng đã ký
     @PostMapping(

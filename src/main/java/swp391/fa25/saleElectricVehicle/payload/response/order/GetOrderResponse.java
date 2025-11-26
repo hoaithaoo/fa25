@@ -2,7 +2,6 @@ package swp391.fa25.saleElectricVehicle.payload.response.order;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.*;
@@ -22,6 +21,8 @@ public class GetOrderResponse {
     private BigDecimal totalTaxPrice;
     private BigDecimal totalPromotionAmount;
     private BigDecimal totalPayment;
+    private BigDecimal paidAmount; // Số tiền đã thanh toán
+    private BigDecimal remainingAmount; // Số tiền còn lại (totalPayment - paidAmount)
     private String status;
 
 //    private int contractId;
