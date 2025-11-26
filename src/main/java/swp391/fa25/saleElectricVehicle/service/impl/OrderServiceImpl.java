@@ -1,12 +1,15 @@
 package swp391.fa25.saleElectricVehicle.service.impl;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.ContractStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.OrderStatus;
+import swp391.fa25.saleElectricVehicle.entity.entity_enum.VehicleStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.OrderDetailsDto;
@@ -27,6 +30,7 @@ import java.util.List;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+    private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     @Autowired
     OrderRepository orderRepository;
@@ -42,6 +46,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     StoreStockService storeStockService;
+
+    @Autowired
+    VehicleService vehicleService;
 
     @Override
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
@@ -115,14 +122,17 @@ public class OrderServiceImpl implements OrderService {
         }
 
         List<OrderDetail> list = order.getOrderDetails();
-        int count = 0;
+        // Mỗi detail = 1 vehicle, đếm số detail = số xe
+        int count = list.size();
         BigDecimal totalUnitPrice = BigDecimal.ZERO;
         BigDecimal totalTaxPrice = BigDecimal.ZERO;
         BigDecimal totalDiscount = BigDecimal.ZERO;
         for (OrderDetail detail : list) {
-            count += detail.getQuantity(); // đếm tổng số lượng xe trong đơn hàng
+            // Mỗi detail = 1 vehicle, không nhân với quantity
             totalUnitPrice = totalUnitPrice.add(detail.getUnitPrice());
-            totalTaxPrice = totalTaxPrice.add(detail.getLicensePlateFee().add(detail.getRegistrationFee()));
+            // Các loại phí khác = serviceFee + otherTax
+            BigDecimal otherFees = detail.getServiceFee().add(detail.getOtherTax());
+            totalTaxPrice = totalTaxPrice.add(detail.getLicensePlateFee().add(otherFees));
             totalDiscount = totalDiscount.add(detail.getDiscountAmount());
         }
 
@@ -136,10 +146,13 @@ public class OrderServiceImpl implements OrderService {
                                 .seatingCapacity(od.getStoreStock().getModelColor().getModel().getSeatingCapacity())
                                 .bodyType(od.getStoreStock().getModelColor().getModel().getBodyType().name())
                                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
-                                .quantity(od.getQuantity())
+                                .vin(od.getVehicle() != null ? od.getVehicle().getVin() : null)
+                                .engineNo(od.getVehicle() != null ? od.getVehicle().getEngineNo() : null)
+                                .batteryNo(od.getVehicle() != null ? od.getVehicle().getBatteryNo() : null)
+                                // .quantity(1) // Mỗi detail = 1 vehicle
                                 .unitPrice(od.getUnitPrice())
                                 .discount(od.getDiscountAmount())
-                                .totalTax(od.getLicensePlateFee().add(od.getRegistrationFee())) // biển số và đăng ký
+                                .totalTax(od.getLicensePlateFee().add(od.getServiceFee().add(od.getOtherTax()))) // biển số và các loại phí khác
                                 .totalPrice(od.getTotalPrice())
                                 .build())
                         .toList())
@@ -154,6 +167,7 @@ public class OrderServiceImpl implements OrderService {
                 .storeId(order.getStore().getStoreId())
                 .storeName(order.getStore().getStoreName())
                 .storeAddress(order.getStore().getAddress())
+                .paymentDeadline(order.getPaymentDeadline())
                 .build();
     }
 
@@ -186,25 +200,39 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void updateOrderStatus(Order order, OrderStatus status) {
-        // ✅ Khi order được DELIVERED, trừ stock thực tế và unlock reserved
-        if (status == OrderStatus.DELIVERED && order.getStatus() != OrderStatus.DELIVERED) {
-            for (OrderDetail orderDetail : order.getOrderDetails()) {
-                StoreStock stock = orderDetail.getStoreStock();
-                
-                // Trừ số lượng thực tế
-                stock.setQuantity(stock.getQuantity() - orderDetail.getQuantity());
-                
-                // Unlock reserved quantity
-                stock.setReservedQuantity(Math.max(0, stock.getReservedQuantity() - orderDetail.getQuantity()));
-                
-                storeStockService.updateStoreStock(stock);
-            }
-        }
-        
         order.setStatus(status);
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
+
+    @Override
+    public void updateOrderStatusWithDeadline(Order order, OrderStatus status, LocalDateTime paymentDeadline) {
+        order.setStatus(status);
+        order.setPaymentDeadline(paymentDeadline);
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
+    }
+
+//    private void updateOrderStatusInternal(Order order, OrderStatus status) {
+//        // ✅ Khi order được DELIVERED, trừ stock thực tế và unlock reserved
+//        if (status == OrderStatus.DELIVERED && order.getStatus() != OrderStatus.DELIVERED) {
+//            for (OrderDetail orderDetail : order.getOrderDetails()) {
+//                StoreStock stock = orderDetail.getStoreStock();
+//
+//                // Mỗi detail = 1 vehicle, trừ 1
+//                stock.setQuantity(stock.getQuantity() - 1);
+//
+//                // Unlock reserved quantity: mỗi detail unlock 1
+//                stock.setReservedQuantity(Math.max(0, stock.getReservedQuantity() - 1));
+//
+//                storeStockService.updateStoreStock(stock);
+//            }
+//        }
+//
+//        order.setStatus(status);
+//        order.setUpdatedAt(LocalDateTime.now());
+//        orderRepository.save(order);
+//    }
 
     @Override
     @Transactional
@@ -217,12 +245,12 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
 
-        // ✅ Validation: Order phải thuộc store của user hiện tại
+        // Validation: Order phải thuộc store của user hiện tại
         if (order.getStore() == null || order.getStore().getStoreId() != store.getStoreId()) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
 
-        // ✅ Validation: Order status phải là DRAFT
+        // Validation: Order status phải là DRAFT
         if (order.getStatus() != OrderStatus.DRAFT) {
             throw new AppException(ErrorCode.ORDER_NOT_EDITABLE, 
                 "Chỉ có thể xác nhận đơn hàng ở trạng thái DRAFT");
@@ -233,21 +261,22 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.ORDER_NO_ITEMS);
         }
 
-        // ✅ Reserve stock cho tất cả order details
+        // Reserve stock cho tất cả order details
+        // Mỗi detail = 1 vehicle, mỗi detail reserve 1
         for (OrderDetail orderDetail : order.getOrderDetails()) {
             StoreStock stock = orderDetail.getStoreStock();
             int availableStock = stock.getQuantity() - stock.getReservedQuantity();
 
-            if (availableStock < orderDetail.getQuantity()) {
+            // Mỗi detail = 1 vehicle, chỉ cần check >= 1
+            if (availableStock < 1) {
                 throw new AppException(ErrorCode.INSUFFICIENT_STOCK,
-                    String.format("Sản phẩm %s không đủ hàng để xác nhận đơn. Còn %d, yêu cầu %d",
+                    String.format("Sản phẩm %s không đủ hàng để xác nhận đơn. Còn %d",
                         stock.getModelColor().getModel().getModelName(),
-                        availableStock,
-                        orderDetail.getQuantity()));
+                        availableStock));
             }
 
-            // Reserve stock
-            stock.setReservedQuantity(stock.getReservedQuantity() + orderDetail.getQuantity());
+            // giữ chỗ cho đơn hàng: mỗi detail reserve 1
+            stock.setReservedQuantity(stock.getReservedQuantity() + 1);
             storeStockService.updateStoreStock(stock);
         }
 
@@ -328,10 +357,9 @@ public class OrderServiceImpl implements OrderService {
         for (OrderDetail orderDetail : order.getOrderDetails()) {
             StoreStock stock = orderDetail.getStoreStock();
             int currentReserved = stock.getReservedQuantity();
-            int unlockAmount = orderDetail.getQuantity();
 
-            // Đảm bảo không unlock quá số đã reserve
-            stock.setReservedQuantity(Math.max(0, currentReserved - unlockAmount));
+            // Mỗi detail = 1 vehicle, unlock 1
+            stock.setReservedQuantity(Math.max(0, currentReserved - 1));
             storeStockService.updateStoreStock(stock);
         }
     }
@@ -503,24 +531,25 @@ public class OrderServiceImpl implements OrderService {
                                 .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
                                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
                                 .unitPrice(od.getUnitPrice())
-                                .quantity(od.getQuantity())
-//                                .vatAmount(od.getVatAmount())
-                                .licensePlateFee(od.getLicensePlateFee())
-                                .registrationFee(od.getRegistrationFee())
+                                // .quantity(1) // Mỗi detail = 1 vehicle
+                                .licensePlateFee(od.getLicensePlateFee()) // phí biển số
+                                .serviceFee(od.getServiceFee()) // phí đăng ký biển số
+                                .otherTax(od.getOtherTax()) // thuế khác
+                                .otherFees(od.getServiceFee().add(od.getOtherTax())) // phí khác (gồm phí đăng ký biển số + thuế khác)
                                 .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : null)
                                 .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
                                 .discountAmount(od.getDiscountAmount())
                                 .totalPrice(od.getTotalPrice())
                                 .build())
                         .toList())
-                .totalPrice(order.getTotalPrice())
+                .totalPrice(order.getTotalPrice()) // giá trị trước thuế và khuyến mãi
                 .totalTaxPrice(order.getTotalTaxPrice())
                 .totalPromotionAmount(order.getTotalPromotionAmount())
                 .totalPayment(order.getTotalPayment())
                 .status(order.getStatus().name())
-                .contractId(order.getContract() != null ? order.getContract().getContractId() : 0)
-                .contractCode(order.getContract() != null ? order.getContract().getContractCode() : null)
-                .urlContractFile(order.getContract() != null ? order.getContract().getContractFileUrl() : null)
+//                .contractId(order.getContract() != null ? order.getContract().getContractId() : 0)
+//                .contractCode(order.getContract() != null ? order.getContract().getContractCode() : null)
+//                .urlContractFile(order.getContract() != null ? order.getContract().getContractFileUrl() : null)
                 .customerId(order.getCustomer().getCustomerId())
                 .customerName(order.getCustomer().getFullName())
                 .customerPhone(order.getCustomer().getPhone())
@@ -530,6 +559,7 @@ public class OrderServiceImpl implements OrderService {
                 .storeId(order.getStore().getStoreId())
                 .storeName(order.getStore().getStoreName())
                 .orderDate(order.getOrderDate())
+                .paymentDeadline(order.getPaymentDeadline())
                 .build();
     }
 
@@ -553,68 +583,105 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // ✅ Auto-cancel CONFIRMED orders không thanh toán đặt cọc sau 48 giờ
-    @Scheduled(fixedRate = 3600000) // Mỗi giờ
-    @Transactional
-    public void autoCancelUnpaidConfirmedOrders() {
-        LocalDateTime expiryTime = LocalDateTime.now().minusHours(48); // 48 giờ sau khi CONFIRMED
-
-        List<Order> unpaidOrders = orderRepository.findByStatusAndUpdatedAtBefore(
-            OrderStatus.CONFIRMED,
-            expiryTime
-        );
-
-        for (Order order : unpaidOrders) {
-            // Kiểm tra xem đã có payment deposit chưa
-            boolean hasDepositPayment = false;
-            if (order.getContract() != null) {
-                // Kiểm tra contract status
-                if (order.getContract().getStatus() == ContractStatus.DEPOSIT_PAID
-                        || order.getContract().getStatus() == ContractStatus.FULLY_PAID
-                        || order.getContract().getStatus() == ContractStatus.COMPLETED) {
-                    hasDepositPayment = true;
-                }
-            }
-
-            // Nếu chưa có deposit payment thì hủy và unlock stock
-            if (!hasDepositPayment) {
-                unlockStockForOrder(order);
-                order.setStatus(OrderStatus.CANCELLED);
-                order.setUpdatedAt(LocalDateTime.now());
-                orderRepository.save(order);
-            }
-        }
-    }
+//    @Scheduled(fixedRate = 3600000) // Mỗi giờ
+//    @Transactional
+//    public void autoCancelUnpaidConfirmedOrders() {
+//        LocalDateTime expiryTime = LocalDateTime.now().minusHours(48); // 48 giờ sau khi CONFIRMED
+//
+//        List<Order> unpaidOrders = orderRepository.findByStatusAndUpdatedAtBefore(
+//            OrderStatus.CONFIRMED,
+//            expiryTime
+//        );
+//
+//        for (Order order : unpaidOrders) {
+//            // Kiểm tra xem đã có payment deposit chưa
+//            boolean hasDepositPayment = false;
+//            if (order.getContract() != null) {
+//                // Kiểm tra contract status
+//                if (order.getContract().getStatus() == ContractStatus.DEPOSIT_PAID
+//                        || order.getContract().getStatus() == ContractStatus.FULLY_PAID
+//                        || order.getContract().getStatus() == ContractStatus.COMPLETED) {
+//                    hasDepositPayment = true;
+//                }
+//            }
+//
+//            // Nếu chưa có deposit payment thì hủy và unlock stock
+//            if (!hasDepositPayment) {
+//                unlockStockForOrder(order);
+//                order.setStatus(OrderStatus.CANCELLED);
+//                order.setUpdatedAt(LocalDateTime.now());
+//                orderRepository.save(order);
+//            }
+//        }
+//    }
 
     // ✅ Auto-cancel CONTRACT_PENDING orders không ký hợp đồng sau 72 giờ
-    @Scheduled(fixedRate = 3600000) // Mỗi giờ
-    @Transactional
-    public void autoCancelUnsignedContractOrders() {
-        LocalDateTime expiryTime = LocalDateTime.now().minusHours(72); // 72 giờ sau khi CONTRACT_PENDING
+//    @Scheduled(fixedRate = 3600000) // Mỗi giờ
+//    @Transactional
+//    public void autoCancelUnsignedContractOrders() {
+//        LocalDateTime expiryTime = LocalDateTime.now().minusHours(72); // 72 giờ sau khi CONTRACT_PENDING
+//
+//        List<Order> unsignedOrders = orderRepository.findByStatusAndUpdatedAtBefore(
+//            OrderStatus.CONTRACT_PENDING,
+//            expiryTime
+//        );
+//
+//        for (Order order : unsignedOrders) {
+//            // Kiểm tra xem contract đã được ký chưa
+//            boolean isContractSigned = false;
+//            if (order.getContract() != null) {
+//                if (order.getContract().getStatus() == ContractStatus.SIGNED
+//                        || order.getContract().getStatus() == ContractStatus.DEPOSIT_PAID
+//                        || order.getContract().getStatus() == ContractStatus.FULLY_PAID
+//                        || order.getContract().getStatus() == ContractStatus.COMPLETED) {
+//                    isContractSigned = true;
+//                }
+//            }
+//
+//            // Nếu chưa ký hợp đồng thì hủy và unlock stock
+//            if (!isContractSigned) {
+//                unlockStockForOrder(order);
+//                order.setStatus(OrderStatus.CANCELLED);
+//                order.setUpdatedAt(LocalDateTime.now());
+//                orderRepository.save(order);
+//            }
+//        }
+//    }
 
-        List<Order> unsignedOrders = orderRepository.findByStatusAndUpdatedAtBefore(
-            OrderStatus.CONTRACT_PENDING,
-            expiryTime
+    // ✅ Auto-expire DEPOSIT_PAID orders quá hạn thanh toán (7 ngày sau khi đặt cọc)
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Ho_Chi_Minh") // Chạy mỗi ngày lúc 00:00
+    @Transactional
+    public void autoExpireOrdersWithExpiredPaymentDeadline() {
+        LocalDateTime now = LocalDateTime.now();
+        logger.info("Checking orders with expired payment deadline at {}", now);
+
+        // Tìm các orders có status DEPOSIT_PAID và đã quá hạn thanh toán
+        List<Order> expiredOrders = orderRepository.findOrdersWithExpiredPaymentDeadline(
+            OrderStatus.DEPOSIT_PAID, 
+            now
         );
 
-        for (Order order : unsignedOrders) {
-            // Kiểm tra xem contract đã được ký chưa
-            boolean isContractSigned = false;
-            if (order.getContract() != null) {
-                if (order.getContract().getStatus() == ContractStatus.SIGNED
-                        || order.getContract().getStatus() == ContractStatus.DEPOSIT_PAID
-                        || order.getContract().getStatus() == ContractStatus.FULLY_PAID
-                        || order.getContract().getStatus() == ContractStatus.COMPLETED) {
-                    isContractSigned = true;
+        for (Order order : expiredOrders) {
+            // Unlock reserved stock
+            unlockStockForOrder(order);
+            
+            // Chuyển vehicle về AVAILABLE lại
+            for (OrderDetail orderDetail : order.getOrderDetails()) {
+                if (orderDetail.getVehicle() != null) {
+                    vehicleService.updateVehicleStatusById(
+                        orderDetail.getVehicle().getVehicleId(), 
+                        VehicleStatus.AVAILABLE
+                    );
                 }
             }
-
-            // Nếu chưa ký hợp đồng thì hủy và unlock stock
-            if (!isContractSigned) {
-                unlockStockForOrder(order);
-                order.setStatus(OrderStatus.CANCELLED);
-                order.setUpdatedAt(LocalDateTime.now());
-                orderRepository.save(order);
-            }
+            
+            // Cập nhật status thành EXPIRED
+            order.setStatus(OrderStatus.EXPIRED);
+            order.setUpdatedAt(now);
+            orderRepository.save(order);
+            logger.info("Order {} has been expired due to payment deadline passed. Stock unlocked and vehicles set to AVAILABLE", order.getOrderCode());
         }
+
+        logger.info("Expired {} orders with payment deadline passed", expiredOrders.size());
     }
 }

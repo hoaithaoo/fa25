@@ -21,8 +21,8 @@ public class OrderDetail {
     @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(nullable = false)
-    private int quantity;
+    // @Column(nullable = false)
+    // private int quantity;
 
 //    @Column(nullable = false)
 //    private BigDecimal vatAmount;
@@ -31,7 +31,10 @@ public class OrderDetail {
     private BigDecimal licensePlateFee;
 
     @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
-    private BigDecimal registrationFee;
+    private BigDecimal serviceFee;
+
+    @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
+    private BigDecimal otherTax;
 
     @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal discountAmount;
@@ -54,9 +57,10 @@ public class OrderDetail {
     private Promotion promotion;
 
     @OneToOne
-    @JoinColumn(name = "vehicleId", nullable = false)
+    @JoinColumn(name = "vehicleId")
     private Vehicle vehicle;
 
+    // giữ để tạo báo giá
     @ManyToOne
     @JoinColumn(name = "storeStockId", nullable = false)
     private StoreStock storeStock;

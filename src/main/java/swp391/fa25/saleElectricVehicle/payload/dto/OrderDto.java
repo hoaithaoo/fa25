@@ -31,4 +31,6 @@ public class OrderDto {
     private int storeId;
     private String storeName;
     private String storeAddress;
+
+    private LocalDateTime paymentDeadline; // hạn thanh toán số tiền còn lại (7 ngày sau khi đặt cọc, nếu có)
 }

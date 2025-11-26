@@ -39,17 +39,8 @@ public class Contract {
     @Enumerated(EnumType.STRING)
     private ContractStatus status;
 
-    @Column(columnDefinition = "DECIMAL(15,0)")
-    private BigDecimal depositPrice;
-
     @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal totalPayment;
-
-    @Column(columnDefinition = "DECIMAL(15,0)")
-    private BigDecimal remainPrice;
-
-    @Column(columnDefinition = "NVARCHAR(1000)")
-    private String terms;
 
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String uploadedBy;
@@ -61,13 +52,14 @@ public class Contract {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Payment> payments = new ArrayList<>();
 
-//    @ManyToOne
-//    @JoinColumn(name = "orderId", nullable = false)
-//    private Order order;
-
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "orderId", nullable = false)
     private Order order;
+
+//    @OneToOne
+//    @JoinColumn(name = "orderId", nullable = false)
+//    private Order order;
 }

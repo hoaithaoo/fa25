@@ -8,6 +8,7 @@ import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderDetailsRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.order.CreateOrderWithItemsRequest;
+import swp391.fa25.saleElectricVehicle.payload.request.order.VehicleAssignment;
 import swp391.fa25.saleElectricVehicle.payload.response.order.*;
 import swp391.fa25.saleElectricVehicle.repository.*;
 import swp391.fa25.saleElectricVehicle.service.*;
@@ -15,6 +16,7 @@ import swp391.fa25.saleElectricVehicle.service.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +51,13 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     @Autowired
     private UserService userService;
 
-    private final double VAT_AMOUNT_RATE = (double) 10 /100; // 10%
-    private final BigDecimal LICENSE_PLATE_AMOUNT_20M = BigDecimal.valueOf(20000000); // 20 millions VND
-    private final BigDecimal LICENSE_PLATE_AMOUNT_200K = BigDecimal.valueOf(200000); // 20 thousands VND
-    private final BigDecimal REGISTRATION_FEE_AMOUNT = BigDecimal.valueOf(1500000); // 1.5 millions VND
+    @Autowired
+    private VehicleService vehicleService;
+
+    private final BigDecimal LICENSE_PLATE_FEE_HCM_HN = BigDecimal.valueOf(10000000); // 10 millions VND - Hà Nội và TP. Hồ Chí Minh
+    private final BigDecimal LICENSE_PLATE_FEE_OTHER = BigDecimal.valueOf(1000000); // 1 million VND - các tỉnh thành khác
+    private final BigDecimal SERVICE_FEE_AMOUNT = BigDecimal.valueOf(1500000); // 1.5 millions VND - phí đăng ký biển số (cố định)
+    private final BigDecimal OTHER_TAX_AMOUNT = BigDecimal.valueOf(2500000); // 2.5 millions VND - các loại thuế khác (hardcode)
 
 // =============== CRUD OPERATIONS ===============
 
@@ -66,7 +71,7 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             throw new AppException(ErrorCode.ORDER_NOT_EDITABLE);
         }
 
-        // ✅ Validation: Không cho phép tạo quote nếu order đã có order details
+        // Validation: Không cho phép tạo quote nếu order đã có order details
         if (!order.getOrderDetails().isEmpty()) {
             throw new AppException(ErrorCode.ORDER_ALREADY_HAS_DETAILS);
         }
@@ -75,45 +80,26 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         User staff = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(staff.getUserId());
 
-        // ✅ Validation: Order phải thuộc store của user hiện tại
+        // Validation: Order phải thuộc store của user hiện tại
         if (order.getStore() == null || order.getStore().getStoreId() != store.getStoreId()) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
 
         // default để tính toán tổng
         List<OrderDetail> orderDetails = order.getOrderDetails();
-        BigDecimal price = BigDecimal.ZERO;
         BigDecimal totalOrderPrice = BigDecimal.ZERO;
         BigDecimal totalTax = BigDecimal.ZERO;
         BigDecimal totalPromotions = BigDecimal.ZERO;
         BigDecimal finalAmount = BigDecimal.ZERO;
 
-        // ✅ Tổng phí biển số và đăng ký cho tất cả items
+        // Tổng phí biển số và các loại phí khác cho tất cả items
         BigDecimal totalLicensePlateFee = BigDecimal.ZERO;
-        BigDecimal totalRegistrationFee = BigDecimal.ZERO;
+        BigDecimal totalServiceFee = BigDecimal.ZERO;
+        BigDecimal totalOtherTax = BigDecimal.ZERO;
 
-        // ✅ Merge duplicate items (cùng model + color) bằng cách cộng dồn quantity
-        java.util.Map<String, CreateOrderDetailsRequest> mergedItems = new java.util.HashMap<>();
-        
-        for (int i = 0; i < request.getOrderDetails().size(); i++) {
-            CreateOrderDetailsRequest itemReq = request.getOrderDetails().get(i);
-            
-            // ✅ Validation: quantity phải > 0
-            if (itemReq.getQuantity() <= 0) {
-                throw new AppException(ErrorCode.INVALID_NUMBER, "Số lượng phải lớn hơn 0");
-            }
-            
-            // ✅ Merge duplicate items: nếu đã có item với cùng model+color thì cộng dồn quantity
-            String itemKey = itemReq.getModelId() + "_" + itemReq.getColorId();
-            if (mergedItems.containsKey(itemKey)) {
-                CreateOrderDetailsRequest existingItem = mergedItems.get(itemKey);
-                // Cộng dồn quantity, giữ promotionId của item đầu tiên
-                existingItem.setQuantity(existingItem.getQuantity() + itemReq.getQuantity());
-            } else {
-                mergedItems.put(itemKey, itemReq);
-            }
-        }
-        
+        // Merge duplicate items (cùng model + color) bằng cách cộng dồn quantity
+        Map<String, CreateOrderDetailsRequest> mergedItems = mergeDuplicateItem(request);
+
         // Xử lý các items đã được merge
         for (CreateOrderDetailsRequest itemReq : mergedItems.values()) {
 
@@ -138,93 +124,105 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     modelColor.getModelColorId()
             );
 
-            // ✅ Validate stock availability (available = quantity - reservedQuantity)
+            // kiểm tra xem còn đủ xe có sẵn không (available = quantity - reservedQuantity)
             int availableStock = stock.getQuantity() - stock.getReservedQuantity();
             validateStockAvailability(stock, itemReq.getQuantity(), availableStock);
 
-            // đơn giá bao gồm cả VAT
-            BigDecimal unitPriceAfterVat = stock.getPriceOfStore()
-                    .add(stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)));
-            // tổng tiền xe (đã gồm vat)
-            totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
-
-            // ✅ Tính phí biển số và đăng ký cho từng item
-            BigDecimal itemLicensePlateFee = BigDecimal.ZERO;
-            BigDecimal itemRegistrationFee = BigDecimal.ZERO;
+            // đơn giá KHÔNG bao gồm VAT (đã bỏ VAT)
+            BigDecimal unitPrice = stock.getPriceOfStore();
             
-            if (request.isIncludeLicensePlateService()) {
-                // Khách chọn dịch vụ đăng ký biển số
-                itemLicensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
-                if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
-                        || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
-                    itemLicensePlateFee = LICENSE_PLATE_AMOUNT_20M.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-                }
-                itemRegistrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-                
-                // ✅ Cộng dồn vào tổng
-                totalLicensePlateFee = totalLicensePlateFee.add(itemLicensePlateFee);
-                totalRegistrationFee = totalRegistrationFee.add(itemRegistrationFee);
-            }
-
-            totalTax = totalTax.add(itemLicensePlateFee).add(itemRegistrationFee);
-
-            // Calculate discount amount
+            // Calculate promotion (tính cho 1 xe)
             Promotion promotion = null;
-            BigDecimal discountAmount = BigDecimal.ZERO;
+            BigDecimal discountPerVehicle = BigDecimal.ZERO;
             if (itemReq.getPromotionId() != null && itemReq.getPromotionId() > 0) {
                 // Chỉ lấy promotion của đại lý (không phải hãng) và còn active
                 promotion = promotionService.getStorePromotionEntityById(itemReq.getPromotionId());
                 
-                // ✅ Validation: Promotion phải thuộc model của item
+                // Validation: Promotion phải thuộc model của item
                 if (promotion.getModel() == null || promotion.getModel().getModelId() != model.getModelId()) {
                     throw new AppException(ErrorCode.PROMOTION_NOT_EXIST, 
                         String.format("Khuyến mãi không áp dụng cho model %s", model.getModelName()));
                 }
                 
-                // Giả sử promotion là giảm giá theo phần trăm
+                // Tính discount cho 1 xe
                 if (promotion.getPromotionType().toString().equals("PERCENTAGE")) {
-                    discountAmount = stock.getPriceOfStore()
-                            .multiply(BigDecimal.valueOf(itemReq.getQuantity()))
+                    discountPerVehicle = stock.getPriceOfStore()
                             .multiply(promotion.getAmount().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
                 } else if (promotion.getPromotionType().toString().equals("FIXED_AMOUNT")) {
-                    discountAmount = promotion.getAmount().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                    discountPerVehicle = promotion.getAmount();
                 }
             }
-
-            // tổng tiền khuyến mãi
-            totalPromotions = totalPromotions.add(discountAmount);
-
-            // Calculate total price
-            // tính vat ở trong hàm calculateTotalPrice
-            price = calculateTotalPrice(
-                    stock.getPriceOfStore(),
-                    itemReq.getQuantity(),
-//                    vatAmount,
-                    itemLicensePlateFee,
-                    itemRegistrationFee,
-                    discountAmount
-            );
-            // calculate final amount
-            finalAmount = finalAmount.add(price);
-
-            // Create OrderDetail
-            OrderDetail orderDetail = OrderDetail.builder()
-                    // set đơn giá là giá tại cửa hàng đã bao gồm VAT
-                    .unitPrice(unitPriceAfterVat)
-                    .quantity(itemReq.getQuantity())
-                    .licensePlateFee(itemLicensePlateFee) // phí biển số theo số lượng
-                    .registrationFee(itemRegistrationFee)
-                    .discountAmount(discountAmount)
-                    .totalPrice(price) // tiền một model sau phí dịch vụ và khuyến mãi
-                    .createdAt(LocalDateTime.now())
-                    .order(order)
-                    .storeStock(stock)
-                    .promotion(promotion)
-                    .build();
-
-            // Save OrderDetail
-            OrderDetail saved = orderDetailRepository.save(orderDetail);
-            orderDetails.add(saved);
+            
+            // Tạo nhiều detail, mỗi detail = 1 vehicle
+            // Mỗi detail tương ứng với 1 vehicle, không có quantity
+            for (int i = 0; i < itemReq.getQuantity(); i++) {
+                // Tính phí cho 1 xe
+                BigDecimal itemLicensePlateFee = BigDecimal.ZERO;
+                BigDecimal itemServiceFee = BigDecimal.ZERO;
+                BigDecimal itemOtherTax = BigDecimal.ZERO;
+                
+                if (request.isIncludeLicensePlateService()) {
+                    // Khách chọn dịch vụ đăng ký biển số
+                    // Phí biển số: 10tr ở Hà Nội và TP. Hồ Chí Minh, 1tr ở nơi khác
+                    if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
+                            || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
+                        itemLicensePlateFee = LICENSE_PLATE_FEE_HCM_HN;
+                    } else {
+                        itemLicensePlateFee = LICENSE_PLATE_FEE_OTHER;
+                    }
+                    
+                    // Phí đăng ký biển số (serviceFee): 1.5tr (cố định)
+                    itemServiceFee = SERVICE_FEE_AMOUNT;
+                    
+                    // Other tax: 2.5tr (hardcode)
+                    itemOtherTax = OTHER_TAX_AMOUNT;
+                    
+                    // Cộng dồn vào tổng
+                    totalLicensePlateFee = totalLicensePlateFee.add(itemLicensePlateFee);
+                    totalServiceFee = totalServiceFee.add(itemServiceFee);
+                    totalOtherTax = totalOtherTax.add(itemOtherTax);
+                }
+                
+                // Các loại phí khác = phí đăng ký biển số (serviceFee) + other tax
+                BigDecimal itemOtherFees = itemServiceFee.add(itemOtherTax);
+                totalTax = totalTax.add(itemLicensePlateFee).add(itemOtherFees);
+                
+                // Tính total price cho 1 xe
+                BigDecimal priceForOneVehicle = calculateTotalPrice(
+                        stock.getPriceOfStore(),
+                        1, // Mỗi detail = 1 vehicle
+                        itemLicensePlateFee,
+                        itemServiceFee,
+                        itemOtherTax,
+                        discountPerVehicle
+                );
+                
+                // Cộng vào tổng
+                totalOrderPrice = totalOrderPrice.add(unitPrice);
+                totalPromotions = totalPromotions.add(discountPerVehicle);
+                finalAmount = finalAmount.add(priceForOneVehicle);
+                
+                // Create OrderDetail - mỗi detail = 1 vehicle, không có quantity field
+                // báo giá chưa có xe cụ thể nên chưa gán được vehicle
+                OrderDetail orderDetail = OrderDetail.builder()
+                        // set đơn giá là giá tại cửa hàng KHÔNG bao gồm VAT
+                        .unitPrice(unitPrice)
+                        // quantity đã bị xóa, mỗi detail = 1 vehicle
+                        .licensePlateFee(itemLicensePlateFee) // phí biển số cho 1 xe
+                        .serviceFee(itemServiceFee) // phí đăng ký biển số cho 1 xe
+                        .otherTax(itemOtherTax) // các loại thuế khác cho 1 xe
+                        .discountAmount(discountPerVehicle)
+                        .totalPrice(priceForOneVehicle) // tiền cho 1 xe
+                        .createdAt(LocalDateTime.now())
+                        .order(order)
+                        .storeStock(stock)
+                        .promotion(promotion)
+                        .build();
+                
+                // Save OrderDetail
+                OrderDetail saved = orderDetailRepository.save(orderDetail);
+                orderDetails.add(saved);
+            }
         }
 
 //        if (request.isIncludeLicensePlateService()) {
@@ -263,9 +261,11 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
                                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
                                 .unitPrice(od.getUnitPrice())
-                                .quantity(od.getQuantity())
-                                .licensePlateFee(od.getLicensePlateFee())
-                                .registrationFee(od.getRegistrationFee())
+                                .quantity(1) // Mỗi detail = 1 vehicle
+                                .licensePlateFee(od.getLicensePlateFee()) // tiền biển số
+                                .serviceFee(od.getServiceFee()) // tiền đăng kí biển số
+                                .otherTax(od.getOtherTax()) // tiền các loại thuế khác
+                                .otherFees(od.getServiceFee().add(od.getOtherTax())) // phí khác (gồm phí đăng ký biển số + thuế khác)
                                 .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
                                 .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
                                 .discountAmount(od.getDiscountAmount())
@@ -273,8 +273,10 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 .build()
                         ).toList())
                 .totalPrice(order.getTotalPrice())
-                .totalLicensePlateFee(totalLicensePlateFee)
-                .totalRegistrationFee(totalRegistrationFee)
+                .totalLicensePlateFee(totalLicensePlateFee) // tổng phí biển số
+                .totalServiceFee(totalServiceFee) // tổng phí đăng kí biển số
+                .totalOtherTax(totalOtherTax) // tổng thuế khác
+                .totalOtherFees(totalServiceFee.add(totalOtherTax)) // tổng phí khác (gồm phí đăng ký biển số + thuế khác)
                 .totalPromotionAmount(order.getTotalPromotionAmount())
                 .totalPayment(order.getTotalPayment())
                 .status(order.getStatus().name())
@@ -295,75 +297,71 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         User staff = userService.getCurrentUserEntity();
         Store store = storeService.getCurrentStoreEntity(staff.getUserId());
 
-        // ✅ Validation: Order phải thuộc store của user hiện tại
+        // Validation: Order phải thuộc store của user hiện tại
         if (order.getStore() == null || order.getStore().getStoreId() != store.getStoreId()) {
             throw new AppException(ErrorCode.ORDER_NOT_EXIST);
         }
 
-        // ✅ Tối ưu: So sánh và update/delete/create từng item thay vì xóa hết rồi tạo lại
+        // Tối ưu: So sánh và update/delete/create từng item thay vì xóa hết rồi tạo lại
         List<OrderDetail> existingOrderDetails = new java.util.ArrayList<>(order.getOrderDetails());
         
         // Tạo Map từ existing order details theo key modelId_colorId để dễ tìm
-        Map<String, OrderDetail> existingDetailsMap = new HashMap<>();
+        // Map này lưu List vì có thể có nhiều detail với cùng model+color (mỗi detail = 1 vehicle)
+        Map<String, List<OrderDetail>> existingDetailsMap = new HashMap<>();
         for (OrderDetail existingDetail : existingOrderDetails) {
             int modelId = existingDetail.getStoreStock().getModelColor().getModel().getModelId();
             int colorId = existingDetail.getStoreStock().getModelColor().getColor().getColorId();
             String key = modelId + "_" + colorId;
-            existingDetailsMap.put(key, existingDetail);
+            existingDetailsMap.computeIfAbsent(key, k -> new ArrayList<>()).add(existingDetail);
         }
 
         // Merge duplicate items trong request (cùng model + color)
-        Map<String, CreateOrderDetailsRequest> mergedRequestItems = new HashMap<>();
-        
-        for (int i = 0; i < request.getOrderDetails().size(); i++) {
-            CreateOrderDetailsRequest itemReq = request.getOrderDetails().get(i);
-            
-            // ✅ Validation: quantity phải > 0
-            if (itemReq.getQuantity() <= 0) {
-                throw new AppException(ErrorCode.INVALID_NUMBER, "Số lượng phải lớn hơn 0");
-            }
-            
-            // ✅ Merge duplicate items: nếu đã có item với cùng model+color thì cộng dồn quantity
-            String itemKey = itemReq.getModelId() + "_" + itemReq.getColorId();
-            if (mergedRequestItems.containsKey(itemKey)) {
-                CreateOrderDetailsRequest existingItem = mergedRequestItems.get(itemKey);
-                // Cộng dồn quantity, giữ promotionId của item đầu tiên
-                existingItem.setQuantity(existingItem.getQuantity() + itemReq.getQuantity());
-            } else {
-                mergedRequestItems.put(itemKey, itemReq);
-            }
-        }
+        Map<String, CreateOrderDetailsRequest> mergedRequestItems = mergeDuplicateItem(request);
+//        Map<String, CreateOrderDetailsRequest> mergedRequestItems;
 
         // default để tính toán tổng
         List<OrderDetail> orderDetails = order.getOrderDetails();
-        BigDecimal price = BigDecimal.ZERO;
         BigDecimal totalOrderPrice = BigDecimal.ZERO;
         BigDecimal totalTax = BigDecimal.ZERO;
         BigDecimal totalPromotions = BigDecimal.ZERO;
         BigDecimal finalAmount = BigDecimal.ZERO;
 
-        // ✅ Tổng phí biển số và đăng ký cho tất cả items
+        // Tổng phí biển số và các loại phí khác cho tất cả items
         BigDecimal totalLicensePlateFee = BigDecimal.ZERO;
-        BigDecimal totalRegistrationFee = BigDecimal.ZERO;
+        BigDecimal totalServiceFee = BigDecimal.ZERO;
+        BigDecimal totalOtherTax = BigDecimal.ZERO;
         
         // Xử lý các items đã được merge từ request
         for (CreateOrderDetailsRequest itemReq : mergedRequestItems.values()) {
             String itemKey = itemReq.getModelId() + "_" + itemReq.getColorId();
-            OrderDetail existingDetail = existingDetailsMap.get(itemKey);
+            List<OrderDetail> existingDetailsForModelColor = existingDetailsMap.get(itemKey);
 
-            // ✅ Kiểm tra: Nếu model+color và quantity giống với cái cũ thì giữ nguyên (không update)
-            if (existingDetail != null && existingDetail.getQuantity() == itemReq.getQuantity()) {
-                // Giữ nguyên order detail cũ, chỉ tính lại vào tổng
-                totalOrderPrice = totalOrderPrice.add(existingDetail.getUnitPrice().multiply(BigDecimal.valueOf(existingDetail.getQuantity())));
-                totalTax = totalTax.add(existingDetail.getLicensePlateFee()).add(existingDetail.getRegistrationFee());
-                totalPromotions = totalPromotions.add(existingDetail.getDiscountAmount());
-                finalAmount = finalAmount.add(existingDetail.getTotalPrice());
-                totalLicensePlateFee = totalLicensePlateFee.add(existingDetail.getLicensePlateFee());
-                totalRegistrationFee = totalRegistrationFee.add(existingDetail.getRegistrationFee());
+            // Kiểm tra: Nếu model+color và số lượng detail giống với quantity mới thì giữ nguyên
+            if (existingDetailsForModelColor != null && existingDetailsForModelColor.size() == itemReq.getQuantity()) {
+                // Giữ nguyên order details cũ, chỉ tính lại vào tổng
+                for (OrderDetail existingDetail : existingDetailsForModelColor) {
+                    // Mỗi detail = 1 vehicle, không nhân với quantity
+                    totalOrderPrice = totalOrderPrice.add(existingDetail.getUnitPrice());
+                    BigDecimal itemOtherFees = existingDetail.getServiceFee().add(existingDetail.getOtherTax());
+                    totalTax = totalTax.add(existingDetail.getLicensePlateFee()).add(itemOtherFees);
+                    totalPromotions = totalPromotions.add(existingDetail.getDiscountAmount());
+                    finalAmount = finalAmount.add(existingDetail.getTotalPrice());
+                    totalLicensePlateFee = totalLicensePlateFee.add(existingDetail.getLicensePlateFee());
+                    totalServiceFee = totalServiceFee.add(existingDetail.getServiceFee());
+                    totalOtherTax = totalOtherTax.add(existingDetail.getOtherTax());
+                }
                 
                 // Đánh dấu đã xử lý để không xóa sau này
                 existingDetailsMap.remove(itemKey);
                 continue; // Skip phần còn lại, không update
+            }
+            
+            // Xóa tất cả existing details của model+color này (sẽ tạo lại)
+            if (existingDetailsForModelColor != null) {
+                for (OrderDetail detailToDelete : existingDetailsForModelColor) {
+                    orderDetailRepository.delete(detailToDelete);
+                    orderDetails.remove(detailToDelete);
+                }
             }
 
             // Get model
@@ -384,113 +382,111 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                     modelColor.getModelColorId()
             );
 
-            // ✅ Validate stock availability (available = quantity - reservedQuantity)
+            // Validate stock availability (available = quantity - reservedQuantity)
             int availableStock = stock.getQuantity() - stock.getReservedQuantity();
             validateStockAvailability(stock, itemReq.getQuantity(), availableStock);
 
-            // đơn giá bao gồm cả VAT
-            BigDecimal unitPriceAfterVat = stock.getPriceOfStore()
-                    .add(stock.getPriceOfStore().multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)));
-            // tổng tiền xe (đã gồm vat)
-            totalOrderPrice = totalOrderPrice.add(unitPriceAfterVat.multiply(BigDecimal.valueOf(itemReq.getQuantity())));
-
-            // ✅ Tính phí biển số và đăng ký cho từng item
-            BigDecimal itemLicensePlateFee = BigDecimal.ZERO;
-            BigDecimal itemRegistrationFee = BigDecimal.ZERO;
+            // đơn giá KHÔNG bao gồm VAT (đã bỏ VAT)
+            BigDecimal unitPrice = stock.getPriceOfStore();
             
-            if (request.isIncludeLicensePlateService()) {
-                // Khách chọn dịch vụ đăng ký biển số
-                itemLicensePlateFee = LICENSE_PLATE_AMOUNT_200K.multiply(BigDecimal.valueOf(itemReq.getQuantity())); // Default 200K/vehicle
-                if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
-                        || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
-                    itemLicensePlateFee = LICENSE_PLATE_AMOUNT_20M.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-                }
-                itemRegistrationFee = REGISTRATION_FEE_AMOUNT.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
-                
-                // ✅ Cộng dồn vào tổng
-                totalLicensePlateFee = totalLicensePlateFee.add(itemLicensePlateFee);
-                totalRegistrationFee = totalRegistrationFee.add(itemRegistrationFee);
-            }
-
-            totalTax = totalTax.add(itemLicensePlateFee).add(itemRegistrationFee);
-
-            // Calculate discount amount
+            // Calculate promotion (tính cho 1 xe)
             Promotion promotion = null;
-            BigDecimal discountAmount = BigDecimal.ZERO;
+            BigDecimal discountPerVehicle = BigDecimal.ZERO;
             if (itemReq.getPromotionId() != null && itemReq.getPromotionId() > 0) {
                 // Chỉ lấy promotion của đại lý (không phải hãng) và còn active
                 promotion = promotionService.getStorePromotionEntityById(itemReq.getPromotionId());
                 
-                // ✅ Validation: Promotion phải thuộc model của item
+                // Validation: Promotion phải thuộc model của item
                 if (promotion.getModel() == null || promotion.getModel().getModelId() != model.getModelId()) {
                     throw new AppException(ErrorCode.PROMOTION_NOT_EXIST, 
                         String.format("Khuyến mãi không áp dụng cho model %s", model.getModelName()));
                 }
                 
-                // Giả sử promotion là giảm giá theo phần trăm
+                // Tính discount cho 1 xe
                 if (promotion.getPromotionType().toString().equals("PERCENTAGE")) {
-                    discountAmount = stock.getPriceOfStore()
-                            .multiply(BigDecimal.valueOf(itemReq.getQuantity()))
+                    discountPerVehicle = stock.getPriceOfStore()
                             .multiply(promotion.getAmount().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
                 } else if (promotion.getPromotionType().toString().equals("FIXED_AMOUNT")) {
-                    discountAmount = promotion.getAmount().multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                    discountPerVehicle = promotion.getAmount();
                 }
             }
-
-            // tổng tiền khuyến mãi
-            totalPromotions = totalPromotions.add(discountAmount);
-
-            // Calculate total price
-            // tính vat ở trong hàm calculateTotalPrice
-            price = calculateTotalPrice(
-                    stock.getPriceOfStore(),
-                    itemReq.getQuantity(),
-                    itemLicensePlateFee,
-                    itemRegistrationFee,
-                    discountAmount
-            );
-            // calculate final amount
-            finalAmount = finalAmount.add(price);
-
-            // ✅ Tối ưu: Update existing detail nếu có và quantity khác, nếu không thì tạo mới
-            OrderDetail saved;
-            if (existingDetail != null) {
-                // Update existing order detail - giữ nguyên ID và createdAt
-                existingDetail.setUnitPrice(unitPriceAfterVat);
-                existingDetail.setQuantity(itemReq.getQuantity());
-                existingDetail.setLicensePlateFee(itemLicensePlateFee);
-                existingDetail.setRegistrationFee(itemRegistrationFee);
-                existingDetail.setDiscountAmount(discountAmount);
-                existingDetail.setTotalPrice(price);
-                existingDetail.setPromotion(promotion);
-                existingDetail.setUpdatedAt(LocalDateTime.now());
-                saved = orderDetailRepository.save(existingDetail);
-                // Đánh dấu đã xử lý để không xóa sau này
-                existingDetailsMap.remove(itemKey);
-            } else {
-                // Create new OrderDetail
+            
+            // Tạo nhiều detail, mỗi detail = 1 vehicle
+            // Mỗi detail tương ứng với 1 vehicle, không có quantity
+            for (int i = 0; i < itemReq.getQuantity(); i++) {
+                // Tính phí cho 1 xe
+                BigDecimal itemLicensePlateFee = BigDecimal.ZERO;
+                BigDecimal itemServiceFee = BigDecimal.ZERO;
+                BigDecimal itemOtherTax = BigDecimal.ZERO;
+                
+                if (request.isIncludeLicensePlateService()) {
+                    // Khách chọn dịch vụ đăng ký biển số
+                    // Phí biển số: 10tr ở Hà Nội và TP. Hồ Chí Minh, 1tr ở nơi khác
+                    if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
+                            || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
+                        itemLicensePlateFee = LICENSE_PLATE_FEE_HCM_HN;
+                    } else {
+                        itemLicensePlateFee = LICENSE_PLATE_FEE_OTHER;
+                    }
+                    
+                    // Phí đăng ký biển số (serviceFee): 1.5tr (cố định)
+                    itemServiceFee = SERVICE_FEE_AMOUNT;
+                    
+                    // Other tax: 2.5tr (hardcode)
+                    itemOtherTax = OTHER_TAX_AMOUNT;
+                    
+                    // Cộng dồn vào tổng
+                    totalLicensePlateFee = totalLicensePlateFee.add(itemLicensePlateFee);
+                    totalServiceFee = totalServiceFee.add(itemServiceFee);
+                    totalOtherTax = totalOtherTax.add(itemOtherTax);
+                }
+                
+                // Các loại phí khác = phí đăng ký biển số (serviceFee) + other tax
+                BigDecimal itemOtherFees = itemServiceFee.add(itemOtherTax);
+                totalTax = totalTax.add(itemLicensePlateFee).add(itemOtherFees);
+                
+                // Tính total price cho 1 xe
+                BigDecimal priceForOneVehicle = calculateTotalPrice(
+                        stock.getPriceOfStore(),
+                        1, // Mỗi detail = 1 vehicle
+                        itemLicensePlateFee,
+                        itemServiceFee,
+                        itemOtherTax,
+                        discountPerVehicle
+                );
+                
+                // Cộng vào tổng
+                totalOrderPrice = totalOrderPrice.add(unitPrice);
+                totalPromotions = totalPromotions.add(discountPerVehicle);
+                finalAmount = finalAmount.add(priceForOneVehicle);
+                
+                // Create OrderDetail - mỗi detail = 1 vehicle, không có quantity field
                 OrderDetail orderDetail = OrderDetail.builder()
-                        // set đơn giá là giá tại cửa hàng đã bao gồm VAT
-                        .unitPrice(unitPriceAfterVat)
-                        .quantity(itemReq.getQuantity())
-                        .licensePlateFee(itemLicensePlateFee) // phí biển số theo số lượng
-                        .registrationFee(itemRegistrationFee)
-                        .discountAmount(discountAmount)
-                        .totalPrice(price) // tiền một model sau phí dịch vụ và khuyến mãi
+                        // set đơn giá là giá tại cửa hàng KHÔNG bao gồm VAT
+                        .unitPrice(unitPrice)
+                        // quantity đã bị xóa, mỗi detail = 1 vehicle
+                        .licensePlateFee(itemLicensePlateFee) // phí biển số cho 1 xe
+                        .serviceFee(itemServiceFee) // phí đăng ký biển số cho 1 xe
+                        .otherTax(itemOtherTax) // các loại thuế khác cho 1 xe
+                        .discountAmount(discountPerVehicle)
+                        .totalPrice(priceForOneVehicle) // tiền cho 1 xe
                         .createdAt(LocalDateTime.now())
                         .order(order)
                         .storeStock(stock)
                         .promotion(promotion)
                         .build();
-                saved = orderDetailRepository.save(orderDetail);
+                
+                OrderDetail saved = orderDetailRepository.save(orderDetail);
                 orderDetails.add(saved);
             }
         }
         
-        // ✅ Xóa những order details không còn trong request
-        for (OrderDetail detailToDelete : existingDetailsMap.values()) {
-            orderDetailRepository.delete(detailToDelete);
-            orderDetails.remove(detailToDelete);
+        // Xóa những order details không còn trong request
+        for (List<OrderDetail> detailsToDelete : existingDetailsMap.values()) {
+            for (OrderDetail detailToDelete : detailsToDelete) {
+                orderDetailRepository.delete(detailToDelete);
+                orderDetails.remove(detailToDelete);
+            }
         }
 
         // Đảm bảo finalAmount không bao giờ âm (nếu âm thì set = 0)
@@ -516,9 +512,11 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
                                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
                                 .unitPrice(od.getUnitPrice())
-                                .quantity(od.getQuantity())
-                                .licensePlateFee(od.getLicensePlateFee())
-                                .registrationFee(od.getRegistrationFee())
+                                .quantity(1) // Mỗi detail = 1 vehicle
+                                .licensePlateFee(od.getLicensePlateFee()) // tiền biển số
+                                .serviceFee(od.getServiceFee()) // tiền đăng kí biển số
+                                .otherTax(od.getOtherTax()) // tiền các loại thuế khác
+                                .otherFees(od.getServiceFee().add(od.getOtherTax())) // phí khác (gồm phí đăng ký biển số + thuế khác)
                                 .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : 0)
                                 .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
                                 .discountAmount(od.getDiscountAmount())
@@ -526,83 +524,41 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                                 .build()
                         ).toList())
                 .totalPrice(order.getTotalPrice())
-                .totalLicensePlateFee(totalLicensePlateFee)
-                .totalRegistrationFee(totalRegistrationFee)
+                .totalLicensePlateFee(totalLicensePlateFee) // tổng phí biển số
+                .totalServiceFee(totalServiceFee) // tổng phí đăng kí biển số
+                .totalOtherTax(totalOtherTax) // tổng thuế khác
+                .totalOtherFees(totalServiceFee.add(totalOtherTax)) // tổng phí khác (gồm phí đăng ký biển số + thuế khác)
                 .totalPromotionAmount(order.getTotalPromotionAmount())
                 .totalPayment(order.getTotalPayment())
                 .status(order.getStatus().name())
                 .build();
     }
 
-//    @Override
-//    public GetOrderDetailsResponse getOrderDetailById(int id) {
-//        OrderDetail orderDetail = orderDetailRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
-//        return mapToDto(orderDetail);
-//    }
+    // Merge duplicate items trong request (cùng model + color) bằng cách cộng dồn quantity
+    private Map<String, CreateOrderDetailsRequest> mergeDuplicateItem(CreateOrderWithItemsRequest request) {
+        Map<String, CreateOrderDetailsRequest> mergedRequestItems = new HashMap<>();
 
-//    @Override
-//    public List<OrderDetailDto> getAllOrderDetails() {
-//        return orderDetailRepository.findAll().stream()
-//                .map(this::mapToDto)
-//                .toList();
-//    }
-//
-//    @Override
-//    public OrderDetailDto updateOrderDetail(int id, OrderDetailDto orderDetailDto) {
-//        OrderDetail orderDetail = orderDetailRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
-//
-//        // Handle quantity change (stock adjustment)
-//        if (orderDetailDto.getQuantity() != orderDetail.getQuantity()) {
-//            int oldQuantity = orderDetail.getQuantity();
-//            int newQuantity = orderDetailDto.getQuantity();
-//            int stockDifference = oldQuantity - newQuantity;
-//
-//            // Update stock
-//            StoreStock storeStock = orderDetail.getStoreStock();
-//            storeStock.setQuantity(storeStock.getQuantity() + stockDifference);
-//            storeStockRepository.save(storeStock);
-//        }
-//
-//        // Update fields
-//        orderDetail.setUnitPrice(orderDetailDto.getUnitPrice());
-//        orderDetail.setQuantity(orderDetailDto.getQuantity());
-//        orderDetail.setVatAmount(orderDetailDto.getVatAmount());
-//        orderDetail.setLicensePlateFee(orderDetailDto.getLicensePlateFee());
-//        orderDetail.setRegistrationFee(orderDetailDto.getRegistrationFee());
-//        orderDetail.setDiscountAmount(orderDetailDto.getDiscountAmount());
-//
-//        // Recalculate total price
-//        BigDecimal newTotalPrice = calculateTotalPrice(
-//                orderDetailDto.getUnitPrice(),
-//                orderDetailDto.getQuantity(),
-//                orderDetailDto.getVatAmount(),
-//                orderDetailDto.getLicensePlateFee(),
-//                orderDetailDto.getRegistrationFee(),
-//                orderDetailDto.getDiscountAmount()
-//        );
-//        orderDetail.setTotalPrice(newTotalPrice);
-//        orderDetail.setUpdatedAt(LocalDateTime.now());
-//
-//        OrderDetail saved = orderDetailRepository.save(orderDetail);
-//        return mapToDto(saved);
-//    }
-//
-//    @Override
-//    public void deleteOrderDetail(int id) {
-//        OrderDetail orderDetail = orderDetailRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
-//
-//        // Restore stock quantity
-//        StoreStock storeStock = orderDetail.getStoreStock();
-//        storeStock.setQuantity(storeStock.getQuantity() + orderDetail.getQuantity());
-//        storeStockRepository.save(storeStock);
-//
-//        orderDetailRepository.delete(orderDetail);
-//    }
-//
-//    // =============== BUSINESS OPERATIONS ===============
+        for (int i = 0; i < request.getOrderDetails().size(); i++) {
+            CreateOrderDetailsRequest itemReq = request.getOrderDetails().get(i);
+
+            // Validation: quantity phải > 0
+            if (itemReq.getQuantity() <= 0) {
+                throw new AppException(ErrorCode.INVALID_NUMBER, "Số lượng phải lớn hơn 0");
+            }
+
+            // Merge duplicate items: nếu đã có item với cùng model+color thì cộng dồn quantity
+            String itemKey = itemReq.getModelId() + "_" + itemReq.getColorId();
+            if (mergedRequestItems.containsKey(itemKey)) {
+                CreateOrderDetailsRequest existingItem = mergedRequestItems.get(itemKey);
+                // Cộng dồn quantity, giữ promotionId của item đầu tiên
+                existingItem.setQuantity(existingItem.getQuantity() + itemReq.getQuantity());
+            } else {
+                mergedRequestItems.put(itemKey, itemReq);
+            }
+        }
+        return mergedRequestItems;
+    }
+
 
     @Override
     public List<GetOrderDetailsResponse> getOrderDetailsByOrderId(int orderId) {
@@ -610,6 +566,274 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrder_OrderIdAndOrder_Store_StoreId(orderId, currentStore.getStoreId());
         return orderDetails.stream().map(this::mapToDto).toList();
+    }
+
+    /**
+     * Gán vehicles vào order details - Main method
+     * 
+     * Flow xử lý:
+     * 1. Validate input: Kiểm tra danh sách assignments không rỗng
+     * 2. Load data: Load tất cả order details và vehicles một lần (tối ưu performance)
+     * 3. Validate business rules: Kiểm tra tất cả điều kiện trước khi gán
+     * 4. Update order status: Chuyển order sang PENDING_DEPOSIT (đã gán xe, chờ đặt cọc)
+     * 5. Assign vehicles: Thực hiện gán và cập nhật các thông tin liên quan
+     * 
+     * @param assignments Danh sách các assignment (orderDetailId -> vehicleId)
+     * @return Danh sách order details đã được cập nhật
+     */
+    @Override
+    public List<GetOrderDetailsResponse> assignVehiclesToOrderDetails(List<VehicleAssignment> assignments) {
+        // ========== BƯỚC 1: VALIDATE INPUT ==========
+        // Kiểm tra danh sách assignments không null và không rỗng
+        if (assignments == null || assignments.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_NUMBER, "Danh sách gán xe không được rỗng");
+        }
+        
+        // ========== BƯỚC 2: LOAD TẤT CẢ DATA CẦN THIẾT MỘT LẦN ==========
+        // Load store hiện tại của user (để validate order details thuộc store này)
+        Store currentStore = storeService.getCurrentStoreEntity(userService.getCurrentUserEntity().getUserId());
+        
+        // Load tất cả order details vào Map (key: orderDetailId)
+        // Tối ưu: Load một lần, sử dụng lại nhiều lần thay vì query lại
+        Map<Integer, OrderDetail> orderDetailMap = loadOrderDetails(assignments, currentStore);
+        
+        // Load tất cả vehicles vào Map (key: vehicleId)
+        // Tối ưu: Load một lần, sử dụng lại nhiều lần thay vì query lại
+        Map<Long, Vehicle> vehicleMap = loadVehicles(assignments);
+        
+        // ========== BƯỚC 3: VALIDATE BUSINESS RULES ==========
+        // Validate tất cả điều kiện trước khi gán:
+        // - Vehicle status phải là AVAILABLE
+        // - Vehicle phải khớp model và color với order detail
+        // - Không có vehicle nào bị trùng lặp trong request
+        // - Vehicle chưa được gán cho order detail khác
+        validateAssignments(assignments, orderDetailMap, vehicleMap, currentStore);
+        
+        // ========== BƯỚC 4: UPDATE ORDER STATUS ==========
+        // Tất cả order details trong request phải thuộc cùng một order
+        // Lấy order từ order detail đầu tiên (tất cả đều cùng một order)
+        // Chuyển order status thành PENDING_DEPOSIT: đã gán xe, chờ khách hàng thanh toán đặt cọc
+        Order order = orderDetailMap.values().iterator().next().getOrder();
+        orderService.updateOrderStatus(order, OrderStatus.PENDING_DEPOSIT);
+        
+        // ========== BƯỚC 5: ASSIGN VEHICLES VÀ UPDATE CÁC THÔNG TIN LIÊN QUAN ==========
+        // Thực hiện gán vehicle vào order detail và cập nhật:
+        // - Vehicle status: AVAILABLE -> HOLDING
+        // - Store stock: reservedQuantity + 1
+        return assignVehiclesAndUpdate(assignments, orderDetailMap, vehicleMap);
+    }
+    
+    /**
+     * Load tất cả order details từ database và validate
+     * 
+     * @param assignments Danh sách assignments
+     * @param currentStore Store hiện tại của user
+     * @return Map chứa order details (key: orderDetailId, value: OrderDetail entity)
+     */
+    private Map<Integer, OrderDetail> loadOrderDetails(List<VehicleAssignment> assignments, Store currentStore) {
+        Map<Integer, OrderDetail> orderDetailMap = new HashMap<>();
+        
+        for (VehicleAssignment assignment : assignments) {
+            int orderDetailId = assignment.getOrderDetailId();
+            
+            // Load order detail từ database
+            OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
+            
+            // Validate order detail thuộc store hiện tại
+            // Bảo mật: Staff chỉ có thể gán xe cho order details của store mình
+            if (orderDetail.getOrder().getStore().getStoreId() != currentStore.getStoreId()) {
+                throw new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND);
+            }
+            
+            // Thêm vào Map để sử dụng lại (tránh query lại nhiều lần)
+            orderDetailMap.put(orderDetailId, orderDetail);
+        }
+        
+        return orderDetailMap;
+    }
+    
+    /**
+     * Load tất cả vehicles từ database
+     * 
+     * @param assignments Danh sách assignments
+     * @return Map chứa vehicles (key: vehicleId, value: Vehicle entity)
+     */
+    private Map<Long, Vehicle> loadVehicles(List<VehicleAssignment> assignments) {
+        Map<Long, Vehicle> vehicleMap = new HashMap<>();
+        
+        for (VehicleAssignment assignment : assignments) {
+            long vehicleId = assignment.getVehicleId();
+            
+            // Load vehicle từ service (có validation trong service)
+            Vehicle vehicle = vehicleService.getVehicleEntityById(vehicleId);
+            
+            // Thêm vào Map để sử dụng lại (tránh query lại nhiều lần)
+            vehicleMap.put(vehicleId, vehicle);
+        }
+        
+        return vehicleMap;
+    }
+    
+    /**
+     * Validate tất cả business rules trước khi gán vehicles
+     * 
+     * Các validation được thực hiện:
+     * 1. Vehicle status phải là AVAILABLE
+     *    - Nếu vehicle đã được gán cho order detail khác, status đã là HOLDING (không còn AVAILABLE)
+     *    - API get vehicle chỉ trả về vehicle có status AVAILABLE
+     *    - Nên không cần check vehicle đã được gán chưa (đã được cover bởi status check)
+     * 2. Vehicle phải khớp model và color với order detail
+     * 3. Không có vehicle nào bị trùng lặp trong request (một vehicle không thể gán cho nhiều order detail)
+     * 
+     * @param assignments Danh sách assignments
+     * @param orderDetailMap Map chứa order details đã load
+     * @param vehicleMap Map chứa vehicles đã load
+     * @param currentStore Store hiện tại (để validate nếu cần)
+     */
+    private void validateAssignments(List<VehicleAssignment> assignments, 
+                                    Map<Integer, OrderDetail> orderDetailMap,
+                                    Map<Long, Vehicle> vehicleMap,
+                                    Store currentStore) {
+        // ========== VALIDATE 1: Vehicle status và model/color match ==========
+        // Kiểm tra từng assignment: vehicle phải available và khớp với order detail
+        for (VehicleAssignment assignment : assignments) {
+            OrderDetail orderDetail = orderDetailMap.get(assignment.getOrderDetailId());
+            Vehicle vehicle = vehicleMap.get(assignment.getVehicleId());
+            
+            // Validate vehicle status = AVAILABLE
+            // Note: Nếu vehicle đã được gán cho order detail khác, status đã là HOLDING
+            // API get vehicle chỉ trả về AVAILABLE, nên không cần check vehicle đã được gán chưa
+            if (vehicle.getStatus() != swp391.fa25.saleElectricVehicle.entity.entity_enum.VehicleStatus.AVAILABLE) {
+                String vin = vehicle.getVin() != null ? vehicle.getVin() : "N/A";
+                throw new AppException(ErrorCode.VEHICLE_NOT_AVAILABLE, 
+                    String.format("Xe có VIN %s (ID: %d) không có sẵn. Trạng thái hiện tại: %s", 
+                        vin, vehicle.getVehicleId(), vehicle.getStatus()));
+            }
+            
+            // Validate vehicle khớp model và color với order detail
+            validateVehicleModelColorMatch(orderDetail, vehicle);
+        }
+        
+        // ========== VALIDATE 2: Không có vehicle trùng lặp trong request ==========
+        // Một vehicle không thể được gán cho nhiều order detail trong cùng một request
+        validateNoDuplicateVehicles(assignments, vehicleMap);
+    }
+    
+    /**
+     * Validate vehicle khớp model và color với order detail
+     * 
+     * Vehicle được gán phải có cùng model và color với order detail
+     * Ví dụ: Order detail yêu cầu "Tesla Model 3 - Đỏ" thì vehicle cũng phải là "Tesla Model 3 - Đỏ"
+     * 
+     * @param orderDetail Order detail cần gán vehicle
+     * @param vehicle Vehicle được gán
+     * @throws AppException nếu model hoặc color không khớp (có thông tin VIN và model/color)
+     */
+    private void validateVehicleModelColorMatch(OrderDetail orderDetail, Vehicle vehicle) {
+        // Lấy model và color từ order detail (qua StoreStock -> ModelColor)
+        int orderModelId = orderDetail.getStoreStock().getModelColor().getModel().getModelId();
+        int orderColorId = orderDetail.getStoreStock().getModelColor().getColor().getColorId();
+        String orderModelName = orderDetail.getStoreStock().getModelColor().getModel().getModelName();
+        String orderColorName = orderDetail.getStoreStock().getModelColor().getColor().getColorName();
+        
+        // Lấy model và color từ vehicle (qua StoreStock -> ModelColor)
+        int vehicleModelId = vehicle.getStoreStock().getModelColor().getModel().getModelId();
+        int vehicleColorId = vehicle.getStoreStock().getModelColor().getColor().getColorId();
+        String vehicleModelName = vehicle.getStoreStock().getModelColor().getModel().getModelName();
+        String vehicleColorName = vehicle.getStoreStock().getModelColor().getColor().getColorName();
+        
+        // So sánh: cả model và color phải khớp
+        if (orderModelId != vehicleModelId || orderColorId != vehicleColorId) {
+            String vin = vehicle.getVin() != null ? vehicle.getVin() : "N/A";
+            throw new AppException(ErrorCode.VEHICLE_NOT_MATCH, 
+                String.format("Xe có VIN %s (ID: %d) không khớp với đơn hàng. " +
+                    "Đơn hàng yêu cầu: %s - %s, nhưng xe là: %s - %s",
+                    vin, vehicle.getVehicleId(), 
+                    orderModelName, orderColorName,
+                    vehicleModelName, vehicleColorName));
+        }
+    }
+    
+    /**
+     * Validate không có vehicle nào bị trùng lặp trong request
+     * 
+     * Một vehicle không thể được gán cho nhiều order detail trong cùng một request
+     * Ví dụ: Không thể gán vehicle ID 100 cho cả orderDetail 1 và orderDetail 2
+     * 
+     * @param assignments Danh sách assignments
+     * @param vehicleMap Map chứa vehicles để lấy thông tin VIN
+     * @throws AppException nếu có vehicle bị trùng lặp
+     */
+    private void validateNoDuplicateVehicles(List<VehicleAssignment> assignments, Map<Long, Vehicle> vehicleMap) {
+        Map<Long, Integer> vehicleUsageMap = new HashMap<>();
+        
+        for (VehicleAssignment assignment : assignments) {
+            long vehicleId = assignment.getVehicleId();
+            
+            // Nếu vehicle đã xuất hiện trong Map -> bị trùng lặp
+            if (vehicleUsageMap.containsKey(vehicleId)) {
+                Vehicle vehicle = vehicleMap.get(vehicleId);
+                String vin = vehicle.getVin() != null ? vehicle.getVin() : "N/A";
+                int firstOrderDetailId = vehicleUsageMap.get(vehicleId);
+                throw new AppException(ErrorCode.VEHICLE_ALREADY_ASSIGNED, 
+                    String.format("Xe có VIN %s (ID: %d) được gán cho nhiều order detail trong cùng một request. " +
+                        "Đã được gán cho order detail %d, không thể gán thêm cho order detail %d",
+                        vin, vehicleId, firstOrderDetailId, assignment.getOrderDetailId()));
+            }
+            
+            // Lưu vehicle vào Map để track
+            vehicleUsageMap.put(vehicleId, assignment.getOrderDetailId());
+        }
+    }
+    
+    
+    /**
+     * Gán vehicles vào order details và cập nhật các thông tin liên quan
+     * 
+     * Flow xử lý cho mỗi assignment:
+     * 1. Gán vehicle vào order detail: Liên kết vehicle cụ thể với order detail
+     * 2. Update vehicle status: Chuyển status từ AVAILABLE -> HOLDING (xe đã được gán, chờ thanh toán đặt cọc)
+     * 
+     * Lưu ý: KHÔNG reserve stock ở đây vì đã được reserve khi confirmOrder() (theo quantity của order detail)
+     * 
+     * @param assignments Danh sách các assignment cần xử lý
+     * @param orderDetailMap Map chứa order details đã được load sẵn (key: orderDetailId)
+     * @param vehicleMap Map chứa vehicles đã được load sẵn (key: vehicleId)
+     * @return Danh sách order details đã được cập nhật (dạng DTO)
+     */
+    private List<GetOrderDetailsResponse> assignVehiclesAndUpdate(List<VehicleAssignment> assignments,
+                                                                  Map<Integer, OrderDetail> orderDetailMap,
+                                                                  Map<Long, Vehicle> vehicleMap) {
+        List<GetOrderDetailsResponse> results = new java.util.ArrayList<>();
+        
+        for (VehicleAssignment assignment : assignments) {
+            // Lấy order detail và vehicle từ Map (đã được load và validate trước đó)
+            OrderDetail orderDetail = orderDetailMap.get(assignment.getOrderDetailId());
+            Vehicle vehicle = vehicleMap.get(assignment.getVehicleId());
+            
+            // ========== BƯỚC 1: GÁN VEHICLE VÀO ORDER DETAIL ==========
+            // Liên kết vehicle cụ thể với order detail này
+            // Mối quan hệ OneToOne: mỗi order detail sẽ có một vehicle cụ thể (VIN)
+            orderDetail.setVehicle(vehicle);
+            orderDetail.setUpdatedAt(LocalDateTime.now());
+            orderDetailRepository.save(orderDetail);
+            
+            // ========== BƯỚC 2: UPDATE VEHICLE STATUS ==========
+            // Chuyển status từ AVAILABLE -> HOLDING
+            // HOLDING: Xe đã được gán cho đơn hàng, đang chờ khách hàng thanh toán đặt cọc
+            // Khi status = HOLDING, xe không còn available để gán cho đơn hàng khác
+            vehicleService.updateVehicleStatusById(assignment.getVehicleId(), 
+                swp391.fa25.saleElectricVehicle.entity.entity_enum.VehicleStatus.HOLDING);
+            
+            // Lưu ý: KHÔNG reserve stock ở đây vì đã được reserve khi confirmOrder()
+            // Stock đã được reserve theo quantity của order detail khi order chuyển sang CONFIRMED
+            
+            // Thêm vào kết quả trả về
+            results.add(mapToDto(orderDetail));
+        }
+        
+        return results;
     }
     //
 //    @Override
@@ -664,16 +888,19 @@ public class OrderDetailServiceImpl implements OrderDetailService {
         }
     }
 
-//      Override
     private BigDecimal calculateTotalPrice(BigDecimal priceOfStore, int quantity,
-//                                          BigDecimal vatAmount,
                                            BigDecimal licensePlateFee,
-                                           BigDecimal registrationFee, BigDecimal discountAmount) {
-        BigDecimal totalPrice = priceOfStore.add(priceOfStore.multiply(BigDecimal.valueOf(VAT_AMOUNT_RATE)))
-                .multiply(BigDecimal.valueOf(quantity))
-//                .add(vatAmount)
+                                           BigDecimal serviceFee,
+                                           BigDecimal otherTax,
+                                           BigDecimal discountAmount) {
+        // Đơn giá KHÔNG bao gồm VAT
+        // Mỗi detail = 1 vehicle, quantity luôn = 1
+        // Các loại phí khác = serviceFee + otherTax
+        BigDecimal otherFees = serviceFee.add(otherTax);
+        // quantity = 1 vì mỗi detail = 1 vehicle
+        BigDecimal totalPrice = priceOfStore
                 .add(licensePlateFee)
-                .add(registrationFee)
+                .add(otherFees)
                 .subtract(discountAmount);
         
         // Đảm bảo totalPrice không bao giờ âm (nếu âm thì set = 0)
@@ -688,10 +915,11 @@ public class OrderDetailServiceImpl implements OrderDetailService {
                 .colorId(od.getStoreStock().getModelColor().getColor().getColorId())
                 .colorName(od.getStoreStock().getModelColor().getColor().getColorName())
                 .unitPrice(od.getUnitPrice())
-                .quantity(od.getQuantity())
-//                .vatAmount(od.getVatAmount())
-                .licensePlateFee(od.getLicensePlateFee())
-                .registrationFee(od.getRegistrationFee())
+                .quantity(1) // Mỗi detail = 1 vehicle
+                .licensePlateFee(od.getLicensePlateFee()) // phí biển số
+                .serviceFee(od.getServiceFee()) // phí đăng ký biển số
+                .otherTax(od.getOtherTax()) // thuế khác
+                .otherFees(od.getServiceFee().add(od.getOtherTax())) // phí khác (gồm phí đăng ký biển số + thuế khác)
                 .promotionId(od.getPromotion() != null ? od.getPromotion().getPromotionId() : null)
                 .promotionName(od.getPromotion() != null ? od.getPromotion().getPromotionName() : null)
                 .discountAmount(od.getDiscountAmount())

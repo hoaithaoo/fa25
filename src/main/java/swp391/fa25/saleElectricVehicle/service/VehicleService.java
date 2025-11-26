@@ -11,9 +11,12 @@ import java.util.List;
 public interface VehicleService {
     List<VehicleDto> importVehicles(MultipartFile file, int transactionId);
     VehicleDto getVehicleById(long vehicleId);
+    Vehicle getVehicleEntityById(long vehicleId);
     List<VehicleDto> getVehiclesByInventoryTransaction(int inventoryId);
+    List<VehicleDto> getAvailableVehiclesByModelAndColor(int modelId, int colorId);
 
     void updateVehicleStatus(int inventoryId, VehicleStatus status);
+    void updateVehicleStatusById(long vehicleId, VehicleStatus status);
     void updateVehicleDate(int inventoryId, VehicleStatus status, LocalDateTime date);
     VehicleDto updateVehicleNote(int vehicleId, String note);
 }

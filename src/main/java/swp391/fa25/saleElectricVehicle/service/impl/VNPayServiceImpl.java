@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import swp391.fa25.saleElectricVehicle.config.VNPayConfig;
 import swp391.fa25.saleElectricVehicle.entity.Contract;
+import swp391.fa25.saleElectricVehicle.entity.Order;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.Transaction;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.*;
@@ -229,7 +230,10 @@ public class VNPayServiceImpl implements VNPayService {
                 // cập nhật contract status nếu đã đặt cọc hoặc thanh toán hết thành công
                 if (payment.getPaymentType().equals(PaymentType.DEPOSIT)) {
                     contractService.updateContractStatus(payment.getContract(), ContractStatus.DEPOSIT_PAID);
-                    orderService.updateOrderStatus(payment.getContract().getOrder(), OrderStatus.DEPOSIT_PAID);
+                    Order order = payment.getContract().getOrder();
+                    // Set payment deadline: 7 ngày sau khi đặt cọc thành công
+                    LocalDateTime paymentDeadline = LocalDateTime.now().plusDays(7);
+                    orderService.updateOrderStatusWithDeadline(order, OrderStatus.DEPOSIT_PAID, paymentDeadline);
                 } else if (payment.getPaymentType().equals(PaymentType.BALANCE)) {
                     contractService.updateContractStatus(payment.getContract(), ContractStatus.FULLY_PAID);
                     orderService.updateOrderStatus(payment.getContract().getOrder(), OrderStatus.FULLY_PAID);

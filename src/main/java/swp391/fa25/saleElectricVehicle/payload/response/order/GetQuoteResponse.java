@@ -17,9 +17,10 @@ public class GetQuoteResponse {
     private List<GetOrderDetailsResponse> getOrderDetailsResponses;
 
     private BigDecimal totalPrice;
-    private BigDecimal totalLicensePlateFee;
-    private BigDecimal totalRegistrationFee;
-//    private BigDecimal totalTaxPrice;
+    private BigDecimal totalLicensePlateFee; // tổng phí biển số
+    private BigDecimal totalServiceFee; // tổng phí đăng ký biển số
+    private BigDecimal totalOtherTax; // tổng thuế khác
+    private BigDecimal totalOtherFees; // tổng phí khác (gồm phí đăng ký biển số + thuế khác = totalServiceFee + totalOtherTax)
     private BigDecimal totalPromotionAmount;
     private BigDecimal totalPayment;
     private String status;

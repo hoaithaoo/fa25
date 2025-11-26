@@ -35,6 +35,10 @@ public class Order {
     @Column(columnDefinition = "DECIMAL(15,0)", nullable = false)
     private BigDecimal totalPayment;
 
+    @Column(columnDefinition = "DECIMAL(15,0)")
+    @Builder.Default
+    private BigDecimal paidAmount = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
     @Column
     private OrderStatus status;
@@ -45,12 +49,16 @@ public class Order {
     @Column
     private LocalDateTime updatedAt;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "contract_id")
-    private Contract contract;
+    @Column
+    private LocalDateTime paymentDeadline; // hạn thanh toán số tiền còn lại (7 ngày sau khi đặt cọc)
 
-//    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Contract> contracts = new ArrayList<>();
+//    @OneToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "contract_id")
+//    private Contract contract;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Contract> contracts = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
@@ -79,5 +87,6 @@ public class Order {
     private Feedback feedback;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<OrderDetail> orderDetails = new java.util.ArrayList<>();
 }

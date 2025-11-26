@@ -84,15 +84,15 @@ public class PaymentServiceImpl implements PaymentService {
                 .contract(contract)
                 .build());
 
-        if (PaymentType.DEPOSIT.equals(request.getPaymentType())) {
-            payment.setPaymentCode("DP" + String.format("%06d", payment.getPaymentId()));
-            payment.setAmount(contract.getDepositPrice()); // số tiền cần thanh toán
-            payment.setRemainPrice(contract.getDepositPrice()); // số tiền còn lại cần thanh toán
-        } else {
-            payment.setPaymentCode("BL" + String.format("%06d", payment.getPaymentId()));
-            payment.setAmount(contract.getRemainPrice()); // số tiền cần thanh toán
-            payment.setRemainPrice(contract.getRemainPrice()); // số tiền còn lại cần thanh toán
-        }
+//        if (PaymentType.DEPOSIT.equals(request.getPaymentType())) {
+//            payment.setPaymentCode("DP" + String.format("%06d", payment.getPaymentId()));
+//            payment.setAmount(contract.getDepositPrice()); // số tiền cần thanh toán
+//            payment.setRemainPrice(contract.getDepositPrice()); // số tiền còn lại cần thanh toán
+//        } else {
+//            payment.setPaymentCode("BL" + String.format("%06d", payment.getPaymentId()));
+//            payment.setAmount(contract.getRemainPrice()); // số tiền cần thanh toán
+//            payment.setRemainPrice(contract.getRemainPrice()); // số tiền còn lại cần thanh toán
+//        }
 
         // lưu lại khi đã có payment code
         paymentRepository.save(payment);

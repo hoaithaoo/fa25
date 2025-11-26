@@ -6,6 +6,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import swp391.fa25.saleElectricVehicle.entity.InventoryTransaction;
+import swp391.fa25.saleElectricVehicle.entity.Store;
+import swp391.fa25.saleElectricVehicle.entity.User;
 import swp391.fa25.saleElectricVehicle.entity.Vehicle;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.VehicleStatus;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
@@ -13,6 +15,8 @@ import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
 import swp391.fa25.saleElectricVehicle.payload.dto.VehicleDto;
 import swp391.fa25.saleElectricVehicle.repository.VehicleRepository;
 import swp391.fa25.saleElectricVehicle.service.InventoryTransactionService;
+import swp391.fa25.saleElectricVehicle.service.StoreService;
+import swp391.fa25.saleElectricVehicle.service.UserService;
 import swp391.fa25.saleElectricVehicle.service.VehicleService;
 import swp391.fa25.saleElectricVehicle.utils.ExcelHelper;
 
@@ -28,6 +32,12 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Autowired
     private InventoryTransactionService transactionService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private StoreService storeService;
 
     @Override
     @Transactional
@@ -88,11 +98,17 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public VehicleDto getVehicleById(long vehicleId) {
+        Vehicle vehicle = getVehicleEntityById(vehicleId);
+        return mapToDto(vehicle);
+    }
+
+    @Override
+    public Vehicle getVehicleEntityById(long vehicleId) {
         Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
         if (vehicle == null) {
             throw new AppException(ErrorCode.VEHICLE_NOT_FOUNDl);
         }
-        return mapToDto(vehicle);
+        return vehicle;
     }
 
     // Lấy danh sách vehicle trong inventory transaction
@@ -111,6 +127,13 @@ public class VehicleServiceImpl implements VehicleService {
         for (Vehicle vehicle : inventoryTransaction.getVehicles()) {
             vehicle.setStatus(status);
         }
+    }
+
+    @Override
+    public void updateVehicleStatusById(long vehicleId, VehicleStatus status) {
+        Vehicle vehicle = getVehicleEntityById(vehicleId);
+        vehicle.setStatus(status);
+        vehicleRepository.save(vehicle);
     }
 
     @Override
@@ -140,6 +163,24 @@ public class VehicleServiceImpl implements VehicleService {
         }
         vehicleRepository.save(vehicle);
         return mapToDto(vehicle);
+    }
+
+    @Override
+    public List<VehicleDto> getAvailableVehiclesByModelAndColor(int modelId, int colorId) {
+        // Lấy user hiện tại
+        User currentUser = userService.getCurrentUserEntity();
+        
+        // Lấy store hiện tại của user
+        Store currentStore = storeService.getCurrentStoreEntity(currentUser.getUserId());
+        
+        // Lấy danh sách vehicles theo store, model, color và status = AVAILABLE, sắp xếp theo importDate ASC
+        List<Vehicle> vehicles = vehicleRepository
+                .findByStoreStock_Store_StoreIdAndStoreStock_ModelColor_Model_ModelIdAndStoreStock_ModelColor_Color_ColorIdAndStatusOrderByImportDateAsc(
+                        currentStore.getStoreId(), modelId, colorId, VehicleStatus.AVAILABLE);
+        
+        return vehicles.stream()
+                .map(this::mapToDto)
+                .toList();
     }
 
 

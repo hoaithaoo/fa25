@@ -6,8 +6,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import swp391.fa25.saleElectricVehicle.entity.InventoryTransaction;
-import swp391.fa25.saleElectricVehicle.entity.Vehicle;
 import swp391.fa25.saleElectricVehicle.payload.dto.VehicleDto;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.service.VehicleService;
@@ -59,7 +57,7 @@ public class VehicleController {
     }
 
     @GetMapping("/inventory/{inventoryId}")
-    public ResponseEntity<ApiResponse<List<VehicleDto>>> getInventoryTransactionByInventoryId(@PathVariable int inventoryId) {
+    public ResponseEntity<ApiResponse<List<VehicleDto>>> getVehicleByInventoryId(@PathVariable int inventoryId) {
         List<VehicleDto> vehicleDtos = vehicleService.getVehiclesByInventoryTransaction(inventoryId);
         ApiResponse<List<VehicleDto>> response = ApiResponse.<List<VehicleDto>>builder()
                 .code(HttpStatus.OK.value())
@@ -76,6 +74,18 @@ public class VehicleController {
                 .code(HttpStatus.OK.value())
                 .message("Cập nhật ghi chú xe thành công")
                 .data(vehicleDto)
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping("/available/model/{modelId}/color/{colorId}")
+    public ResponseEntity<ApiResponse<List<VehicleDto>>> getAvailableVehiclesByModelAndColor(
+            @PathVariable int modelId, @PathVariable int colorId) {
+        List<VehicleDto> vehicleDtos = vehicleService.getAvailableVehiclesByModelAndColor(modelId, colorId);
+        ApiResponse<List<VehicleDto>> response = ApiResponse.<List<VehicleDto>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Lấy danh sách xe có sẵn theo model và color thành công")
+                .data(vehicleDtos)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

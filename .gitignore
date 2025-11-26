@@ -34,5 +34,6 @@ build/
 
 ### Plan files ###
 plan.plan.md
+NGHIEP_VU_BAN_XE.md
 
 database=.sql

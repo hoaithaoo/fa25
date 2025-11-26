@@ -20,6 +20,7 @@ public interface OrderService {
     List<GetOrderResponse> getAllOrdersByStore();
     void updateOrder(Order order);
     void updateOrderStatus(Order order, OrderStatus status);
+    void updateOrderStatusWithDeadline(Order order, OrderStatus status, LocalDateTime paymentDeadline);
     GetOrderResponse confirmOrder(int orderId);
     GetOrderResponse markOrderDelivered(int orderId);
     void deleteOrder(int orderId);
