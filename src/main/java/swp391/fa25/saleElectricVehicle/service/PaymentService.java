@@ -4,7 +4,6 @@ import java.util.List;
 import swp391.fa25.saleElectricVehicle.entity.Payment;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentStatus;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.PaymentType;
-import swp391.fa25.saleElectricVehicle.payload.request.payment.ConfirmCashPaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentResponse;
 
@@ -19,6 +18,6 @@ public interface PaymentService {
     void updatePaymentStatus(Payment payment, BigDecimal amount, PaymentStatus status);
     // Get payments by order and payment type
     List<Payment> getPaymentsByOrderAndPaymentType(int orderId, PaymentType paymentType);
-    // Confirm cash payment
-    GetPaymentResponse confirmCashPayment(int paymentId, ConfirmCashPaymentRequest request);
+    // Confirm cash payment - no parameters, amount auto from payment
+    GetPaymentResponse confirmCashPayment(int paymentId);
 }

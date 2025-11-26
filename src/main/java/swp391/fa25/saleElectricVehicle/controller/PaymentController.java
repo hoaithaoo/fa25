@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swp391.fa25.saleElectricVehicle.payload.request.payment.ConfirmCashPaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.ApiResponse;
 import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentResponse;
@@ -31,27 +30,26 @@ public class PaymentController {
     private VNPayService vnpayService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<?>> createPayment(@RequestBody CreatePaymentRequest request, HttpServletRequest req) {
+    public ResponseEntity<ApiResponse<String>> createPayment(@RequestBody CreatePaymentRequest request, HttpServletRequest req) {
         GetPaymentResponse payment = paymentService.createDraftPayment(request);
-        
-        // Nếu là thanh toán VNPay, tạo payment URL
-        if (request.getPaymentMethod() == PaymentMethod.VNPAY) {
-            String paymentUrl = vnpayService.buildPaymentUrl(payment.getPaymentId(), req);
-            ApiResponse<String> response = ApiResponse.<String>builder()
-                    .code(HttpStatus.CREATED.value())
-                    .message("VNPay payment URL generated successfully")
-                    .data(paymentUrl)
-                    .build();
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } else {
-            // Nếu là thanh toán tiền mặt, trả về payment info
-            ApiResponse<GetPaymentResponse> response = ApiResponse.<GetPaymentResponse>builder()
-                    .code(HttpStatus.CREATED.value())
-                    .message("Cash payment created successfully. Please confirm payment after receiving cash.")
-                    .data(payment)
-                    .build();
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
+        String paymentUrl = vnpayService.buildPaymentUrl(payment.getPaymentId(), req);
+        ApiResponse<String> response = ApiResponse.<String>builder()
+                .code(HttpStatus.CREATED.value())
+                .message("VNPay payment URL generated successfully")
+                .data(paymentUrl)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//        String paymentUrl = vnpayService.buildPaymentUrl(
+//                CreatePaymentUrlRequest.builder()
+//                        .paymentId(payment.getPaymentId())
+//                        .build()
+//        );
+//        ApiResponse<GetPaymentResponse> response = ApiResponse.<GetPaymentResponse>builder()
+//                .code(HttpStatus.CREATED.value())
+//                .message("Draft payment created successfully")
+//                .data(payment)
+//                .build();
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // chỉ được xem payment của cửa hàng mình
@@ -130,16 +128,13 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // Confirm cash payment (xác nhận đã nhận tiền mặt)
-    // Staff nhập thông tin transaction: amount, transactionDate, transactionRef, bankTransactionCode
+    // Confirm cash payment - no parameters, amount auto from payment
     @PutMapping("/{paymentId}/confirm-cash")
-    public ResponseEntity<ApiResponse<GetPaymentResponse>> confirmCashPayment(
-            @PathVariable int paymentId,
-            @RequestBody ConfirmCashPaymentRequest request) {
-        GetPaymentResponse payment = paymentService.confirmCashPayment(paymentId, request);
+    public ResponseEntity<ApiResponse<GetPaymentResponse>> confirmCashPayment(@PathVariable int paymentId) {
+        GetPaymentResponse payment = paymentService.confirmCashPayment(paymentId);
         ApiResponse<GetPaymentResponse> response = ApiResponse.<GetPaymentResponse>builder()
                 .code(HttpStatus.OK.value())
-                .message("Cash payment confirmed successfully")
+                .message("Xác nhận thanh toán tiền mặt thành công")
                 .data(payment)
                 .build();
         return ResponseEntity.ok(response);

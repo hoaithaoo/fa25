@@ -7,7 +7,6 @@ import swp391.fa25.saleElectricVehicle.entity.*;
 import swp391.fa25.saleElectricVehicle.entity.entity_enum.*;
 import swp391.fa25.saleElectricVehicle.exception.AppException;
 import swp391.fa25.saleElectricVehicle.exception.ErrorCode;
-import swp391.fa25.saleElectricVehicle.payload.request.payment.ConfirmCashPaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreatePaymentRequest;
 import swp391.fa25.saleElectricVehicle.payload.request.payment.CreateTransactionRequest;
 import swp391.fa25.saleElectricVehicle.payload.response.payment.GetPaymentResponse;
@@ -66,9 +65,9 @@ public class PaymentServiceImpl implements PaymentService {
             }
         } else if (request.getPaymentType() == PaymentType.BALANCE) {
             // Payment balance chỉ được tạo khi order ở trạng thái DEPOSIT_PAID hoặc DEPOSIT_SIGNED
-            if (order.getStatus() != OrderStatus.SALE_SIGNED) {
+            if (order.getStatus() != OrderStatus.DEPOSIT_PAID && order.getStatus() != OrderStatus.DEPOSIT_SIGNED) {
                 throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
-                    "Chỉ có thể tạo payment số dư cho đơn hàng đã ký hợp đồng mua bán");
+                    "Chỉ có thể tạo payment số dư cho đơn hàng đã thanh toán đặt cọc");
             }
             
             // kiểm tra xem đã có payment đặt cọc completed chưa
@@ -92,20 +91,16 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
 
-        // Tự động tính amount dựa trên paymentType
-        BigDecimal calculatedAmount;
-        BigDecimal paidAmount = order.getPaidAmount() != null ? order.getPaidAmount() : BigDecimal.ZERO;
-        BigDecimal remainingAmount = order.getTotalPayment().subtract(paidAmount);
-        
+        // Tính số tiền tự động dựa trên loại payment
+        BigDecimal amount;
         if (request.getPaymentType() == PaymentType.DEPOSIT) {
-            // Đặt cọc: 20% của totalPayment
-            calculatedAmount = order.getTotalPayment().multiply(new BigDecimal("0.20"));
-        } else if (request.getPaymentType() == PaymentType.BALANCE) {
-            // Thanh toán số dư: số tiền còn lại
-            calculatedAmount = remainingAmount;
+            // Deposit: 20% của totalPayment
+            BigDecimal DEPOSIT_PERCENTAGE = BigDecimal.valueOf(0.2);
+            amount = order.getTotalPayment().multiply(DEPOSIT_PERCENTAGE);
         } else {
-            // Fallback: dùng totalPayment
-            calculatedAmount = order.getTotalPayment();
+            // Balance: số tiền còn lại (totalPayment - paidAmount)
+            BigDecimal paidAmount = order.getPaidAmount() != null ? order.getPaidAmount() : BigDecimal.ZERO;
+            amount = order.getTotalPayment().subtract(paidAmount);
         }
 
         // Tạo payment
@@ -113,7 +108,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .status(PaymentStatus.DRAFT)
                 .paymentType(request.getPaymentType())
                 .paymentMethod(request.getPaymentMethod())
-                .amount(calculatedAmount)
+                .amount(amount)
                 .createdAt(LocalDateTime.now())
                 .order(order)
                 .build();
@@ -201,83 +196,50 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public GetPaymentResponse confirmCashPayment(int paymentId, ConfirmCashPaymentRequest request) {
-        // Lấy payment và kiểm tra quyền truy cập - chỉ cần payment thuộc store của user
-        User user = userService.getCurrentUserEntity();
-        Store store = storeService.getCurrentStoreEntity(user.getUserId());
+    @org.springframework.transaction.annotation.Transactional
+    public GetPaymentResponse confirmCashPayment(int paymentId) {
+        // Lấy payment entity
+        Payment payment = getPaymentEntityById(paymentId);
         
-        // Cả staff và manager đều có thể confirm payment trong store của mình
-        Payment payment = paymentRepository.findPaymentByPaymentIdAndOrder_Store(paymentId, store);
-        
-        if (payment == null) {
-            throw new AppException(ErrorCode.PAYMENT_NOT_EXISTED);
-        }
-
         // Validate payment method phải là CASH
         if (payment.getPaymentMethod() != PaymentMethod.CASH) {
-            throw new AppException(ErrorCode.INVALID_PAYMENT_METHOD, 
-                "Chỉ có thể xác nhận thanh toán tiền mặt cho payment có payment method là CASH");
+            throw new AppException(ErrorCode.PAYMENT_NOT_EXISTED, 
+                "Chỉ có thể xác nhận thanh toán tiền mặt cho payment có phương thức CASH");
         }
-
+        
         // Validate payment status phải là DRAFT
         if (payment.getStatus() != PaymentStatus.DRAFT) {
-            throw new AppException(ErrorCode.INVALID_PAYMENT_STATUS, 
+            throw new AppException(ErrorCode.PAYMENT_NOT_EXISTED, 
                 "Chỉ có thể xác nhận thanh toán cho payment ở trạng thái DRAFT");
         }
-
-        // Validate đã thanh toán payment này chưa để tránh xử lí trùng
-        if (payment.getStatus().equals(PaymentStatus.COMPLETED)) {
-            throw new AppException(ErrorCode.PAYMENT_ALREADY_CONFIRMED, 
-                "Payment đã được xác nhận");
-        }
-
-        // Validate request data
-        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new AppException(ErrorCode.INVALID_AMOUNT, 
-                "Số tiền thanh toán phải lớn hơn 0");
-        }
-
-        if (request.getTransactionRef() == null || request.getTransactionRef().trim().isEmpty()) {
-            throw new AppException(ErrorCode.INVALID_TIME_RANGE, 
-                "Mã tham chiếu giao dịch không được để trống");
-        }
-
-        // Validate amount phải khớp với payment amount (cho phép sai số nhỏ do làm tròn)
-        BigDecimal paymentAmount = payment.getAmount();
-        BigDecimal requestAmount = request.getAmount();
-        if (requestAmount.compareTo(paymentAmount) != 0) {
-            throw new AppException(ErrorCode.INVALID_AMOUNT, 
-                String.format("Số tiền thanh toán (%s) không khớp với số tiền của payment (%s)", 
-                    requestAmount, paymentAmount));
-        }
-
-        // Tự động lấy thời gian hiện tại
-        LocalDateTime transactionDate = LocalDateTime.now();
-
-        // Sử dụng thông tin từ request để tạo transaction
+        
+        // Lấy số tiền tự động từ payment (đã được set dựa trên payment type khi tạo)
+        BigDecimal amount = payment.getAmount();
+        
+        // Tạo transaction để lưu thông tin thanh toán
+        String transactionRef = "CASH_" + payment.getPaymentCode() + "_" + System.currentTimeMillis();
         CreateTransactionRequest transactionRequest = CreateTransactionRequest.builder()
                 .paymentCode(payment.getPaymentCode())
-                .transactionRef(request.getTransactionRef())
-                .amount(request.getAmount())
-                .transactionDate(transactionDate) // Tự động lấy thời gian hiện tại
-                .bankTransactionCode(request.getBankTransactionCode()) // Có thể null
+                .transactionRef(transactionRef)
+                .amount(amount)
+                .transactionDate(LocalDateTime.now())
+                .bankTransactionCode(null) // Cash không có bank transaction code
                 .gateway(PaymentGateway.CASH)
                 .status(TransactionStatus.SUCCESS)
                 .build();
-
+        
         transactionService.createTransaction(transactionRequest);
-
+        
         // Cập nhật payment status thành COMPLETED
-        updatePaymentStatus(payment, requestAmount, PaymentStatus.COMPLETED);
-
+        updatePaymentStatus(payment, amount, PaymentStatus.COMPLETED);
+        
         // Cập nhật order paidAmount
         Order order = payment.getOrder();
-        order.setPaidAmount(order.getPaidAmount().add(requestAmount));
+        order.setPaidAmount(order.getPaidAmount().add(amount));
         orderService.updateOrder(order);
-
+        
         // Nếu là payment deposit, update order status thành DEPOSIT_PAID
         if (payment.getPaymentType() == PaymentType.DEPOSIT) {
-            // Update order status thành DEPOSIT_PAID
             orderService.updateOrderStatus(order, OrderStatus.DEPOSIT_PAID);
             
             // Nếu đã có contract đặt cọc, update contract status thành DEPOSIT_PAID
@@ -298,7 +260,7 @@ public class PaymentServiceImpl implements PaymentService {
                 orderService.updateOrderStatus(order, OrderStatus.FULLY_PAID);
             }
         }
-
+        
         return mapToDto(payment);
     }
 
