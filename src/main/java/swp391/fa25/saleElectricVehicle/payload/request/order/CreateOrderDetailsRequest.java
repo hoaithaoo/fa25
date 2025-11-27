@@ -13,4 +13,6 @@ public class CreateOrderDetailsRequest {
     private int colorId;
     private int quantity;
     private Integer promotionId;
+    private boolean includeLicensePlateService; // true nếu khách chọn dịch vụ đăng ký biển số, false hoặc null nếu không chọn
+
 }
