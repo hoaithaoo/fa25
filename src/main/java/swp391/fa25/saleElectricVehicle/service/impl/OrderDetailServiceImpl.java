@@ -135,14 +135,14 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             BigDecimal itemServiceFee = BigDecimal.ZERO;
             BigDecimal itemOtherTax = BigDecimal.ZERO;
             
-            if (request.isIncludeLicensePlateService()) {
+            if (itemReq.isIncludeLicensePlateService()) {
                 // Khách chọn dịch vụ đăng ký biển số
                 // Phí biển số: 10tr ở Hà Nội và TP. Hồ Chí Minh, 1tr ở nơi khác
                 if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
                         || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
-                    itemLicensePlateFee = LICENSE_PLATE_FEE_HCM_HN.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                    itemLicensePlateFee = LICENSE_PLATE_FEE_HCM_HN;
                 } else {
-                    itemLicensePlateFee = LICENSE_PLATE_FEE_OTHER.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                    itemLicensePlateFee = LICENSE_PLATE_FEE_OTHER;
                 }
                 
                 // Phí đăng ký biển số (serviceFee): 1.5tr (cố định) * quantity
@@ -358,14 +358,14 @@ public class OrderDetailServiceImpl implements OrderDetailService {
             BigDecimal itemServiceFee = BigDecimal.ZERO;
             BigDecimal itemOtherTax = BigDecimal.ZERO;
             
-            if (request.isIncludeLicensePlateService()) {
+            if (itemReq.isIncludeLicensePlateService()) {
                 // Khách chọn dịch vụ đăng ký biển số
                 // Phí biển số: 10tr ở Hà Nội và TP. Hồ Chí Minh, 1tr ở nơi khác
                 if (store.getProvinceName().equalsIgnoreCase("Thành phố Hồ Chí Minh")
                         || store.getProvinceName().equalsIgnoreCase("Thành phố Hà Nội")) {
-                    itemLicensePlateFee = LICENSE_PLATE_FEE_HCM_HN.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                    itemLicensePlateFee = LICENSE_PLATE_FEE_HCM_HN;
                 } else {
-                    itemLicensePlateFee = LICENSE_PLATE_FEE_OTHER.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+                    itemLicensePlateFee = LICENSE_PLATE_FEE_OTHER;
                 }
                 
                 // Phí đăng ký biển số (serviceFee): 1.5tr (cố định) * quantity
