@@ -65,9 +65,9 @@ public class PaymentServiceImpl implements PaymentService {
             }
         } else if (request.getPaymentType() == PaymentType.BALANCE) {
             // Payment balance chỉ được tạo khi order ở trạng thái DEPOSIT_PAID hoặc DEPOSIT_SIGNED
-            if (order.getStatus() != OrderStatus.DEPOSIT_PAID && order.getStatus() != OrderStatus.DEPOSIT_SIGNED) {
+            if (order.getStatus() != OrderStatus.SALE_SIGNED) {
                 throw new AppException(ErrorCode.ORDER_NOT_IN_CONFIRMED_STATUS, 
-                    "Chỉ có thể tạo payment số dư cho đơn hàng đã thanh toán đặt cọc");
+                    "Chỉ có thể tạo payment số dư cho đơn hàng đã ký hợp đồng mua bán");
             }
             
             // kiểm tra xem đã có payment đặt cọc completed chưa
